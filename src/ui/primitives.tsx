@@ -214,7 +214,10 @@ export function EmptyState({
     <div className={`empty-state${compact ? ' empty-state-inline' : ''}`}>
       <IconTile icon={icon} size="lg" />
       <h3>{title}</h3>
-      {children && <p>{children}</p>}
+      {/* A div, not a <p>: callers pass their own paragraphs and lists here, and
+          a <p> cannot legally contain another one. The max-width that keeps the
+          sentence to a readable measure lives on the paragraph in CSS. */}
+      {children && <div className="empty-state-body">{children}</div>}
       {action && <div className="empty-state-actions">{action}</div>}
     </div>
   )

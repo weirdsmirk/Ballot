@@ -32,21 +32,50 @@ import { ResultsPanel } from './ResultsPanel'
 
 type Stage = 'pick' | 'identify' | 'codes' | 'ballot' | 'receipt' | 'results'
 
-/** The three steps the indicator names, in order. */
+/**
+ * The stages the progress indicator names, in order.
+ *
+ * One entry per stage a voter can actually be on. The list deliberately mirrors
+ * the flow's own states rather than grouping them, so the indicator is a map of
+ * where they are rather than a summary of what happened.
+ */
 const STEPS = [
-  { id: 'verify', label: 'Verify' },
-  { id: 'ballot', label: 'Review ballot' },
+  { id: 'pick', label: 'Choose' },
+  { id: 'identify', label: 'Identify' },
+  { id: 'codes', label: 'Code' },
+  { id: 'ballot', label: 'Ballot' },
   { id: 'receipt', label: 'Receipt' },
 ] as const
 
 function stepFor(stage: Stage): number {
   if (stage === 'pick') return 0
-  if (stage === 'identify' || stage === 'codes') return 0
-  if (stage === 'ballot') return 1
-  return 2
+  if (stage === 'identify') return 1
+  if (stage === 'codes') return 2
+  if (stage === 'ballot') return 3
+  // 'results' is not a stage of its own — it is a detour off the ballot, reached
+  // from a stage already passed, so it keeps that stage's marker rather than
+  // inventing one.
+  if (stage === 'receipt') return 4
+  return 3
 }
 
 type Flash = { tone: 'info' | 'warn' | 'error' | 'success'; text: string } | null
+
+/**
+ * Copy to the clipboard, reporting whether it worked.
+ *
+ * The receipt code is the only record a voter keeps, so the copy affordance has
+ * to acknowledge itself either way rather than silently doing nothing when the
+ * browser refuses clipboard access.
+ */
+async function copyText(value: string): Promise<boolean> {
+  try {
+    await navigator.clipboard.writeText(value)
+    return true
+  } catch {
+    return false
+  }
+}
 
 function optionLabel(option: BallotOption) {
   return option.kind === 'candidate' ? option.name : option.name
@@ -62,6 +91,34 @@ function shuffled<T>(items: T[], seed: number): T[] {
     ;[copy[i], copy[j]] = [copy[j], copy[i]]
   }
   return copy
+}
+
+/**
+ * The progress indicator.
+ *
+ * A bar per stage with the label beneath it. The bar carries the state — filled
+ * and lit where the voter has been, flat where they have not — so progress is
+ * legible at a glance without reading five numbers.
+ */
+function StageSteps({ activeStep }: { activeStep: number }) {
+  return (
+    <nav aria-label="Progress">
+      <ol className="steps">
+        {STEPS.map((step, index) => (
+          <li
+            key={step.id}
+            className={`step-slot${
+              index === activeStep ? ' step-active' : index < activeStep ? ' step-done' : ''
+            }`}
+            aria-current={index === activeStep ? 'step' : undefined}
+          >
+            <span className="step-bar" aria-hidden="true" />
+            <span className="step-label">{step.label}</span>
+          </li>
+        ))}
+      </ol>
+    </nav>
+  )
 }
 
 export function VoterFlow({
@@ -83,6 +140,7 @@ export function VoterFlow({
   /** Codes are keyed by challenge id, so the form never handles a channel index. */
   const [codes, setCodes] = useState<Record<string, string>>({})
   const [receipt, setReceipt] = useState<{ receipts: string[]; submittedAt: string; digest: string } | null>(null)
+  const [copied, setCopied] = useState(false)
 
   const election = useMemo(
     () => elections.find((item) => item.id === electionId) ?? null,
@@ -269,6 +327,7 @@ export function VoterFlow({
   if (stage === 'pick' || !election || !state) {
     return (
       <div className="voter-shell">
+        <StageSteps activeStep={stepFor('pick')} />
         <div className="election-list-header">
           <Eyebrow tone="blue">Voter portal</Eyebrow>
           <h1 style={{ marginTop: 12 }}>Available elections</h1>
@@ -330,22 +389,7 @@ export function VoterFlow({
 
   return (
     <div className="voter-shell voter-shell-narrow">
-      <nav aria-label="Progress">
-        <ol className="steps">
-          {STEPS.map((step, index) => (
-            <li key={step.id} style={{ display: 'contents' }}>
-              {index > 0 && <span className={`step-line${index <= activeStep ? ' step-line-done' : ''}`} aria-hidden="true" />}
-              <span
-                className={`step${index === activeStep ? ' step-active' : ''}${index < activeStep ? ' step-done' : ''}`}
-                aria-current={index === activeStep ? 'step' : undefined}
-              >
-                <span className="step-num">{String(index + 1).padStart(2, '0')}</span>
-                <span className="step-label">{step.label}</span>
-              </span>
-            </li>
-          ))}
-        </ol>
-      </nav>
+      <StageSteps activeStep={activeStep} />
 
       {stage !== 'results' && (
         <div style={{ marginBottom: 18 }}>
@@ -540,6 +584,7 @@ export function VoterFlow({
           setBusy={setBusy}
           onVoted={async (payload) => {
             setReceipt(payload)
+            setCopied(false)
             setStage('receipt')
             await loadBallot(election.id)
             onChanged()
@@ -552,36 +597,52 @@ export function VoterFlow({
       {stage === 'receipt' && receipt && (
         <div className="confirmed-card">
           <div className="green-stripe" />
-          <div style={{ textAlign: 'center' }}>
-            <div className="confirmed-icon">
-              <Icon name="check" strokeWidth={2.5} />
-            </div>
-            <Eyebrow tone="blue">{label}</Eyebrow>
-            <h2 className="confirmed-title" style={{ marginTop: 10 }}>Vote recorded</h2>
+          <div className="confirmed-icon">
+            <Icon name="check" strokeWidth={2.5} />
           </div>
+          <Eyebrow tone="blue">{label}</Eyebrow>
+          <h2 className="confirmed-title" style={{ marginTop: 10 }}>Your ballot is cast</h2>
           <p className="confirmed-subtitle">
-            Your ballot has been recorded. Keep the receipt below: it is the only way to look up what you submitted,
-            because the record of your ballot is not stored against your identity.
+            Keep the receipt code below. It is the only way to confirm a ballot exists for this election, and it
+            deliberately cannot show what you chose.
           </p>
+
           {receipt.receipts.length > 0 && (
             <div className="receipt-box">
-              <div className="receipt-label">Confirmation receipt</div>
+              <div className="receipt-label">Receipt code</div>
               {receipt.receipts.map((code) => (
                 <div className="receipt-hash" key={code}>
                   {code}
                 </div>
               ))}
+              <button
+                type="button"
+                className="receipt-copy"
+                onClick={() => {
+                  void copyText(receipt.receipts.join('\n')).then((ok) => {
+                    if (ok) setCopied(true)
+                  })
+                }}
+              >
+                <Icon name={copied ? 'check' : 'archive'} />
+                {copied ? 'Copied' : 'Copy code'}
+              </button>
             </div>
           )}
-          {receipt.digest && (
-            <p className="field-hint" style={{ margin: '16px 34px 0' }}>
-              Integrity digest <code>{receipt.digest.slice(0, 32)}…</code> — a fingerprint of your recorded ballot. It
-              proves the stored ballot has not been altered without revealing what you chose.
+
+          <div className="receipt-note">
+            <p>
+              This code proves a ballot was recorded for the election. It cannot show what you chose, and it cannot
+              be turned back into your identity.
+              {receipt.digest && (
+                <>
+                  {' '}Integrity digest{' '}
+                  <code>{receipt.digest.slice(0, 24)}…</code>
+                </>
+              )}
             </p>
-          )}
-          <p className="confirmed-thanks">
-            Thank you for taking part in {election.title}. Nobody, including an administrator, can see how you voted.
-          </p>
+          </div>
+
           <div className="confirmed-actions">
             <button type="button" className="btn-outline" onClick={() => setStage('results')}>
               View results

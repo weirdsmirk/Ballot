@@ -247,7 +247,8 @@ describe('casting a vote in this session', () => {
     await user.click(screen.getByRole('button', { name: 'Review and submit' }))
     await user.click(await screen.findByRole('button', { name: 'Submit vote' }))
 
-    expect(await screen.findByText('Vote recorded')).toBeInTheDocument()
+    expect(await screen.findByText('Your ballot is cast')).toBeInTheDocument()
     expect(screen.getByText('BALLOT-RECEIPT-9F2C')).toBeInTheDocument()
+    expect(screen.getByText('Receipt code')).toBeInTheDocument()
   })
 })
