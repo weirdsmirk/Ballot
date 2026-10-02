@@ -1,0 +1,34 @@
+node_modules/
+dist/
+build/
+.cache/
+.env*
+.vite/
+vite.config.*.timestamp-*
+*.tsbuildinfo
+*-debug.log*
+logs/
+*.log
+.tmp-*
+
+# Local database and runtime data — never commit voter or user data
+# The SQLite database is created and seeded automatically on first run.
+/data/
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+*.db
+
+# The ballot integrity key. It lives beside the database, but it is ignored by name
+# as well as by directory: a regression in how the data directory is resolved must not
+# be able to commit the secret that makes ballot digests non-reversible. Losing this
+# file only means old digests can no longer be re-verified; leaking it would let
+# anyone holding a database read a digest back into the option that was chosen.
+ballot-integrity.key
+*.integrity.key
+
+database.json
+coverage/
+.nyc_output/
+.DS_Store
