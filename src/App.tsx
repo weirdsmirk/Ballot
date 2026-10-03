@@ -65,7 +65,7 @@ export default function App() {
 
   if (offline) {
     return (
-      <div className="auth-split">
+      <div className="page-shell">
         <SiteBar />
         <div className="page-center">
           <div className="auth-card" style={{ textAlign: 'center' }}>

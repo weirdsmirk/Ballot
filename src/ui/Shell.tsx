@@ -1,18 +1,18 @@
 /**
- * The two page frames the product is built from.
+ * The page frames the product is built from.
  *
  * `SiteBar` is the dark band that opens every non-console surface: the voter
- * portal and both sign-in screens. It is deliberately not the console's header
- * — an operator's screen and a voter's screen should not be the same screen —
- * but it uses the same brand, the same type and the same icon set.
+ * portal. It is deliberately not the console's header — an operator's screen and
+ * a voter's screen should not be the same screen — but it uses the same brand,
+ * the same type and the same icon set.
  *
- * `AuthSplit` is the two-column sign-in frame. The left column states what the
- * product is for; the right column does the work. The columns are independent of
- * each other so that a longer form never pushes the message off the page.
+ * `AuthFrame` is the sign-in page, and the only surface with no `SiteBar`: it is
+ * a full-bleed 50/50 split instead, because that page is the product's first
+ * impression and the photograph is half of it.
  */
 
 import type { ReactNode } from 'react'
-import { Icon, type IconName } from './Icon'
+import { Icon } from './Icon'
 
 export function Brand({ onNavigate, sub }: { onNavigate?: () => void; sub?: string }) {
   return (
@@ -84,49 +84,64 @@ export function SiteFoot({ left, right }: { left: ReactNode; right?: ReactNode }
   )
 }
 
-export function AuthSplit({
-  eyebrow,
-  headline,
-  accent,
-  lede,
-  note,
-  noteIcon = 'shield-check',
+/**
+ * The sign-in frame.
+ *
+ * Two equal halves: a photograph on one side, the work on the other. The split is
+ * `1fr 1fr`, so it is exactly half the width at every size rather than
+ * approximately half.
+ *
+ * The photograph is not a picture beside the form — it is half the page, which is
+ * why the brand and the promise are set on top of it and the form gets an
+ * uninterrupted half to itself. It also means this frame carries no top band and
+ * no footer: both would eat into the two halves the composition is built on, and
+ * everything they said is already here — the wordmark is reversed out of the
+ * photograph, and the footer's promise is the statement beneath it.
+ *
+ * `children` is the working half: the hero and then the form.
+ */
+export function AuthFrame({
   children,
+  statement,
+  meta,
 }: {
-  eyebrow: string
-  headline: string
-  accent?: string
-  lede: string
-  note?: { title: string; detail: string; icon?: IconName }
-  noteIcon?: IconName
   children: ReactNode
+  statement: string
+  meta?: ReactNode
 }) {
   return (
-    <div className="auth-split">
-      <SiteBar />
-      <div className="auth-split-body">
-        <div className="auth-hero">
-          <span className="eyebrow eyebrow-blue">{eyebrow}</span>
-          <h1>
-            {headline}
-            {accent && <span className="accent">{accent}</span>}
-          </h1>
-          <p className="auth-hero-lede">{lede}</p>
-          {note && (
-            <>
-              <div className="auth-hero-rule" />
-              <div className="auth-hero-note">
-                <Icon name={note.icon ?? noteIcon} />
-                <div>
-                  <strong>{note.title}</strong>
-                  <span>{note.detail}</span>
-                </div>
-              </div>
-            </>
-          )}
+    <div className="auth-frame">
+      <div className="auth-frame-media">
+        <img
+          className="auth-frame-image"
+          src="/ballot.webp"
+          /* The photograph carries the argument for the product, so it gets a real
+             description rather than `alt=""`. The intrinsic size is declared so
+             the browser reserves the box before the bytes arrive. */
+          alt="Three hands putting folded ballots into the slot of a ballot box."
+          width={1086}
+          height={1448}
+          /* Largest contentful paint on the most important page in the product:
+             fetched eagerly and at high priority. */
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
+        />
+        <div className="auth-frame-scrim" aria-hidden="true" />
+
+        <div className="auth-frame-media-inner">
+          <Brand onNavigate={() => { window.location.hash = '#/' }} />
+
+          <div className="auth-frame-caption">
+            <p className="auth-frame-statement">{statement}</p>
+            {meta && <p className="auth-frame-meta">{meta}</p>}
+          </div>
         </div>
-        <div className="auth-panel">{children}</div>
       </div>
+
+      <main className="auth-frame-panel">
+        <div className="auth-frame-inner">{children}</div>
+      </main>
     </div>
   )
 }

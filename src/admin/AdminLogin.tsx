@@ -16,7 +16,7 @@ import { useEffect, useState } from 'react'
 import { authApi } from '../lib/api'
 import type { ClientSession } from '../lib/adminTypes'
 import { Icon } from '../ui/Icon'
-import { SiteBar, SiteFoot } from '../ui/Shell'
+import { AuthFrame } from '../ui/Shell'
 import { Alert, DemoNote, Field } from '../ui/primitives'
 
 type Stage = 'password' | 'mfa'
@@ -29,10 +29,13 @@ const HERO = {
   headline: 'Run elections',
   accent: 'with confidence.',
   lede: 'Secure operations for every election, with clear roles and an audit-ready workspace.',
-  note: {
-    title: 'Privacy-first by design',
-    detail: 'Authentication controls are scoped to this local workspace.',
-  },
+  /*
+   * The hero's old "Privacy-first by design" note said authentication is scoped
+   * to this workspace. The statement on the photograph says the same thing in
+   * four words, so carrying both was repetition rather than emphasis. The shield
+   * icon now marks the second-factor step on the card where it is actionable.
+   */
+  statement: 'No credentials leave this server.',
 }
 
 export function AdminLogin({
@@ -115,28 +118,10 @@ export function AdminLogin({
 
   if (stage === 'mfa') {
     return (
-      <div className="auth-split">
-        <SiteBar />
-        <div className="auth-split-body">
-          <div className="auth-hero">
-            <span className="eyebrow eyebrow-blue">{HERO.eyebrow}</span>
-            <h1>
-              {HERO.headline}
-              <span className="accent">{HERO.accent}</span>
-            </h1>
-            <p className="auth-hero-lede">{HERO.lede}</p>
-            <div className="auth-hero-rule" />
-            <div className="auth-hero-note">
-              <Icon name="shield-check" />
-              <div>
-                <strong>{HERO.note.title}</strong>
-                <span>{HERO.note.detail}</span>
-              </div>
-            </div>
-          </div>
+      <AuthFrame statement={HERO.statement} meta={`Ballot administrator access · ${YEAR} cycle`}>
+        <AuthHero />
 
-          <div className="auth-panel">
-            <form className="auth-card" onSubmit={submitCode}>
+        <form className="auth-card" onSubmit={submitCode}>
               <div className="auth-card-head">
                 <span className="icon-tile tile-green">
                   <Icon name="shield-check" />
@@ -147,8 +132,7 @@ export function AdminLogin({
                 </div>
               </div>
               <p className="card-subtitle">
-                Enter the six-digit code from your authenticator app to finish signing in as{' '}
-                <strong>{username}</strong>.
+                Enter the six-digit code from your authenticator app to finish signing in as <strong>{username}</strong>.
               </p>
 
               {error && (
@@ -195,22 +179,16 @@ export function AdminLogin({
                   Back to sign in
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
-        <SiteFoot left="No credentials leave this server." right={`Ballot administrator access · ${YEAR} cycle`} />
-      </div>
+        </form>
+      </AuthFrame>
     )
   }
 
   return (
-    <div className="auth-split">
-      <SiteBar />
-      <div className="auth-split-body">
-        <AuthHero />
+    <AuthFrame statement={HERO.statement} meta={`Ballot administrator access · ${YEAR} cycle`}>
+      <AuthHero />
 
-        <div className="auth-panel">
-          <form className="auth-card" onSubmit={submitPassword}>
+      <form className="auth-card" onSubmit={submitPassword}>
             <div className="auth-card-head">
               <span className="icon-tile tile-blue">
                 <Icon name="lock" />
@@ -342,14 +320,19 @@ export function AdminLogin({
                 This account has a second factor, so you will be asked for a code after your password.
               </p>
             )}
-          </form>
-        </div>
-      </div>
-      <SiteFoot left="No credentials leave this server." right={`Ballot administrator access · ${YEAR} cycle`} />
-    </div>
+      </form>
+    </AuthFrame>
   )
 }
 
+/**
+ * The hero, above the form.
+ *
+ * Short on purpose: an eyebrow, the headline in two lines, one sentence of
+ * lede, and an accent rule that closes the block. The promise that used to sit
+ * here as a fourth block now runs under the photograph, where there is room for
+ * it and it does not compete with the work.
+ */
 function AuthHero() {
   return (
     <div className="auth-hero">
@@ -360,13 +343,6 @@ function AuthHero() {
       </h1>
       <p className="auth-hero-lede">{HERO.lede}</p>
       <div className="auth-hero-rule" />
-      <div className="auth-hero-note">
-        <Icon name="shield-check" />
-        <div>
-          <strong>{HERO.note.title}</strong>
-          <span>{HERO.note.detail}</span>
-        </div>
-      </div>
     </div>
   )
 }

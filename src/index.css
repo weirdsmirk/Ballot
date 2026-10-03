@@ -866,66 +866,162 @@ a { color: inherit; }
 }
 .card-subtitle { font-size: 13.5px; color: var(--muted); line-height: 1.6; margin-top: 10px; }
 
-/* ---- The split auth layout ---- */
-.auth-split {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+/* ---- The sign-in frame ----
+ *
+ * Two equal columns and nothing else: a photograph on one side, the work on the
+ * other. `1fr 1fr` rather than percentages so the split is exactly half at every
+ * width instead of approximately half, and `100dvh` so a mobile browser's
+ * collapsing toolbar cannot cut the form off.
+ *
+ * The photograph is not a picture beside the form. It is half the page, so the
+ * brand and the promise live on top of it and the form gets a clean, uninterrupted
+ * half to itself.
+ */
+.auth-frame {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  /* Pinned to the viewport rather than merely filling it. `min-height` let the
+     frame grow to the height of its tallest column, which made the photograph
+     taller than the screen on a short laptop — the exact thing a 50/50 split is
+     supposed to prevent. Fixed height plus a scrolling panel keeps the
+     composition intact and still lets a long form be reached. */
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
   background: var(--bg);
 }
-.auth-split-body {
-  flex: 1;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 460px;
-  align-items: center;
-  gap: 80px;
-  /* The same measure-plus-gutter box as the header, content column and footer, so
-     the wordmark sits above the hero rather than 340px to the left of it. On a
-     wide screen the two halves become poles — hero hard left, panel hard right —
-     which is how a split screen is meant to read, and it uses the width instead
-     of centring a narrow composition inside it. */
-  max-width: calc(var(--page-max) + var(--page-gutter) * 2);
-  width: 100%;
-  margin: 0 auto;
-  padding: 56px var(--page-gutter) 64px;
+
+/* ---- The picture half ---- */
+.auth-frame-media {
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+  /* The page's own near-black, so a failed image degrades to a dark panel rather
+     than a white hole beside a dark form. */
+  background: #0a0d0b;
+  isolation: isolate;
 }
+.auth-frame-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* The photograph is portrait and this column is not, so cover crops the top and
+     bottom. Biased upward to hold the hands and the slot rather than the empty
+     floor below the box. */
+  object-position: center 38%;
+  /* A touch of saturation back off so the green accent reads as native to the
+     page rather than pasted on top of a stock photograph. */
+  filter: saturate(0.94) contrast(1.03);
+}
+/* Two gradients, because the text sits at opposite ends: a dark wash at the top
+   for the wordmark, a heavier one at the bottom for the statement, and almost
+   nothing in between so the photograph is left alone. */
+.auth-frame-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(8, 10, 9, 0.74) 0%, rgba(8, 10, 9, 0.16) 22%, rgba(8, 10, 9, 0) 46%),
+    linear-gradient(0deg, rgba(8, 10, 9, 0.88) 0%, rgba(8, 10, 9, 0.42) 26%, rgba(8, 10, 9, 0) 52%);
+}
+.auth-frame-media-inner {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 32px;
+  padding: clamp(26px, 2.6vw, 44px) clamp(26px, 3vw, 56px);
+}
+
+/* The wordmark, reversed out of the photograph. The mark becomes a frosted pane
+   instead of the solid green tile so it does not compete with the accent. */
+.auth-frame-media .brand { color: #fff; }
+.auth-frame-media .brand-mark {
+  background: rgba(255, 255, 255, 0.13);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  backdrop-filter: blur(8px);
+  box-shadow: none;
+  color: #fff;
+}
+.auth-frame-media .brand:hover .brand-mark { background: rgba(255, 255, 255, 0.2); }
+
+.auth-frame-caption { max-width: 30ch; }
+.auth-frame-statement {
+  font-family: var(--font-serif);
+  /* Scales with the column, so the statement stays a remark rather than a label
+     on a wide screen or a paragraph on a laptop. */
+  font-size: clamp(19px, 1.55vw, 27px);
+  line-height: 1.32;
+  color: rgba(255, 255, 255, 0.95);
+  text-wrap: balance;
+}
+.auth-frame-meta {
+  margin-top: 14px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* ---- The working half ---- */
+.auth-frame-panel {
+  display: flex;
+  flex-direction: column;
+  /* Scrolls rather than clips. The bootstrap state adds a field and a longer
+     note, so on a short laptop the form has to be reachable, not cut off. */
+  overflow-y: auto;
+  padding: clamp(26px, 2.8vw, 56px) clamp(26px, 3.4vw, 72px);
+  min-width: 0;
+}
+.auth-frame-inner {
+  width: 100%;
+  /* Wide enough that the serif headline has room to be a headline. */
+  max-width: 480px;
+  /* Auto margins rather than `justify-content: center`: centring a flex child
+     that is taller than its container clips the top, which on this page would
+     mean the headline. Auto margins centre when there is room and simply start
+     at the top when there is not. */
+  margin: auto;
+}
+
+/* ---- The hero ---- */
 .auth-hero { min-width: 0; }
-.auth-hero .eyebrow { margin-bottom: 20px; }
+.auth-hero .eyebrow { margin-bottom: 18px; }
 .auth-hero h1 {
   font-family: var(--font-serif);
-  font-size: 52px;
+  font-size: clamp(38px, 3.1vw, 56px);
   font-weight: 400;
-  letter-spacing: -0.018em;
-  line-height: 1.04;
+  letter-spacing: -0.02em;
+  line-height: 1.03;
   color: var(--ink);
-  max-width: 15ch;
+  max-width: 14ch;
 }
 .auth-hero h1 .accent { color: var(--green); display: block; }
 .auth-hero-lede {
   font-size: 15px;
   line-height: 1.7;
   color: var(--muted);
-  max-width: 44ch;
-  margin-top: 24px;
+  max-width: 42ch;
+  margin-top: 20px;
+  text-wrap: pretty;
 }
+/* A short accent rule rather than a full-width divider: a mark, not a separator. */
 .auth-hero-rule {
-  height: 1px;
-  background: var(--border);
-  margin: 34px 0 26px;
-  max-width: 420px;
+  width: 52px;
+  height: 2px;
+  background: var(--green);
+  border-radius: 2px;
+  margin: 26px 0 28px;
 }
-.auth-hero-note { display: flex; gap: 13px; align-items: flex-start; max-width: 420px; }
-.auth-hero-note svg { width: 19px; height: 19px; color: var(--green); flex: none; margin-top: 2px; }
-.auth-hero-note strong {
-  display: block;
-  font-size: 13.5px;
-  font-weight: 600;
-  letter-spacing: -0.005em;
-  color: var(--ink);
-}
-.auth-hero-note span { display: block; font-size: 12.5px; color: var(--muted); margin-top: 3px; line-height: 1.55; }
+.auth-frame .auth-card { margin-top: 0; }
 
-.auth-panel { min-width: 0; }
 .auth-card-head { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
 .auth-card-head .eyebrow { margin-bottom: 4px; }
 .auth-card-foot { margin-top: 18px; text-align: center; }
@@ -3431,12 +3527,22 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
 .local-status { color: var(--amber-text); }
 .local-status > span { background: var(--amber); }
 
+/* The plain page frame: a band on top and a centred card below it. Used by the
+   states that are not the sign-in — chiefly the server-unavailable screen, which
+   has the shape of a sign-in page but none of the photograph. */
+.page-shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
 .page-center {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-height: calc(100vh - 62px);
-  padding: 48px 24px;
+  padding: 48px var(--page-gutter);
 }
 .page-center .auth-card { max-width: 480px; }
 .page-epigraph { color: var(--muted); line-height: 1.6; }
@@ -3458,8 +3564,10 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   .col-secondary { display: none; }
 }
 @media (max-width: 1180px) {
-  .auth-split-body { grid-template-columns: minmax(0, 1fr) 400px; gap: 44px; }
-  .auth-hero h1 { font-size: 44px; }
+  /* The two halves stay equal, but each needs less air inside it: the working
+     half is now under 500px wide and the form has to fit inside that. */
+  .auth-frame-panel { padding-left: clamp(22px, 2.6vw, 40px); padding-right: clamp(22px, 2.6vw, 40px); }
+  .auth-frame-media-inner { padding-left: clamp(22px, 2.6vw, 40px); padding-right: clamp(22px, 2.6vw, 40px); }
 }
 @media (max-width: 1080px) {
   .control-grid-2-1, .control-grid-1-2 { grid-template-columns: 1fr; }
@@ -3468,10 +3576,6 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   :root { --page-gutter: 24px; }
 }
 @media (max-width: 1024px) {
-  .auth-split-body { grid-template-columns: 1fr; gap: 32px; padding: 40px 24px 48px; }
-  .auth-hero h1 { font-size: 40px; max-width: none; }
-  .auth-hero-lede, .auth-hero-rule, .auth-hero-note { max-width: none; }
-  .auth-hero { text-align: left; }
   .control-nav {
     display: none;
     position: fixed;
@@ -3486,6 +3590,38 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   .control-brand-sub { display: none; }
   .page-title, .control-head-text h1, .workspace-title h1 { font-size: 34px; }
   .election-list-header h1, .ballot-heading h2 { font-size: 32px; }
+}
+/*
+ * Where 50/50 stops being possible.
+ *
+ * A phone in portrait is about 45% as wide as it is tall, so two equal columns
+ * would each be a letterbox slit and the form would be unreadable. Below this
+ * width the photograph stops being half the page and becomes a banner over the
+ * form: still half the *width*, but no longer competing for the height.
+ */
+@media (max-width: 900px) {
+  .auth-frame {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .auth-frame-media { min-height: clamp(180px, 26vh, 300px); height: auto; }
+  .auth-frame-image { object-position: center 44%; }
+  /* One gradient now, because the text sits at the two ends of a short band
+     rather than the two ends of a tall column. */
+  .auth-frame-scrim {
+    background:
+      linear-gradient(180deg, rgba(8, 10, 9, 0.72) 0%, rgba(8, 10, 9, 0.22) 42%, rgba(8, 10, 9, 0.58) 100%);
+  }
+  .auth-frame-statement { font-size: 17px; max-width: 36ch; }
+  /* The fine print is the first thing to go: the statement carries the promise,
+     and vertical space is the scarce resource here. */
+  .auth-frame-meta { display: none; }
+  /* Start at the top rather than centring, so the form is not pushed below the
+     fold by the hero on a short screen. `margin: auto` is what centres the
+     desktop layout, so it has to be undone here explicitly or it would win. */
+  .auth-frame-panel { justify-content: flex-start; }
+  .auth-frame-inner { max-width: 520px; margin: 0 auto; }
+  .auth-hero h1 { font-size: clamp(34px, 7vw, 44px); max-width: 18ch; }
 }
 @media (max-width: 860px) {
   .funnel-row-steps { grid-template-columns: repeat(2, 1fr); }
