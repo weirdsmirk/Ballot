@@ -66,13 +66,39 @@ const COMMAND_ENDPOINT = '/__api/command'
  * browser flow never uses it.
  */
 let voterSessionPresent = false
+/*
+ * Which election the open session belongs to.
+ *
+ * Ending a session takes an election id — `voter.logout` is scoped to one — so a
+ * boolean was not enough for anything outside `VoterFlow` to sign a voter out.
+ * That is what left the portal's own "Exit portal" control with nothing to call:
+ * it could not end the session it was supposed to be ending.
+ *
+ * This is a hint for issuing the right request, never a credential. It cannot
+ * authorise anything; the server decides that from the HttpOnly cookie.
+ */
+let voterSessionElectionId: string | null = null
 
 export function hasVoterSession(): boolean {
   return voterSessionPresent
 }
 
-export function markVoterSession(present: boolean): void {
+export function markVoterSession(present: boolean, electionId?: string): void {
   voterSessionPresent = present
+  voterSessionElectionId = present ? (electionId ?? voterSessionElectionId) : null
+}
+
+/**
+ * The election the open voter session belongs to, or null if there is none.
+ *
+ * No `voterSessionPresent` check here. It looks like the safe version, and it
+ * guards a state that cannot exist: `markVoterSession(false)` already clears the
+ * id, and it is the only writer. A second guard on an unreachable state is not
+ * safety, it is a second thing to keep in sync — and it makes the tests
+ * unfalsifiable, because they would pass whether or not the clearing worked.
+ */
+export function voterSessionElection(): string | null {
+  return voterSessionElectionId
 }
 const REQUEST_TIMEOUT_MS = 12_000
 
@@ -122,7 +148,7 @@ export function voterSessionKnown(): boolean {
 }
 
 export function forgetVoterSession(): void {
-  voterSessionPresent = false
+  markVoterSession(false)
 }
 
 async function request<T>(url: string, init: RequestInit): Promise<T> {

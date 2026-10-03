@@ -181,7 +181,7 @@ export function VoterFlow({
       const result = await voterApi.ballot(electionId)
       if (cancelled) return
       if (result.ok) {
-        markVoterSession(true)
+        markVoterSession(true, electionId)
         setBallot(result.value)
         // Deliberately 'ballot' whether or not the vote is already cast. BallotStage
         // reads `has_voted` and renders the "You have already voted" card itself, and
@@ -265,7 +265,7 @@ export function VoterFlow({
       return
     }
     // No token to store: the server has set an HttpOnly cookie.
-    markVoterSession(true)
+    markVoterSession(true, election.id)
     await loadBallot(election.id)
     setStage('ballot')
   }

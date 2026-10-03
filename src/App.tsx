@@ -14,7 +14,15 @@
  */
 
 import { useCallback, useEffect, useState } from 'react'
-import { fetchState, getServerOffset, ServerUnavailableError, type Bootstrap } from './lib/api'
+import {
+  fetchState,
+  forgetVoterSession,
+  getServerOffset,
+  ServerUnavailableError,
+  voterApi,
+  voterSessionElection,
+  type Bootstrap,
+} from './lib/api'
 import { AdminApp } from './admin/AdminApp'
 import { AdminLogin } from './admin/AdminLogin'
 import { VoterFlow } from './voter/VoterFlow'
@@ -165,6 +173,37 @@ export default function App() {
     )
   }
 
+  /*
+   * Leave the portal.
+   *
+   * This control set `location.hash = '#/vote'` while already on `#/vote`, so it
+   * did nothing at all — assigning a hash to its current value fires no event and
+   * navigates nowhere. It looked like a working link and was not one.
+   *
+   * What it should do is end the session, not just change the address. A button
+   * labelled "Exit portal" that leaves the voter cookie live is worse than no
+   * button: the next person at a shared machine lands inside the previous
+   * voter's session, which is exactly the failure this product is about. So it
+   * revokes on the server first, then navigates to the front door.
+   *
+   * The server call is allowed to fail. Someone on a machine with no election
+   * server still has to be able to leave the page.
+   */
+  const exitPortal = async () => {
+    const electionId = voterSessionElection()
+    if (electionId) {
+      try {
+        await voterApi.logout(electionId)
+      } catch {
+        // Nothing to do. The local session is forgotten below either way, and the
+        // server treats an absent session as already signed out.
+      }
+    }
+    forgetVoterSession()
+    window.location.hash = '#/'
+    void load()
+  }
+
   if (!bootstrap) return <Spinner />
 
   const serverOffsetMs = getServerOffset()
@@ -214,7 +253,7 @@ export default function App() {
             <Icon name="lock" />
             Secure voter session
             <span className="site-bar-sep">·</span>
-            <button type="button" className="site-bar-link" onClick={() => { window.location.hash = '#/vote' }}>
+            <button type="button" className="site-bar-link" onClick={() => void exitPortal()}>
               Exit portal
             </button>
           </span>
