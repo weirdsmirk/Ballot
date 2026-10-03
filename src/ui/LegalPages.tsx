@@ -132,7 +132,7 @@ const PAGES: Record<LegalPageId, { title: string; standfirst: string; blocks: Bl
       },
       {
         kind: 'p',
-        text: 'One exception, stated plainly because a notice that hides it is worthless: the typefaces are fetched from Google Fonts when the page loads, which tells Google your IP address and that you are loading this page. It carries nothing about the election — the request is made before you arrive at a form, and it contains no voter data. If that trade is not acceptable for your election, delete the font import at the top of the stylesheet; the type falls back to a serif already on the machine and nothing else changes.',
+        text: 'One exception, stated plainly because a notice that hides it is worthless: the typefaces are fetched from Google Fonts when the page loads, which tells Google your IP address and that you are loading this page. It carries nothing about the election — the request is made before you arrive at a form, and it contains no voter data. If that trade is not acceptable for your election, delete the font import at the top of the stylesheet; the type falls back to faces already on the machine and nothing else changes.',
       },
       {
         kind: 'h2',

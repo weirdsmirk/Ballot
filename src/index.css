@@ -38,6 +38,17 @@
   --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
+  /*
+   * The wordmark, and only the wordmark.
+   *
+   * Inter, which is already the body face and already loaded. It is not aliased
+   * to the sans token because the wordmark is set differently from body text —
+   * heavier, tighter, larger — and reading `var(--font-wordmark)` in a rule says
+   * "this is the lockup" in a way that `var(--font-sans)` does not. If the face
+   * ever changes, this is the one line to change.
+   */
+  --font-wordmark: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
   /* Ground and surfaces — near-black, faintly warm */
   --bg: #080a09;
   --bg-sunken: #0a0d0b;
@@ -329,13 +340,31 @@ a { color: inherit; }
   box-shadow: var(--green-glow);
 }
 .brand-mark svg { width: 18px; height: 18px; }
+/*
+ * The name, in headers.
+ *
+ * Inter at 22px, weight 500, tracked in tight. It was the display serif, which
+ * is the face this product uses for things being *said* — headlines, results,
+ * receipts — so putting the name in it made the mark claim to be an argument
+ * rather than a name.
+ *
+ * Three things are corrected against the body text rather than left alone:
+ *
+ * - Weight. Body copy is 400 at 11–15px, where a light cut stays open. At 22px
+ *   the same weight looks like a label; 500 gives the lockup enough presence to
+ *   be read as a mark without going bold, which would make it shout.
+ * - Tracking. Negative, roughly -0.022em. Inter's default spacing is set for
+ *   running text and is loose for six letters standing alone; pulled in, the
+ *   word reads as one object rather than six.
+ * - Leading. 1.1, so the name does not open a hole in the 62px header bar.
+ */
 .brand-name {
-  font-family: var(--font-serif);
+  font-family: var(--font-wordmark);
   font-size: 22px;
-  font-weight: 400;
-  letter-spacing: -0.005em;
+  font-weight: 500;
+  letter-spacing: -0.022em;
   color: var(--ink);
-  line-height: 1;
+  line-height: 1.1;
 }
 .brand-name .brand-dot { color: var(--green); }
 
@@ -422,11 +451,11 @@ a { color: inherit; }
  * the same measure-plus-gutter box the header and the content column use, so the
  * wordmark sits on the same left edge as everything above it.
  *
- * Two zones, and the baseline is deliberately not shared. The identity is a
- * signature — a 46px wordmark over one small sentence — and the documents are a
- * nav. Baseline-aligning them to the same line put the links under the empty
- * half of the wordmark's line box, where they looked detached. `padding-top` on
- * the nav lifts them to meet the cap height of the name instead.
+ * Two zones, flex-end, so the documents sit level with the sentence under the
+ * name rather than with the name itself. Matching the name put the links under
+ * the empty lower half of a 44px line box where they read as detached; the
+ * sentence is the thing at that height and the links belong beside it. The nav's
+ * own `padding-top` is what lifts its text off the baseline the row aligns to.
  */
 .site-foot {
   border-top: 1px solid var(--border);
@@ -447,18 +476,22 @@ a { color: inherit; }
 /*
  * The wordmark, at closing-signature scale.
  *
- * The header sets it at 17px because there it is a way back to the top of the
+ * The header sets it at 22px because there it is a way back to the top of the
  * page. Here it is the last thing anyone reads, and a wordmark that size in the
- * last position is a piece of type that was set and then forgotten. 46px makes it
- * legible as the product rather than as navigation, and the serif carries it
- * without needing a tile beside it.
+ * last position is a piece of type that was set and then forgotten. 44px makes it
+ * legible as the product rather than as navigation.
+ *
+ * Same corrections as the header, at the same proportions: weight 500, tracking
+ * pulled in, leading closed. This is the same lockup at two sizes, and a
+ * wordmark that changes shape between the top of the page and the bottom of it
+ * is two logos.
  */
 .site-foot-wordmark {
-  font-family: var(--font-serif);
-  font-size: clamp(34px, 4vw, 46px);
-  font-weight: 400;
-  letter-spacing: -0.024em;
-  line-height: 1;
+  font-family: var(--font-wordmark);
+  font-size: clamp(34px, 3.6vw, 44px);
+  font-weight: 500;
+  letter-spacing: -0.026em;
+  line-height: 1.1;
   color: var(--ink);
   margin: 0 0 13px;
 }
@@ -485,10 +518,7 @@ a { color: inherit; }
  * The documents.
  *
  * A nav, so it takes the spacing of one rather than a list of items with gaps
- * that shift when the count changes from three to four. Baseline-aligned with the
- * top of the wordmark rather than the bottom: the links are peers of the name,
- * and matching the bottom of a 46px line to the bottom of a 13px one pushed them
- * down into the void under it.
+ * that shift when the count changes from three to four.
  */
 .site-foot-nav {
   display: flex;
@@ -2818,11 +2848,14 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   flex: none;
 }
 .control-brand > div { display: flex; flex-direction: column; }
+/* Dead: the console header uses `Brand`, so `.control-brand-name` is not rendered
+   anywhere. It is kept here rather than deleted because it is the only remaining
+   place that would reintroduce the serif wordmark if someone wires it up. */
 .control-brand-name {
-  font-family: var(--font-serif);
-  font-weight: 400;
+  font-family: var(--font-wordmark);
+  font-weight: 500;
   font-size: 21px;
-  letter-spacing: -0.005em;
+  letter-spacing: -0.022em;
   color: var(--ink);
   line-height: 1.1;
 }

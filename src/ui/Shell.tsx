@@ -19,12 +19,18 @@ import { Icon } from './Icon'
  *
  * Pure text: no device, no tile, no mark. A logo is a claim about being a
  * product, and the one thing this product is arguing against is a ballot that
- * looks like a widget — so the name carries it on its own. Set in the sans with
- * a capital, because the serif display face is for things being said, not for
- * the thing saying them; the green full stop is the only ornament left.
+ * looks like a widget — so the name carries it on its own.
  *
- * Used by the portal header, the sign-in frame and the console, all three, so the
- * lockup cannot differ between the pages a person moves between.
+ * Set in Inter, the body face, at weight 500 and tracked in tight, rather than
+ * the serif display face it used to be. Instrument Serif is what this product
+ * uses for things being *said* — headlines, results, receipts — so putting the
+ * name in it made the mark claim to be an argument rather than a name. A neutral
+ * sans says "this is the thing" and nothing more. The green full stop is the only
+ * ornament left.
+ *
+ * Used by the portal header, the sign-in frame, the console and the miniature
+ * ballot preview, all four, so the lockup cannot differ between the pages a
+ * person moves between.
  */
 export function Brand({ onNavigate, sub }: { onNavigate?: () => void; sub?: string }) {
   return (
@@ -86,6 +92,10 @@ export function SiteBar({ meta, children }: { meta?: ReactNode; children?: React
  * Three things and nothing else: the product at a size that reads as a
  * signature, one honest sentence about the page you are on, and the three
  * documents nobody should have to hunt for.
+ *
+ * The signature is the same condensed wordmark as the header, not the serif it
+ * used to be. A footer wordmark in the display face was the same argument made
+ * twice on one screen, and at 46px the second one was louder.
  *
  * The mark is gone. The wordmark is the logo now, and at this scale a 26px tile
  * beside it was a postage stamp.
