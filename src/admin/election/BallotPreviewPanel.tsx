@@ -115,12 +115,11 @@ export function BallotPreviewPanel({ electionId, serverOffsetMs }: { electionId:
             {/* The same inner row the real header uses, so this miniature cannot
                 drift from the layout it is a miniature of. */}
             <div className="site-bar-inner">
+              {/* Text only, like the real header this miniature copies. A mark here
+                  would make the preview show a lockup the voter never sees. */}
               <span className="brand">
-                <span className="brand-mark" aria-hidden="true">
-                  <Icon name="ballot" strokeWidth={2} />
-                </span>
                 <span className="brand-name">
-                  ballot<span className="brand-dot">.</span>
+                  Ballot<span className="brand-dot">.</span>
                 </span>
               </span>
               <span className="site-bar-meta">

@@ -938,17 +938,9 @@ a { color: inherit; }
   padding: clamp(26px, 2.6vw, 44px) clamp(26px, 3vw, 56px);
 }
 
-/* The wordmark, reversed out of the photograph. The mark becomes a frosted pane
-   instead of the solid green tile so it does not compete with the accent. */
+/* The wordmark, reversed out of the photograph. Text only, so there is no tile
+   to frost here and nothing to compete with the accent. */
 .auth-frame-media .brand { color: #fff; }
-.auth-frame-media .brand-mark {
-  background: rgba(255, 255, 255, 0.13);
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  backdrop-filter: blur(8px);
-  box-shadow: none;
-  color: #fff;
-}
-.auth-frame-media .brand:hover .brand-mark { background: rgba(255, 255, 255, 0.2); }
 
 .auth-frame-caption { max-width: 30ch; }
 .auth-frame-statement {
@@ -2016,8 +2008,6 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
    rather than a page. */
 .preview-bar { padding: 0 20px; }
 .preview-bar .site-bar-inner { min-height: 52px; max-width: none; padding: 0; }
-.preview-bar .brand-mark { width: 24px; height: 24px; border-radius: 7px; box-shadow: none; }
-.preview-bar .brand-mark svg { width: 14px; height: 14px; }
 .preview-bar .brand-name { font-size: 17px; }
 .preview-bar .site-bar-meta { font-size: 11.5px; }
 .preview-bar .site-bar-meta svg { width: 13px; height: 13px; }

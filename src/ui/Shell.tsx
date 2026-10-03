@@ -14,14 +14,23 @@
 import type { ReactNode } from 'react'
 import { Icon } from './Icon'
 
+/**
+ * The wordmark.
+ *
+ * Pure text: no device, no tile, no mark. A logo is a claim about being a
+ * product, and the one thing this product is arguing against is a ballot that
+ * looks like a widget — so the name carries it on its own. Set in the sans with
+ * a capital, because the serif display face is for things being said, not for
+ * the thing saying them; the green full stop is the only ornament left.
+ *
+ * Used by the portal header, the sign-in frame and the console, all three, so the
+ * lockup cannot differ between the pages a person moves between.
+ */
 export function Brand({ onNavigate, sub }: { onNavigate?: () => void; sub?: string }) {
   return (
     <button type="button" className="brand" onClick={onNavigate} aria-label="Ballot home">
-      <span className="brand-mark" aria-hidden="true">
-        <Icon name="ballot" strokeWidth={2} />
-      </span>
       <span className="brand-name">
-        ballot<span className="brand-dot">.</span>
+        Ballot<span className="brand-dot">.</span>
       </span>
       {sub && <span className="control-brand-sub">{sub}</span>}
     </button>
@@ -73,7 +82,7 @@ export function SiteFoot({ left, right }: { left: ReactNode; right?: ReactNode }
               <Icon name="ballot" strokeWidth={2} />
             </span>
             <span className="brand-name">
-              ballot<span className="brand-dot">.</span>
+              Ballot<span className="brand-dot">.</span>
             </span>
           </span>
           <p className="site-foot-blurb">{left}</p>
