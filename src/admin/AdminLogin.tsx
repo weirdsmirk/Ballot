@@ -40,7 +40,22 @@ const HERO = {
   eyebrow: 'Election workspace',
   headline: 'Run elections',
   accent: 'with confidence.',
-  lede: 'Secure operations for every election, with clear roles and an audit-ready workspace.',
+  /*
+   * The lede, in plain words and a little longer.
+   *
+   * It was "Secure operations for every election, with clear roles and an
+   * audit-ready workspace", which was three adjectives doing the work of three
+   * facts. "Secure operations" names nothing an operator could check. "Audit-ready
+   * workspace" is the noun phrase you write when you do not want to say what the
+   * audit is. A voter or an officer reading it learns nothing about what will
+   * happen to them.
+   *
+   * Now it says the three things that are actually true and checkable: the whole
+   * election runs in one place, the roles decide who may do what, and the actions
+   * get written down. "Five" is `ADMIN_ROLES.length` today; if a role is ever
+   * added, this number is what has to change with it.
+   */
+  lede: 'Ballot runs the whole election from one machine. Five roles decide who may open the poll, certify the result or only read, and every administrative action is written down.',
   /*
    * The hero's old "Privacy-first by design" note said authentication is scoped
    * to this workspace. The statement on the photograph says the same thing in
