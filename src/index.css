@@ -868,18 +868,18 @@ a { color: inherit; }
 
 /* ---- The sign-in frame ----
  *
- * Two columns in a 2:3 ratio — the photograph takes two parts, the work takes
- * three. `2fr 3fr` rather than `40% 60%` so the split is exactly two fifths at
- * every width with no rounding drift, and `100dvh` so a mobile browser's
- * collapsing toolbar cannot cut the form off.
+ * Two equal columns: the photograph on one side, the work on the other. `1fr 1fr`
+ * rather than percentages so the split is exactly half at every width instead of
+ * approximately half, and `100dvh` so a mobile browser's collapsing toolbar
+ * cannot cut the form off.
  *
- * The photograph is not a picture beside the form. It is two fifths of the
- * page, so the brand and the promise live on top of it and the form gets an
- * uninterrupted three fifths to itself.
+ * The photograph is not a picture beside the form. It is half the page, so the
+ * brand and the promise live on top of it and the form gets an uninterrupted
+ * half to itself.
  */
 .auth-frame {
   display: grid;
-  grid-template-columns: 2fr 3fr;
+  grid-template-columns: 1fr 1fr;
   /* Pinned to the viewport rather than merely filling it. `min-height` let the
      frame grow to the height of its tallest column, which made the photograph
      taller than the screen on a short laptop — the exact thing a fixed split is
@@ -1212,37 +1212,52 @@ a { color: inherit; }
 /*
  * The wide tier.
  *
- * Three fifths of a 1920px screen is 1150px, and a single column in the middle
- * of that is the emptiness this page is meant to not have. So past the width
- * where the hero can hold a large headline *and* the form keeps a comfortable
- * measure, the two sit side by side: the argument on the left, the work on the
- * right, centred against each other.
+ * One column, larger. Not two columns side by side.
  *
- * This serves both stages. The second column holds whatever the visitor is being
- * asked to do — the two ways in, or the sign-in form — so the front door and the
- * form are the same composition at the same width rather than two layouts.
+ * Two columns were tried and they were wrong on a big screen. The hero is a
+ * short block and the work is a tall one, so centring each in its own track put
+ * one column's top edge hundreds of pixels from the other's and left both
+ * floating in a void — the columns read as unrelated rather than as a spread,
+ * and no amount of gap tuning fixes it. A shared top edge would align them, but
+ * then the shorter column hangs off the bottom and the emptiness just moves.
  *
- * The breakpoint is set by the narrower of the two columns rather than by
- * taste, and the two numbers that fix it are: the form is not allowed past
- * 440px, because an input you have to chase is worse than one you can read,
- * and the headline must not overrun the column beside it. The first attempt at
- * 1660px left the hero 333px and the display-size headline overran it by 4px;
- * dropping the ceiling gives the two room to spare.
- *
- * The row is then capped, so both columns grow together to a point and then
- * stop, rather than letting the hero drift away from the form on an ultrawide.
- * What is left over becomes margin, which is deliberate.
+ * The honest answer is that this content — a headline, two ways in, a paragraph —
+ * cannot fill 1150px of width and 1080px of height in two columns without
+ * inflating the type past the point where it looks designed. So the measure stays
+ * readable, the type grows into the extra room, and the whole thing is centred as
+ * a single block, which leaves symmetric space above and below instead of a void
+ * beside something.
  */
 @media (min-width: 1620px) {
-  .auth-frame-inner {
-    max-width: 1080px;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(400px, 440px);
-    align-items: center;
-    gap: clamp(48px, 5vw, 96px);
-  }
-  .auth-hero h1 { font-size: clamp(48px, 3.1vw, 64px); max-width: 12ch; }
-  .auth-hero-lede { font-size: 17px; max-width: 38ch; }
+  .auth-frame-inner { max-width: 960px; }
+
+  .auth-hero h1 { font-size: clamp(56px, 3.9vw, 80px); max-width: 15ch; }
+  .auth-hero-lede { font-size: 18px; max-width: 50ch; margin-top: 26px; }
+  .auth-hero-rule { width: 60px; margin: 32px 0 34px; }
+
+  .entry-way { padding: 30px 4px; gap: 26px; }
+  .entry-way-icon { width: 54px; height: 54px; }
+  .entry-way-icon svg { width: 24px; height: 24px; }
+  .entry-way-label { font-size: clamp(28px, 2vw, 35px); }
+  .entry-way-detail { font-size: 14px; margin-top: 10px; }
+
+  .entry-about { margin-top: 36px; padding-top: 32px; }
+  .entry-about-headline { font-size: clamp(25px, 1.9vw, 33px); max-width: 34ch; }
+  .entry-about-detail { font-size: 14px; max-width: 64ch; }
+}
+
+/*
+ * Ultrawide.
+ *
+ * Half a 3440px screen is 1720px, and a column capped for a 1920px display fills
+ * barely half of it. The form itself keeps its 620px measure — an input that wide
+ * is worse than one you can read — but the hero, the two ways in and the claim
+ * below them are allowed to use the room, and it is those three that carry the
+ * composition. Past this width the remainder is symmetric margin, which is the
+ * intended result rather than something left over.
+ */
+@media (min-width: 2400px) {
+  .auth-frame-inner { max-width: 1120px; }
 }
 
 .auth-card-head { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
