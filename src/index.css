@@ -417,31 +417,37 @@ a { color: inherit; }
 /*
  * The way out of a document.
  *
- * Sits in the header's meta slot so it inherits the row it is in, with the
- * document's own name after the separator. The arrow is 14px like every other
- * icon in the bar, and the whole thing takes the same underline-on-hover as the
- * rest of the header's links — it is a link and should not need a different
- * gesture from the portal's exit.
+ * It is the first thing in the document column, above the eyebrow, not in the
+ * header. The arrow is 15px rather than the bar's 14px because it is now read at
+ * document scale against a 56px title rather than as one item among a row of 12px
+ * meta, and at that size a 14px arrow looks like an artefact of the label.
+ *
+ * The underline is gone. On hover it drew a 280px green rule under a line of
+ * 13px text, which read as a filled button — the exact thing it was not. Colour
+ * and the arrow's nudge carry the state instead, which is enough when the thing
+ * being signalled is "you can leave".
  */
 .back-link {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
   color: var(--muted);
   text-decoration: none;
-  border-bottom: 1px solid transparent;
-  padding-bottom: 1px;
-  transition: color var(--ease), border-color var(--ease);
+  /* Room for the focus ring, which would otherwise be clipped by the rule above. */
+  margin: -8px 0 34px;
+  padding: 8px;
+  margin-left: -8px;
+  transition: color var(--ease);
 }
-.back-link svg { width: 14px; height: 14px; flex: none; transition: transform var(--ease); }
-.back-link:hover { color: var(--ink); border-bottom-color: var(--green); }
+.back-link svg { width: 15px; height: 15px; flex: none; transition: transform var(--ease); }
+.back-link:hover { color: var(--green); }
 /* The arrow leans into the direction it travels on hover. A 3px nudge is enough
    to read as a response without being a movement worth watching. */
 .back-link:hover svg { transform: translateX(-3px); }
 .back-link:focus-visible {
   outline: none;
   box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--green);
-  border-radius: 3px;
+  border-radius: 4px;
 }
 
 /*

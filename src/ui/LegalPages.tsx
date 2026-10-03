@@ -212,19 +212,27 @@ export function LegalPage({
 
   return (
     <div className="page-shell">
-      <SiteBar
-        meta={
-          <span className="site-bar-meta">
-            <BackLink to={backTo} label={backLabel} />
-            <span className="site-bar-sep">·</span>
-            {page.title}
-          </span>
-        }
-      />
+      <SiteBar meta={<span className="site-bar-meta">{page.title}</span>} />
 
       <main className="legal-body">
         <div className="legal-inner">
           <div className="legal-prose">
+            {/*
+              The way out, at the top of the column and not in the header.
+
+              It was in the header's right-hand slot, beside the document's name.
+              That put a 24-character control and a heading into one 62px band and
+              pushed the heading off the edge of the screen — the two were never
+              going to fit, and the header is the one place on the page that has
+              room for exactly one short thing on the right.
+
+              The name up there was also redundant with the H1 one line below it.
+              Here the control sits on the same left edge as the rest of the
+              document, reads before the title rather than competing with it, and
+              has the whole measure if it needs one.
+            */}
+            <BackLink to={backTo} label={backLabel} />
+
             <p className="eyebrow">Ballot</p>
             <h1>{page.title}</h1>
             <p className="legal-standfirst">{page.standfirst}</p>
