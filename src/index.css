@@ -1181,13 +1181,35 @@ a { color: inherit; }
   margin-top: 22px;
   text-wrap: pretty;
 }
-/* A short accent rule rather than a full-width divider: a mark, not a separator. */
+/*
+ * The separator between the argument and the two ways in.
+ *
+ * A full-width rule rather than the 52px accent dash it replaced. The dash read
+ * as a decorative mark floating under the lede, doing nothing a reader could
+ * name. A line that spans the column is doing something: it marks the place where
+ * the pitch stops and the decision starts.
+ *
+ * The green survives as a leading segment instead of the whole rule. A solid 2px
+ * green bar across 760px would be the loudest thing on a page whose entire
+ * restraint is the point, and it is only punctuation.
+ */
 .auth-hero-rule {
+  height: 1px;
+  background: var(--border);
+  margin: 30px 0 32px;
+  position: relative;
+}
+.auth-hero-rule::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  /* Half a pixel up, so the 2px accent sits centred on the 1px hairline instead
+     of hanging a pixel below it. */
+  top: -0.5px;
   width: 52px;
   height: 2px;
   background: var(--green);
   border-radius: 2px;
-  margin: 26px 0 28px;
 }
 
 /* What the product is, under the two doors.
@@ -1263,7 +1285,9 @@ a { color: inherit; }
 
   .auth-hero h1 { font-size: clamp(56px, 3.9vw, 80px); max-width: 15ch; }
   .auth-hero-lede { font-size: 18px; max-width: 50ch; margin-top: 26px; }
-  .auth-hero-rule { width: 60px; margin: 32px 0 34px; }
+  /* Margin only — the width is gone. It used to be 60px here, which is what
+     would have kept the rule short on exactly the screens that needed it full. */
+  .auth-hero-rule { margin: 34px 0 36px; }
 
   .entry-way { padding: 26px 28px; gap: 28px; }
   .entry-way-label { font-size: clamp(24px, 1.55vw, 28px); }
