@@ -868,21 +868,21 @@ a { color: inherit; }
 
 /* ---- The sign-in frame ----
  *
- * Two equal columns and nothing else: a photograph on one side, the work on the
- * other. `1fr 1fr` rather than percentages so the split is exactly half at every
- * width instead of approximately half, and `100dvh` so a mobile browser's
+ * Two columns in a 2:3 ratio — the photograph takes two parts, the work takes
+ * three. `2fr 3fr` rather than `40% 60%` so the split is exactly two fifths at
+ * every width with no rounding drift, and `100dvh` so a mobile browser's
  * collapsing toolbar cannot cut the form off.
  *
- * The photograph is not a picture beside the form. It is half the page, so the
- * brand and the promise live on top of it and the form gets a clean, uninterrupted
- * half to itself.
+ * The photograph is not a picture beside the form. It is two fifths of the
+ * page, so the brand and the promise live on top of it and the form gets an
+ * uninterrupted three fifths to itself.
  */
 .auth-frame {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 2fr 3fr;
   /* Pinned to the viewport rather than merely filling it. `min-height` let the
      frame grow to the height of its tallest column, which made the photograph
-     taller than the screen on a short laptop — the exact thing a 50/50 split is
+     taller than the screen on a short laptop — the exact thing a fixed split is
      supposed to prevent. Fixed height plus a scrolling panel keeps the
      composition intact and still lets a long form be reached. */
   height: 100vh;
@@ -977,13 +977,17 @@ a { color: inherit; }
   /* Scrolls rather than clips. The bootstrap state adds a field and a longer
      note, so on a short laptop the form has to be reachable, not cut off. */
   overflow-y: auto;
-  padding: clamp(26px, 2.8vw, 56px) clamp(26px, 3.4vw, 72px);
+  padding: clamp(26px, 2.8vw, 56px) clamp(26px, 3.6vw, 80px);
   min-width: 0;
 }
 .auth-frame-inner {
   width: 100%;
-  /* Wide enough that the serif headline has room to be a headline. */
-  max-width: 480px;
+  /* Wider than the form needs on purpose. The hero above it can take a large
+     measure — a 60px headline and a two-line lede — while the form below holds
+     its own comfortable width, so the column can be generous without the inputs
+     becoming something you have to chase. What fills the extra width is the
+     layout, not the type: see the two-column tier below. */
+  max-width: 760px;
   /* Auto margins rather than `justify-content: center`: centring a flex child
      that is taller than its container clips the top, which on this page would
      mean the headline. Auto margins centre when there is room and simply start
@@ -991,12 +995,52 @@ a { color: inherit; }
   margin: auto;
 }
 
-/* ---- The hero ---- */
+/* The card is gone.
+ *
+ * A panel inside a panel, floating in the middle of its own column, was the one
+ * piece of the old sign-in page that had no job: the page already has a
+ * photograph and a headline, and a box around a form says "this is a widget"
+ * when what it actually is is the page. Scoped to the frame, so the
+ * server-unavailable screen keeps its card — there it is the entire message.
+ */
+.auth-frame .auth-card {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+  width: 100%;
+  /* Its own measure, narrower than the column it sits in, and centred under the
+     hero. In the two-column tier the grid track is already this width, so the
+     cap simply does not bind. */
+  max-width: 620px;
+  margin-inline: auto;
+}
+
+/* With the box gone, the two remaining callouts would be the only rectangles on
+   the page and would read as leftovers. Both become an edge instead: a rule
+   down the left, no enclosure. */
+.auth-frame .role-readout {
+  border: 0;
+  border-left: 2px solid var(--green-line);
+  border-radius: 0;
+  background: none;
+  padding: 2px 0 2px 16px;
+}
+.auth-frame .demo-note {
+  border: 0;
+  border-left: 2px solid var(--amber);
+  border-radius: 0;
+  background: none;
+  padding: 2px 0 2px 14px;
+}
+
+/* The hero */
 .auth-hero { min-width: 0; }
 .auth-hero .eyebrow { margin-bottom: 18px; }
 .auth-hero h1 {
   font-family: var(--font-serif);
-  font-size: clamp(38px, 3.1vw, 56px);
+  font-size: clamp(38px, 3.4vw, 60px);
   font-weight: 400;
   letter-spacing: -0.02em;
   line-height: 1.03;
@@ -1020,7 +1064,38 @@ a { color: inherit; }
   border-radius: 2px;
   margin: 26px 0 28px;
 }
-.auth-frame .auth-card { margin-top: 0; }
+
+/*
+ * The wide tier.
+ *
+ * Three fifths of a 1920px screen is 1150px, and a single column in the middle
+ * of that is the emptiness this page is meant to not have. So past the width
+ * where the hero can hold a large headline *and* the form keeps a comfortable
+ * measure, the two sit side by side: the argument on the left, the work on the
+ * right, centred against each other.
+ *
+ * The breakpoint is set by the narrower of the two columns rather than by
+ * taste, and the two numbers that fix it are: the form is not allowed past
+ * 440px, because an input you have to chase is worse than one you can read,
+ * and the headline must not overrun the column beside it. The first attempt at
+ * 1660px left the hero 333px and the display-size headline overran it by 4px;
+ * dropping the ceiling to 2.9vw makes the two fit with room to spare.
+ *
+ * The row is then capped, so both columns grow together to a point and then
+ * stop, rather than letting the hero drift away from the form on an ultrawide.
+ * What is left over becomes margin, which is deliberate.
+ */
+@media (min-width: 1620px) {
+  .auth-frame-inner {
+    max-width: 1080px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(400px, 440px);
+    align-items: center;
+    gap: clamp(48px, 5vw, 96px);
+  }
+  .auth-hero h1 { font-size: clamp(42px, 2.9vw, 60px); max-width: 12ch; }
+  .auth-hero-lede { font-size: 16px; max-width: 38ch; }
+}
 
 .auth-card-head { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
 .auth-card-head .eyebrow { margin-bottom: 4px; }

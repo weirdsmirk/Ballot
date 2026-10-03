@@ -194,7 +194,13 @@ export function AdminLogin({
                 <Icon name="lock" />
               </span>
               <div>
-                <span className="eyebrow">Admin console</span>
+                {/*
+                  No eyebrow here. The hero directly above already says
+                  "Administrator access", and with the card's box gone a second
+                  eyebrow a hundred pixels below read as a repetition rather than
+                  as a label. The second-factor step keeps its own, because
+                  "Step 2 of 2" tells the operator something the hero does not.
+                */}
                 <h2>{needsBootstrap ? 'Create the first administrator' : 'Sign in'}</h2>
               </div>
             </div>
