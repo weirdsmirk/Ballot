@@ -225,9 +225,12 @@ export function AdminLogin({
   if (stage === 'mfa') {
     return (
       <AuthFrame statement={HERO.statement} meta={`Ballot administrator access · ${YEAR} cycle`}>
-        <AuthHero />
-
         <div className="auth-frame-work">
+          <button type="button" className="entry-back" onClick={() => { setStage('password'); setCode(''); setError(null) }}>
+            <Icon name="arrow-left" />
+            All ways in
+          </button>
+
           <form className="auth-card" onSubmit={submitCode}>
               <div className="auth-card-head">
                 <span className="icon-tile tile-green">
@@ -272,20 +275,12 @@ export function AdminLogin({
                 {busy ? 'Verifying…' : 'Verify & enter'}
                 <Icon name="arrow-right" />
               </button>
-              <div className="auth-card-foot">
-                <button
-                  type="button"
-                  className="link-secondary"
-                  onClick={() => {
-                    setStage('password')
-                    setCode('')
-                    setError(null)
-                  }}
-                >
-                  <Icon name="arrow-left" />
-                  Back to sign in
-                </button>
-              </div>
+              {/*
+                No second back link at the foot. The one at the top of this stage
+                already goes back, and unlike this one it reaches the chooser as
+                well as the password step — so a second control here would be a
+                slower route to the same place.
+              */}
           </form>
         </div>
       </AuthFrame>
@@ -294,8 +289,6 @@ export function AdminLogin({
 
   return (
     <AuthFrame statement={HERO.statement} meta={`Ballot administrator access · ${YEAR} cycle`}>
-      <AuthHero />
-
       <div className="auth-frame-work">
         {/*
           Always shown. The chooser is the origin of every path into this form, so
