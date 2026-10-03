@@ -1312,7 +1312,23 @@ a { color: inherit; }
   line-height: 1.7;
   color: var(--muted);
   max-width: 44ch;
-  margin-top: 22px;
+  /*
+   * 9px, down from 22. Neither number is what the eye measures.
+   *
+   * The gap between the green accent line and this paragraph is really three
+   * things: the empty bottom of the headline's line box, the margin, and the
+   * empty top of this paragraph's line box. Measured off the canvas, the
+   * headline at 1.02 leading leaves about 7px below its ink — "with confidence."
+   * has no descenders, so nearly the whole leading sits under the baseline — and
+   * this paragraph at 1.7 leaves about 8px above its own. So the 22px margin was
+   * producing a 37px optical gap under 44px of type, which reads as a hole rather
+   * than as a separation.
+   *
+   * 9px brings the ink-to-ink gap to about 24px. The leading that stays is inside
+   * the line boxes and cannot be removed without clipping the type, so this is as
+   * tight as it goes without the two blocks touching.
+   */
+  margin-top: 9px;
   text-wrap: pretty;
 }
 /*
