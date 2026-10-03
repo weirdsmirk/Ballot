@@ -19,10 +19,22 @@ import { AdminApp } from './admin/AdminApp'
 import { AdminLogin } from './admin/AdminLogin'
 import { VoterFlow } from './voter/VoterFlow'
 import { SiteBar, SiteFoot } from './ui/Shell'
+import { LegalPage, isLegalPage, type LegalPageId } from './ui/LegalPages'
 import { Icon } from './ui/Icon'
 import { Alert, Spinner } from './ui/primitives'
 
 type Surface = 'start' | 'voter' | 'admin'
+
+/**
+ * Which document, if any, this hash points at.
+ *
+ * Read separately from `readSurface` because a document is not a surface: legal,
+ * terms and privacy render in the ordinary page frame and are reachable from
+ * anywhere, including while signed in.
+ */
+function readLegal(): LegalPageId | null {
+  return isLegalPage(window.location.hash)
+}
 
 function readSurface(): Surface {
   const hash = window.location.hash.replace('#/', '')
@@ -32,9 +44,36 @@ function readSurface(): Surface {
   return 'start'
 }
 
+/**
+ * What the back control on a document should say, and where it should go.
+ *
+ * It remembers the surface the reader was on, not the last document, because a
+ * reader who arrived from the portal wants the portal back and not a sideways
+ * step into terms. Two documents read in a row still send you to where you
+ * started.
+ *
+ * Labels are named rather than generic because "back" without a destination is
+ * the thing that made this unreadable in the first place.
+ */
+const BACK_LABEL: Record<Surface, string> = {
+  start: 'Back to the front door',
+  voter: 'Back to the voter portal',
+  admin: 'Back to the console',
+}
+function surfaceRoute(surface: Surface): string {
+  if (surface === 'admin') return '#/admin'
+  if (surface === 'voter') return '#/vote'
+  return '#/'
+}
+
 export default function App() {
   const [bootstrap, setBootstrap] = useState<Bootstrap | null>(null)
   const [surface, setSurface] = useState<Surface>(readSurface)
+  const [legal, setLegal] = useState<LegalPageId | null>(readLegal)
+  // The surface a document was opened from, so its back control can name a real
+  // destination. Seeded from the current hash so a document opened cold — pasted
+  // in a new tab — still has somewhere sensible to go back to.
+  const [documentFrom, setDocumentFrom] = useState<Surface>(readSurface)
   const [offline, setOffline] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -66,10 +105,34 @@ export default function App() {
   }, [load])
 
   useEffect(() => {
-    const onHash = () => setSurface(readSurface())
+    const onHash = () => {
+      const nextSurface = readSurface()
+      const nextLegal = readLegal()
+      // Leaving a document is not an origin, and neither is arriving on one, so
+      // only a real surface updates where the back control points.
+      if (!nextLegal) setDocumentFrom(nextSurface)
+      setSurface(nextSurface)
+      setLegal(nextLegal)
+    }
     window.addEventListener('hashchange', onHash)
     return () => window.removeEventListener('hashchange', onHash)
   }, [])
+
+  /*
+   * The three documents render before anything else, including the connection
+   * attempt. They are the same text on every machine and they have nothing to do
+   * with the database, so a person whose election server is down should still be
+   * able to read the privacy notice.
+   */
+  if (legal) {
+    return (
+      <LegalPage
+        id={legal}
+        backTo={surfaceRoute(documentFrom)}
+        backLabel={BACK_LABEL[documentFrom]}
+      />
+    )
+  }
 
   if (loading) return <Spinner label="Connecting to the election server…" />
 
@@ -97,7 +160,7 @@ export default function App() {
             </button>
           </div>
         </div>
-        <SiteFoot left="No election data is cached in this browser." right="Ballot · local election workspace" />
+        <SiteFoot sub="No election data is cached in this browser." />
       </div>
     )
   }
@@ -162,13 +225,7 @@ export default function App() {
         <VoterFlow elections={bootstrap.elections} serverOffsetMs={serverOffsetMs} onChanged={() => void load()} />
       </div>
 
-      {/*
-        The footer names the product and stops there. It used to enumerate every
-        open election type as well, which made the line grow with the workspace
-        and told a voter nothing they could act on — the elections are one screen
-        above, and they can all be read at a glance.
-      */}
-      <SiteFoot left="Ballot secrecy is structural, not a promise." right="Local election workspace" />
+      <SiteFoot sub="Ballot secrecy is structural, not a promise." />
     </div>
   )
 }

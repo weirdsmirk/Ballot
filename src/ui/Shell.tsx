@@ -37,6 +37,28 @@ export function Brand({ onNavigate, sub }: { onNavigate?: () => void; sub?: stri
   )
 }
 
+/**
+ * The way back, for pages that are somewhere other than home.
+ *
+ * A document opened from the footer leaves the reader stranded: they scroll to
+ * the bottom and there is no control, because the footer they came in through is
+ * the only navigation on the page and it only goes sideways. The browser's back
+ * button works, but requiring someone to know that is not a navigation scheme.
+ *
+ * So the document says where it goes, and goes there. `to` is the surface they
+ * arrived from, tracked in App, because "back" on the privacy notice should
+ * return a voter to the portal they were voting in rather than dumping them on
+ * the sign-in.
+ */
+export function BackLink({ to, label }: { to: string; label: string }) {
+  return (
+    <a className="back-link" href={to}>
+      <Icon name="arrow-left" />
+      {label}
+    </a>
+  )
+}
+
 export function SiteBar({ meta, children }: { meta?: ReactNode; children?: ReactNode }) {
   return (
     <header className="site-bar">
@@ -61,33 +83,40 @@ export function SiteBar({ meta, children }: { meta?: ReactNode; children?: React
 /**
  * The page footer.
  *
- * Two zones and nothing else: the product's identity with the one sentence it
- * makes on its way out, and a line of fine print. That is deliberately short —
- * a footer that starts behaving like a second navigation has stopped being a
- * footer — but it is a *block*, not two labels pinned to opposite ends of a wide
- * bar. The statement is set in the display serif because it is the closing
- * remark rather than a label, and the fine print uses the letterspaced sans that
- * every other machine fact in the product uses.
+ * Three things and nothing else: the product at a size that reads as a
+ * signature, one honest sentence about the page you are on, and the three
+ * documents nobody should have to hunt for.
  *
- * The wordmark is a figure here, not a link: the header already owns navigation,
- * and a second control labelled "Ballot home" is a duplicate landmark.
+ * The mark is gone. The wordmark is the logo now, and at this scale a 26px tile
+ * beside it was a postage stamp.
+ *
+ * `sub` is one honest sentence, and it varies by surface because the claim is not
+ * the same on each: "No credentials leave this server" is something a sign-in can
+ * back and the portal cannot say. It is deliberately small and sans. At the old
+ * 18px serif it sat under a 19px wordmark and the two competed as peers; scaled
+ * up under the 46px wordmark it would be a second signature trying to sign the
+ * same page. At 13px muted sans it is the caption to the name, which is the
+ * thing you read after you already have the name.
+ *
+ * The links are real routes, not decoration. Every one of them opens a document
+ * that says what the software does rather than what it promises.
  */
-export function SiteFoot({ left, right }: { left: ReactNode; right?: ReactNode }) {
+export function SiteFoot({ sub }: { sub: ReactNode }) {
   return (
     <footer className="site-foot">
       <div className="site-foot-inner">
         <div className="site-foot-identity">
-          <span className="site-foot-brand" aria-hidden="true">
-            <span className="brand-mark">
-              <Icon name="ballot" strokeWidth={2} />
-            </span>
-            <span className="brand-name">
-              Ballot<span className="brand-dot">.</span>
-            </span>
-          </span>
-          <p className="site-foot-blurb">{left}</p>
+          <p className="site-foot-wordmark">
+            Ballot<span className="brand-dot">.</span>
+          </p>
+          <p className="site-foot-sub">{sub}</p>
         </div>
-        {right && <p className="site-foot-meta">{right}</p>}
+
+        <nav className="site-foot-nav" aria-label="Legal and policy">
+          <a href="#/legal">Legal notices</a>
+          <a href="#/terms">Terms</a>
+          <a href="#/privacy">Privacy</a>
+        </nav>
       </div>
     </footer>
   )

@@ -304,6 +304,17 @@ a { color: inherit; }
   cursor: pointer;
   padding: 0;
   color: inherit;
+  /* A wordmark that navigates has to look like it navigates. This one was a bare
+     button, so on a document page — the one place you need to get out of — it
+     read as the product's name and nothing else. The rule is invisible until the
+     pointer or the keyboard arrives, so the resting state is still just a name. */
+  border-radius: 4px;
+  transition: opacity var(--ease);
+}
+.brand:hover { opacity: 0.72; }
+.brand:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--green);
 }
 .brand-mark {
   width: 32px;
@@ -375,22 +386,47 @@ a { color: inherit; }
 .site-bar-sep { color: var(--muted-2); }
 
 /*
- * The footer.
+ * The way out of a document.
  *
- * The bar is full-bleed and its inner row shares the header's 40px gutter, so
- * the footer lines up with the wordmark above it rather than floating at an
- * arbitrary width. Hierarchy is two levels only: a serif statement and a
- * letterspaced meta line. Both are already muted, so neither needs a rule to
- * sit quietly underneath the page.
+ * Sits in the header's meta slot so it inherits the row it is in, with the
+ * document's own name after the separator. The arrow is 14px like every other
+ * icon in the bar, and the whole thing takes the same underline-on-hover as the
+ * rest of the header's links — it is a link and should not need a different
+ * gesture from the portal's exit.
  */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--muted);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  padding-bottom: 1px;
+  transition: color var(--ease), border-color var(--ease);
+}
+.back-link svg { width: 14px; height: 14px; flex: none; transition: transform var(--ease); }
+.back-link:hover { color: var(--ink); border-bottom-color: var(--green); }
+/* The arrow leans into the direction it travels on hover. A 3px nudge is enough
+   to read as a response without being a movement worth watching. */
+.back-link:hover svg { transform: translateX(-3px); }
+.back-link:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--green);
+  border-radius: 3px;
+}
+
 /*
  * The footer.
  *
  * The bar is full-bleed so its hairline runs edge to edge; the block inside is
  * the same measure-plus-gutter box the header and the content column use, so the
- * wordmark sits on the same left edge as everything above it. Two zones —
- * identity, then fine print — with the meta baseline-aligned rather than
- * centred, because it is a caption to the statement and not a peer of it.
+ * wordmark sits on the same left edge as everything above it.
+ *
+ * Two zones, and the baseline is deliberately not shared. The identity is a
+ * signature — a 46px wordmark over one small sentence — and the documents are a
+ * nav. Baseline-aligning them to the same line put the links under the empty
+ * half of the wordmark's line box, where they looked detached. `padding-top` on
+ * the nav lifts them to meet the cap height of the name instead.
  */
 .site-foot {
   border-top: 1px solid var(--border);
@@ -407,44 +443,69 @@ a { color: inherit; }
   padding: 40px var(--page-gutter) 36px;
 }
 .site-foot-identity { min-width: 0; }
-.site-foot-brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 16px;
-}
-.site-foot-brand .brand-mark {
-  width: 26px;
-  height: 26px;
-  border-radius: 8px;
-  box-shadow: none;
-}
-.site-foot-brand .brand-mark svg { width: 15px; height: 15px; }
-.site-foot-brand .brand-name { font-size: 19px; }
 
-/* The closing remark. Sized to read as a sentence rather than a label, and held
-   to a measure so it never becomes one long line across a wide page. */
-.site-foot-blurb {
+/*
+ * The wordmark, at closing-signature scale.
+ *
+ * The header sets it at 17px because there it is a way back to the top of the
+ * page. Here it is the last thing anyone reads, and a wordmark that size in the
+ * last position is a piece of type that was set and then forgotten. 46px makes it
+ * legible as the product rather than as navigation, and the serif carries it
+ * without needing a tile beside it.
+ */
+.site-foot-wordmark {
   font-family: var(--font-serif);
-  font-size: 18px;
-  line-height: 1.45;
+  font-size: clamp(34px, 4vw, 46px);
+  font-weight: 400;
+  letter-spacing: -0.024em;
+  line-height: 1;
+  color: var(--ink);
+  margin: 0 0 13px;
+}
+.site-foot-wordmark .brand-dot { color: var(--green); }
+
+/*
+ * The one sentence.
+ *
+ * Sans, small, muted. It was 18px serif directly under a 19px wordmark, where
+ * the two sat at nearly the same weight and competed as peers. Under a 46px name
+ * that would be worse — a second signature on the same page. At 13px it is the
+ * caption to the name rather than a headline beside it.
+ */
+.site-foot-sub {
+  font-size: 13px;
+  line-height: 1.6;
   color: var(--muted);
-  max-width: 44ch;
-  text-wrap: balance;
+  margin: 0;
+  max-width: 42ch;
+  text-wrap: pretty;
 }
-.site-foot-meta {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
-  line-height: 1.5;
-  color: var(--muted-2);
-  text-align: right;
-  white-space: nowrap;
-  /* Optically level with the serif statement's baseline, which sits lower than
-     the sans line box would on its own. */
-  padding-bottom: 4px;
+
+/*
+ * The documents.
+ *
+ * A nav, so it takes the spacing of one rather than a list of items with gaps
+ * that shift when the count changes from three to four. Baseline-aligned with the
+ * top of the wordmark rather than the bottom: the links are peers of the name,
+ * and matching the bottom of a 46px line to the bottom of a 13px one pushed them
+ * down into the void under it.
+ */
+.site-foot-nav {
+  display: flex;
+  align-items: baseline;
+  gap: 26px;
+  flex-wrap: wrap;
+  padding-top: 6px;
 }
+.site-foot-nav a {
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  padding-bottom: 2px;
+  transition: color var(--ease), border-color var(--ease);
+}
+.site-foot-nav a:hover { color: var(--ink); border-bottom-color: var(--green); }
 
 /* ========================================
    Buttons
@@ -3850,6 +3911,124 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
 .page-epigraph { color: var(--muted); line-height: 1.6; }
 
 /* ========================================
+   The documents: legal, terms, privacy
+   ========================================
+   Documents, not screens, so the rule is the one for documents: set the measure
+   and let the page get out of the way. 74ch at 15px is about a comfortable line.
+
+   The block shares the header's measure-plus-gutter box and is left-aligned
+   inside it, rather than centred in the window. Centred reads well on a page and
+   badly in this product: it put the first line of the privacy notice 250px right
+   of the wordmark directly above it, on the one screen whose whole argument is
+   that these two things agree. Everything here hangs off the same left edge as
+   the header and the footer.
+
+   The rule down the left of the block is the document's margin. A policy that
+   starts flush at the edge of the window looks like a debug page, and padding
+   would have left the rule floating without anything to divide.
+*/
+.legal-body {
+  flex: 1;
+  padding: 68px var(--page-gutter) 96px;
+}
+.legal-inner {
+  max-width: calc(var(--page-max) + var(--page-gutter) * 2);
+  margin: 0 auto;
+}
+.legal-prose {
+  max-width: 74ch;
+  border-left: 1px solid var(--border);
+  padding-left: 40px;
+}
+.legal-inner h1 {
+  font-family: var(--font-serif);
+  font-size: clamp(38px, 5vw, 56px);
+  font-weight: 400;
+  letter-spacing: -0.024em;
+  line-height: 1.04;
+  color: var(--ink);
+  margin: 0;
+  text-wrap: balance;
+}
+.legal-inner .eyebrow { margin: 0 0 16px; }
+/* The standfirst is the one piece of prose on the page that is about the document
+   rather than in it, so it sits apart: muted, larger than the body, and given a
+   full line of space before the first heading. */
+.legal-standfirst {
+  font-family: var(--font-serif);
+  font-size: 19px;
+  line-height: 1.55;
+  color: var(--muted);
+  margin: 22px 0 0;
+  max-width: 56ch;
+  text-wrap: pretty;
+}
+.legal-inner h2 {
+  counter-increment: none;
+  font-family: var(--font-serif);
+  font-size: 25px;
+  font-weight: 400;
+  letter-spacing: -0.012em;
+  line-height: 1.2;
+  color: var(--ink);
+  margin: 52px 0 14px;
+}
+.legal-inner p {
+  font-size: 15px;
+  line-height: 1.72;
+  color: var(--muted);
+  margin: 0 0 16px;
+  text-wrap: pretty;
+}
+.legal-inner ul {
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+  /* A real left rule for the list, aligned with the block's own. Each item gets a
+     hanging dash rather than a bullet: a bullet is a round blob at 8px and these
+     are sentences, not tags. */
+  border-left: 1px solid var(--border);
+  padding-left: 22px;
+}
+.legal-inner li {
+  position: relative;
+  font-size: 15px;
+  line-height: 1.72;
+  color: var(--muted);
+  margin: 0 0 12px;
+  text-wrap: pretty;
+}
+.legal-inner li:last-child { margin-bottom: 0; }
+.legal-inner li::before {
+  content: '';
+  position: absolute;
+  left: -22px;
+  top: 0.82em;
+  width: 12px;
+  height: 1px;
+  background: var(--border-strong);
+}
+/* The other two documents. Sits below the last section with a rule above it, so
+   it reads as an index to the set rather than as another paragraph of one. */
+.legal-switch {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-top: 64px;
+  padding-top: 28px;
+  border-top: 1px solid var(--border);
+}
+.legal-switch a {
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: none;
+  border-bottom: 1px solid var(--border-strong);
+  padding-bottom: 2px;
+  transition: color var(--ease), border-color var(--ease);
+}
+.legal-switch a:hover { color: var(--ink); border-bottom-color: var(--green); }
+
+/* ========================================
    Responsive
    ======================================== */
 @media (min-width: 2200px) {
@@ -3935,13 +4114,23 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
 @media (max-width: 720px) {
   :root { --page-gutter: 16px; }
   .site-bar-inner { min-height: 58px; }
-  /* Below this width the two zones stop competing for one line: the identity
-     keeps its gutter and the meta drops beneath it, still left-aligned to the
-     same edge rather than hanging off the right. */
+  /* Below this width the name and the documents stop competing for one line: the
+     wordmark keeps its gutter and the nav drops beneath it, still left-aligned to
+     the same edge rather than hanging off the right. The type itself does not
+     scale — it is a signature, not a headline, and it should look the same size
+     on a phone as on a desk. */
   .site-foot-inner { flex-direction: column; align-items: flex-start; gap: 20px; padding-top: 30px; padding-bottom: 28px; }
-  .site-foot-meta { text-align: left; padding-bottom: 0; }
-  .site-foot-brand { margin-bottom: 12px; }
-  .site-foot-blurb { font-size: 16px; max-width: none; }
+  .site-foot-wordmark { font-size: 34px; }
+  .site-foot-sub { max-width: none; }
+  .site-foot-nav { padding-top: 0; gap: 20px; }
+  /* Below tablet the block rule costs more width than it is worth on a narrow
+     screen, and the text has to start at the gutter or it runs to the edge. */
+  .legal-body { padding: 44px var(--page-gutter) 64px; }
+  .legal-inner { border-left: none; padding-left: 0; }
+  .legal-inner ul { border-left: none; padding-left: 18px; }
+  .legal-inner li::before { left: -18px; width: 9px; }
+  .legal-inner h2 { font-size: 22px; margin-top: 40px; }
+  .legal-standfirst { font-size: 17px; }
   .focus-card, .focus-card-lg { padding: 24px 20px; }
   .auth-card { padding: 24px 20px; }
   .confirmed-title { font-size: 26px; }
