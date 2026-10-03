@@ -1015,12 +1015,35 @@ a { color: inherit; }
   box-shadow: none;
   padding: 0;
   width: 100%;
-  /* Its own measure, narrower than the column it sits in. Left-aligned rather
-     than centred: the back link above it is on the column's left edge, and a
-     centred form sits 70px in from that edge on a wide screen — the same class
-     of misalignment the doors had. */
+  /* Left-aligned rather than centred: the back link above it is on the column's
+     left edge, and a centred form sits 70px in from that edge on a wide screen —
+     the same class of misalignment the doors had. */
   max-width: 620px;
   margin-inline: 0;
+}
+
+/*
+ * The sign-in and second-factor steps are sized separately from the chooser.
+ *
+ * The chooser's measure is set by its doors: they have to stay narrow enough to
+ * read as buttons, which pins the whole column at 760px. The sign-in has no
+ * doors — it is one form and nothing else — so inheriting that cap left a 620px
+ * form floating in the middle of a panel that can be 1600px wide, with a gutter
+ * on one side and a void on the other. Same page, two jobs, two measures.
+ *
+ * `:has()` rather than a prop, so the distinction is visible where it is made
+ * instead of being threaded through three call sites and liable to be set wrong
+ * on one of them.
+ */
+.auth-frame-inner:has(> .auth-frame-work > .auth-card) {
+  max-width: 1040px;
+  /* Centred, not right-anchored. With no second column to sit beside, anchoring
+     right only moves the emptiness from the right of the form to the left of the
+     column, where it is twice as large. */
+  margin-inline: auto;
+}
+.auth-frame-inner:has(> .auth-frame-work > .auth-card) .auth-card {
+  max-width: 820px;
 }
 
 /* With the box gone, the two remaining callouts would be the only rectangles on
