@@ -107,11 +107,10 @@ export default function App() {
   const serverOffsetMs = getServerOffset()
 
   /*
-   * The front door. It renders the same sign-in component the console does, in
-   * its "entry" mode: the photograph and the argument, with the two ways in, and
-   * the administrator form swapping into the right-hand half in place rather than
-   * by navigating away — so the page the voter chose is still the page behind
-   * the form.
+   * The front door. It renders the same sign-in component the console does: the
+   * photograph and the argument, the two ways in, and the administrator form
+   * swapping into the right-hand half in place rather than by navigating away —
+   * so the page the visitor chose is still the page behind the form.
    *
    * Signing in hands over to `#/admin`, because that is where the console
    * actually lives and the two must not end up rendering each other.
@@ -119,7 +118,6 @@ export default function App() {
   if (surface === 'start') {
     return (
       <AdminLogin
-        entry
         needsBootstrap={!bootstrap.admins_exist}
         onAuthenticated={() => {
           window.location.hash = '#/admin'

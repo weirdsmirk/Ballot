@@ -11,10 +11,11 @@
  * than an extra field on the form: a hidden field would invite a client to send
  * a password and a code together, which is exactly what must not happen.
  *
- * In `entry` mode the component is the front door: the hero and the two ways in,
- * with the form swapping into the same half of the screen rather than navigating
- * away. It is the same component in both roles deliberately — the form must not
- * exist in two versions that can drift apart.
+ * The chooser comes first on every unauthenticated route, including `#/admin`.
+ * It used to be opt-in per route, which meant a bookmarked console link dropped
+ * someone straight into a password field with no explanation of what else the
+ * product is — a state no visitor had asked for and one they could not back out
+ * of. One rule now: signed out, you get the choice.
  */
 
 import { useEffect, useState } from 'react'
@@ -47,6 +48,21 @@ const HERO = {
    * icon now marks the second-factor step on the card where it is actionable.
    */
   statement: 'No credentials leave this server.',
+}
+
+/**
+ * What the product is, in one paragraph.
+ *
+ * On the chooser, because a visitor who has just been offered two doors is
+ * deciding whether to care about either, and the answer is the same either way.
+ * Every claim here is one the server actually enforces; nothing on this page is
+ * a promise the product does not keep.
+ */
+const ABOUT = {
+  eyebrow: 'About Ballot',
+  headline: 'A ballot is never stored against the person who cast it.',
+  detail:
+    'The roll, the one-time codes and the audit trail live on this machine and nowhere else. What a voter takes away is a receipt — the only record that a ballot was cast, and one that can be checked later without revealing the choice.',
 }
 
 /**
@@ -83,14 +99,13 @@ const DESTINATIONS: {
 export function AdminLogin({
   needsBootstrap,
   onAuthenticated,
-  entry = false,
 }: {
   needsBootstrap: boolean
   onAuthenticated: (session: ClientSession) => void
-  /** Show the two ways in first. Skipped when there are no accounts to sign into. */
-  entry?: boolean
 }) {
-  const [stage, setStage] = useState<Stage>(entry && !needsBootstrap ? 'choose' : 'password')
+  // A server with no accounts has nothing to sign in *to*, so the chooser's
+  // administrator row would lead nowhere. That is the one case that skips it.
+  const [stage, setStage] = useState<Stage>(needsBootstrap ? 'password' : 'choose')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [displayName, setDisplayName] = useState('')
@@ -197,6 +212,17 @@ export function AdminLogin({
               </button>
             ))}
           </nav>
+
+          {/*
+            What the product is, below the two doors. It earns its place by being
+            the same answer whichever door someone is about to walk through, and
+            by being the one thing a first-time visitor cannot get from either.
+          */}
+          <div className="entry-about">
+            <span className="eyebrow">{ABOUT.eyebrow}</span>
+            <p className="entry-about-headline">{ABOUT.headline}</p>
+            <p className="entry-about-detail">{ABOUT.detail}</p>
+          </div>
         </div>
       </AuthFrame>
     )
@@ -278,17 +304,15 @@ export function AdminLogin({
 
       <div className="auth-frame-work">
         {/*
-          Only from the front door. Arriving here by choosing "administrator" is a
-          decision the visitor can change their mind about, and a form with no way
-          out of it is a dead end. Someone who came straight to `#/admin` never saw
-          the two ways in, so there is nothing to go back to.
+          Always shown. The chooser is the origin of every path into this form, so
+          there is always something to go back to — including for someone who
+          arrived on a console bookmark, who otherwise has no explanation of what
+          the other door was.
         */}
-        {entry && (
-          <button type="button" className="entry-back" onClick={() => { setStage('choose'); setError(null) }}>
-            <Icon name="arrow-left" />
-            All ways in
-          </button>
-        )}
+        <button type="button" className="entry-back" onClick={() => { setStage('choose'); setError(null) }}>
+          <Icon name="arrow-left" />
+          All ways in
+        </button>
 
         <form className="auth-card" onSubmit={submitPassword}>
             <div className="auth-card-head">

@@ -1169,6 +1169,36 @@ a { color: inherit; }
   margin: 26px 0 28px;
 }
 
+/* What the product is, under the two doors.
+ *
+ * Set apart by a rule rather than a second enclosure, and in the display serif
+ * because it is a claim rather than a caption. The claim is the product's whole
+ * argument in one line; the paragraph beneath it is there so the line is not
+ * asked to carry detail it cannot hold. */
+.entry-about {
+  margin-top: 30px;
+  padding-top: 26px;
+  border-top: 1px solid var(--border);
+}
+.entry-about .eyebrow { margin-bottom: 14px; }
+.entry-about-headline {
+  font-family: var(--font-serif);
+  font-size: clamp(21px, 1.7vw, 27px);
+  line-height: 1.24;
+  letter-spacing: -0.012em;
+  color: var(--ink);
+  max-width: 30ch;
+  text-wrap: balance;
+}
+.entry-about-detail {
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--muted);
+  margin-top: 14px;
+  max-width: 58ch;
+  text-wrap: pretty;
+}
+
 /*
  * The working half: the form, or the two ways in.
  *

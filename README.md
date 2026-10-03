@@ -371,11 +371,15 @@ A voter needs an identifier and two codes; an operator needs a password and
 possibly a second factor. Putting the sign-in form first would mean every voter
 passes a password prompt to reach a ballot.
 
-Choosing **the admin console** swaps the sign-in form into the right-hand half
-of the same page rather than navigating, so the visitor can change their mind and
-go back. Choosing **the voter portal** navigates, because the portal is a
-separate surface with its own header and footer. Signing in from the front door
-hands over to `#/admin`.
+Every unauthenticated route shows the chooser first, `#/admin` included: the hero,
+the two ways in, and a short paragraph on what the product is. Choosing **the
+admin console** swaps the sign-in form into the right-hand half of the same page
+rather than navigating, so the visitor can change their mind and go back. Choosing
+**the voter portal** navigates, because the portal is a separate surface with its
+own header and footer. Signing in hands over to `#/admin`.
+
+The one case that skips the chooser is a server with no administrator accounts
+yet: there is nothing to sign in to, so the bootstrap form is shown directly.
 
 Anything that is neither `#/vote` nor `#/admin` resolves to the front door.
 
