@@ -484,8 +484,16 @@ a { color: inherit; }
  *
  * The header sets it at 22px because there it is a way back to the top of the
  * page. Here it is the last thing anyone reads, and a wordmark that size in the
- * last position is a piece of type that was set and then forgotten. 44px makes it
- * legible as the product rather than as navigation.
+ * last position is a piece of type that was set and then forgotten.
+ *
+ * It was 44px, which was one step too far. That is a judgement about optical
+ * weight rather than a measurement — at 44px the left of the row was a mass of
+ * ink sitting opposite 13px text, and the rest of the row read as the quiet part.
+ * The word was never the widest thing here; the documents are 218px against its
+ * 124px. It just carried more of the row than a closing remark should.
+ *
+ * 38px is still nearly twice the header, so it is unmistakably the signature
+ * rather than the navigation, and the row is calm again.
  *
  * Same corrections as the header, at the same proportions: weight 500, tracking
  * pulled in, leading closed. This is the same lockup at two sizes, and a
@@ -494,9 +502,9 @@ a { color: inherit; }
  */
 .site-foot-wordmark {
   font-family: var(--font-wordmark);
-  font-size: clamp(34px, 3.6vw, 44px);
+  font-size: clamp(30px, 3vw, 38px);
   font-weight: 500;
-  letter-spacing: -0.026em;
+  letter-spacing: -0.024em;
   line-height: 1.1;
   color: var(--ink);
   margin: 0 0 13px;
@@ -4165,7 +4173,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
      scale — it is a signature, not a headline, and it should look the same size
      on a phone as on a desk. */
   .site-foot-inner { flex-direction: column; align-items: flex-start; gap: 20px; padding-top: 30px; padding-bottom: 28px; }
-  .site-foot-wordmark { font-size: 34px; }
+  .site-foot-wordmark { font-size: 32px; }
   .site-foot-sub { max-width: none; }
   .site-foot-nav { padding-top: 0; gap: 20px; }
   /* Below tablet the block rule costs more width than it is worth on a narrow
