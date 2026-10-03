@@ -339,20 +339,48 @@ a { color: inherit; }
 .site-bar-link:hover { color: var(--ink); border-bottom-color: var(--green); }
 .site-bar-sep { color: var(--muted-2); }
 
+/*
+ * The footer.
+ *
+ * The bar is full-bleed and its inner row shares the header's 40px gutter, so
+ * the footer lines up with the wordmark above it rather than floating at an
+ * arbitrary width. Hierarchy is two levels only: a serif statement and a
+ * letterspaced meta line. Both are already muted, so neither needs a rule to
+ * sit quietly underneath the page.
+ */
 .site-foot {
   border-top: 1px solid var(--border);
   background: var(--navy);
-  padding: 18px 40px;
+  padding: 0 40px;
+}
+.site-foot-inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 10px 32px;
   flex-wrap: wrap;
-  font-size: 12px;
-  color: var(--muted-2);
+  min-height: 66px;
 }
-.site-foot span { display: inline-flex; align-items: center; gap: 8px; }
-.site-foot svg { width: 13px; height: 13px; color: var(--muted-2); flex: none; }
+.site-foot-statement {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  font-family: var(--font-serif);
+  font-size: 16px;
+  line-height: 1.3;
+  color: var(--muted);
+}
+.site-foot-statement svg { width: 13px; height: 13px; color: var(--muted-2); flex: none; }
+.site-foot-meta {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1.5;
+  color: var(--muted-2);
+  text-align: right;
+}
 
 /* ========================================
    Buttons
@@ -1582,19 +1610,6 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   background-attachment: fixed, fixed, fixed;
 }
 .app-content { flex: 1; }
-.app-footer {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-  padding: 18px 40px;
-  border-top: 1px solid var(--border);
-  background: var(--navy);
-  color: var(--muted-2);
-  font-size: 12px;
-}
-.app-footer span { display: inline-flex; align-items: center; gap: 8px; }
-.app-footer svg { width: 13px; height: 13px; color: var(--muted-2); }
 
 .voter-shell { max-width: 900px; margin: 0 auto; padding: 48px 24px 72px; width: 100%; }
 .voter-shell-narrow { max-width: 760px; }
@@ -3332,7 +3347,8 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
 }
 @media (max-width: 1080px) {
   .control-grid-2-1, .control-grid-1-2 { grid-template-columns: 1fr; }
-  .site-bar, .site-foot, .app-footer { padding-left: 24px; padding-right: 24px; }
+  .site-bar { padding-left: 24px; padding-right: 24px; }
+  .site-foot { padding-left: 24px; padding-right: 24px; }
 }
 @media (max-width: 1024px) {
   .auth-split-body { grid-template-columns: 1fr; gap: 32px; padding: 40px 24px 48px; }
@@ -3363,7 +3379,13 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
 }
 @media (max-width: 720px) {
   .site-bar { height: 58px; padding: 0 16px; }
-  .site-foot, .app-footer { padding: 16px; flex-direction: column; align-items: flex-start; gap: 8px; }
+  /* Below this width the two zones stop competing for one line: the statement
+     keeps its gutter and the meta drops beneath it, still left-aligned to the
+     same edge rather than hanging off the right. */
+  .site-foot { padding: 18px 16px; }
+  .site-foot-inner { flex-direction: column; align-items: flex-start; gap: 7px; }
+  .site-foot-meta { text-align: left; }
+  .site-foot-statement { font-size: 15px; }
   .focus-card, .focus-card-lg { padding: 24px 20px; }
   .auth-card { padding: 24px 20px; }
   .confirmed-title { font-size: 26px; }

@@ -9,8 +9,8 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
-import { createDefaultData } from '../lib/seed'
 import { MIGRATION_STEPS } from './migrations'
+import { writeDemoArchives, writeDemoDataset } from './demoData'
 
 export type SqlRow = Record<string, unknown>
 
@@ -628,96 +628,46 @@ export class Store {
     }
   }
 
+  /**
+   * Write the demonstration workspace.
+   *
+   * Delegates to `writeDemoDataset`, which lives in its own module because it
+   * needs the real ballot, receipt and password writers. It is reached only when
+   * the database holds no elections at all — see `isDatabaseEmpty` in `build` —
+   * so it can never run against a workspace that has history in it.
+   *
+   * The whole write is one transaction. A demo dataset that half-applied would be
+   * worse than none: an election with a roll but no ballots looks like a real
+   * result of zero turnout.
+   */
   private seed(database: SqlDatabase): void {
-    const data = createDefaultData()
-    const now = new Date().toISOString()
-    const insertElection = database.prepare(
-      `INSERT INTO elections (id, title, description, election_type, timezone, starts_at, ends_at,
-        status, rules, eligibility, ever_opened, created_at, updated_at, published_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    )
-    const insertCandidate = database.prepare(
-      `INSERT INTO candidates (election_id, name, organization, abbreviation, description,
-        image_url, symbol, position, status, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    )
-    const insertVoter = database.prepare(
-      `INSERT INTO roll_voters (election_id, voter_id, full_name, phone, email, external_ref, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    )
-    // Eligibility is its own record, written alongside the identity rather than as
-    // a column on it, so the roll never doubles as the permission list.
-    const insertEligibility = database.prepare(
-      `INSERT INTO eligibility (election_id, voter_record_id, status, reason, decided_at, decided_by)
-       VALUES (?, ?, ?, '', ?, 'seed')`,
-    )
+    const archiveOptions = {
+      database,
+      databasePath: this.databasePath,
+      backupDirectory: path.join(this.dataDirectory, 'backups'),
+      logger: this.logger,
+    }
     try {
       database.run('BEGIN IMMEDIATE')
-      for (const election of data.elections) {
-        insertElection.run([
-          election.id,
-          election.title,
-          election.description,
-          election.election_type,
-          election.timezone,
-          election.starts_at,
-          election.ends_at,
-          election.status,
-          JSON.stringify(election.rules),
-          JSON.stringify(election.eligibility),
-          election.ever_opened,
-          now,
-          now,
-          election.published_at,
-        ])
-        for (const candidate of election.candidates) {
-          insertCandidate.run([
-            election.id,
-            candidate.name,
-            candidate.organization,
-            candidate.abbreviation,
-            candidate.description,
-            candidate.image_url,
-            candidate.symbol,
-            candidate.position,
-            candidate.status,
-            now,
-            now,
-          ])
-        }
-        for (const voter of election.voters) {
-          insertVoter.run([
-            election.id,
-            voter.voter_id,
-            voter.full_name,
-            voter.phone,
-            voter.email,
-            voter.external_ref,
-            now,
-          ])
-          const voterRecordId = Number(
-            database.exec('SELECT last_insert_rowid()')[0]?.values[0]?.[0] ?? 0,
-          )
-          insertEligibility.run([
-            election.id,
-            voterRecordId,
-            voter.is_eligible ? 'eligible' : 'ineligible',
-            now,
-          ])
-        }
-      }
+      const written = writeDemoDataset(archiveOptions)
       database.run('COMMIT')
+      // After the commit, and deliberately outside it: writing an archive takes a
+      // `Database.export()`, and sql.js opens and commits a transaction of its own
+      // to take a consistent snapshot. Doing that inside the seed transaction
+      // would commit it early and throw away every row written since.
+      const archives = writeDemoArchives(archiveOptions)
+      this.logger.warn(
+        `[election-store] seeded the demonstration workspace: ${written.elections} elections, ` +
+          `${written.ballots} ballots, ${archives} archives. Sign in as hana.wexford ` +
+          'with the demo password documented in the README.',
+      )
     } catch (error) {
       try {
         database.run('ROLLBACK')
       } catch {
-        /* transaction already closed */
+        /* the transaction may never have opened */
       }
       throw error
-    } finally {
-      insertElection.free()
-      insertCandidate.free()
-      insertVoter.free()
     }
   }
 

@@ -16,7 +16,7 @@ import { useEffect, useState } from 'react'
 import { authApi } from '../lib/api'
 import type { ClientSession } from '../lib/adminTypes'
 import { Icon } from '../ui/Icon'
-import { SiteBar } from '../ui/Shell'
+import { SiteBar, SiteFoot } from '../ui/Shell'
 import { Alert, DemoNote, Field } from '../ui/primitives'
 
 type Stage = 'password' | 'mfa'
@@ -198,13 +198,7 @@ export function AdminLogin({
             </form>
           </div>
         </div>
-        <div className="site-foot" style={{ background: 'transparent' }}>
-          <span>
-            <Icon name="lock" />
-            No credentials leave this server.
-          </span>
-          <span>Ballot administrator access · {YEAR} cycle</span>
-        </div>
+        <SiteFoot left="No credentials leave this server." right={`Ballot administrator access · ${YEAR} cycle`} />
       </div>
     )
   }
@@ -351,13 +345,7 @@ export function AdminLogin({
           </form>
         </div>
       </div>
-      <div className="site-foot" style={{ background: 'transparent' }}>
-        <span>
-          <Icon name="lock" />
-          No credentials leave this server.
-        </span>
-        <span>Ballot administrator access · {YEAR} cycle</span>
-      </div>
+      <SiteFoot left="No credentials leave this server." right={`Ballot administrator access · ${YEAR} cycle`} />
     </div>
   )
 }

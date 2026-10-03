@@ -143,7 +143,15 @@ function credentialDigest(token: string): string {
   return digest(token)
 }
 
-function receiptDigest(code: string): string {
+/**
+ * The stored form of a receipt code.
+ *
+ * Exported so anything that has to write a receipt row — the demo seed, above
+ * all — hashes a code exactly the way `issueReceipt` does. A receipt hash is the
+ * only thing standing between a copied database and a list of codes somebody
+ * could quote, so the rule lives in one place rather than being restated.
+ */
+export function receiptDigest(code: string): string {
   return digest(normaliseReceipt(code))
 }
 

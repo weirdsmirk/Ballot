@@ -45,14 +45,26 @@ export function SiteBar({ meta, children }: { meta?: ReactNode; children?: React
   )
 }
 
+/**
+ * The page footer.
+ *
+ * One bar, one statement, one quiet meta line. The statement is set in the
+ * display serif because it is the only sentence the product makes on its way
+ * out, and a serif is what turns a line of small print into a closing remark;
+ * the meta beside it is letterspaced sans, the same language every other machine
+ * fact in the product uses. Nothing else belongs here — a footer that starts
+ * behaving like a second navigation has stopped being a footer.
+ */
 export function SiteFoot({ left, right }: { left: ReactNode; right?: ReactNode }) {
   return (
     <footer className="site-foot">
-      <span>
-        <Icon name="lock" />
-        {left}
-      </span>
-      {right && <span>{right}</span>}
+      <div className="site-foot-inner">
+        <p className="site-foot-statement">
+          <Icon name="lock" />
+          <span>{left}</span>
+        </p>
+        {right && <p className="site-foot-meta">{right}</p>}
+      </div>
     </footer>
   )
 }

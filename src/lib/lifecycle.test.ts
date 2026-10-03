@@ -17,7 +17,18 @@ import { countdownParts, describeVotableState, formatInZone, schedulePhase, utcT
 import type { Election } from './types'
 
 const HOUR = 3_600_000
-const NOW = Date.parse('2026-09-26T12:00:00.000Z')
+
+/**
+ * The reference instant for these fixtures.
+ *
+ * Relative to the moment the suite loads rather than a fixed date. The tests that
+ * call `describeVotableState` hand it a window built from this value, but the
+ * function compares that window against the real clock inside itself — so a
+ * hard-coded date quietly turns every "this poll is open" fixture into a closed
+ * one the day after it is written, and the failure looks like a product bug rather
+ * than a stale test. The demo seed works the same way, for the same reason.
+ */
+const NOW = Date.now()
 
 function election(overrides: Partial<Election>): Pick<Election, 'status' | 'starts_at' | 'ends_at'> {
   return {

@@ -11,6 +11,7 @@
     "build": "vite build",
     "start": "vite preview --host 127.0.0.1",
     "preview": "vite preview",
+    "demo:reset": "node scripts/reset-demo-data.mjs",
     "typecheck": "tsc --noEmit",
     "audit": "env -u npm_config_allow_scripts npm audit --omit=dev --ignore-scripts",
     "test": "vitest run --reporter=verbose",

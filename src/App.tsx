@@ -9,7 +9,6 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { fetchState, getServerOffset, ServerUnavailableError, type Bootstrap } from './lib/api'
-import { ELECTION_TYPE_LABELS } from './lib/types'
 import { AdminApp } from './admin/AdminApp'
 import { VoterFlow } from './voter/VoterFlow'
 import { SiteBar, SiteFoot } from './ui/Shell'
@@ -113,8 +112,6 @@ export default function App() {
     )
   }
 
-  const live = bootstrap.elections.filter((item) => item.status !== 'archived')
-
   return (
     <div className="app-shell">
       <SiteBar
@@ -134,15 +131,13 @@ export default function App() {
         <VoterFlow elections={bootstrap.elections} serverOffsetMs={serverOffsetMs} onChanged={() => void load()} />
       </div>
 
-      <SiteFoot
-        left="Ballot secrecy is structural, not a promise."
-        right={
-          <>
-            Powered by Ballot · Local election workspace
-            {live.length > 0 && ` · ${live.map((item) => ELECTION_TYPE_LABELS[item.election_type]).join(' · ')}`}
-          </>
-        }
-      />
+      {/*
+        The footer names the product and stops there. It used to enumerate every
+        open election type as well, which made the line grow with the workspace
+        and told a voter nothing they could act on — the elections are one screen
+        above, and they can all be read at a glance.
+      */}
+      <SiteFoot left="Ballot secrecy is structural, not a promise." right="Local election workspace" />
     </div>
   )
 }
