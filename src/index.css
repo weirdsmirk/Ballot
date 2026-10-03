@@ -1209,32 +1209,19 @@ a { color: inherit; }
 /*
  * The separator between the argument and the two ways in.
  *
- * A full-width rule rather than the 52px accent dash it replaced. The dash read
- * as a decorative mark floating under the lede, doing nothing a reader could
- * name. A line that spans the column is doing something: it marks the place where
- * the pitch stops and the decision starts.
+ * One hairline, full width, and nothing on it. It went through three forms: a
+ * 52px green dash, then a full rule with a green leading segment, then this. The
+ * dash was decoration that named nothing; the segment was decoration pretending
+ * to be punctuation. A plain rule is a division, which is the only thing a
+ * division needs to be.
  *
- * The green survives as a leading segment instead of the whole rule. A solid 2px
- * green bar across 760px would be the loudest thing on a page whose entire
- * restraint is the point, and it is only punctuation.
+ * The green is not lost from the page — it is in the accent line of the headline
+ * and the arrow on each door, which are places where it means something.
  */
 .auth-hero-rule {
   height: 1px;
   background: var(--border);
   margin: 30px 0 32px;
-  position: relative;
-}
-.auth-hero-rule::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  /* Half a pixel up, so the 2px accent sits centred on the 1px hairline instead
-     of hanging a pixel below it. */
-  top: -0.5px;
-  width: 52px;
-  height: 2px;
-  background: var(--green);
-  border-radius: 2px;
 }
 
 /* What the product is, under the two doors.
