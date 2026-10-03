@@ -312,7 +312,7 @@ export function VoterFlow({
 
   if (elections.length === 0) {
     return (
-      <div className="voter-shell voter-shell-narrow">
+      <div className="voter-shell">
         <div className="empty-state">
           <span className="icon-tile icon-tile-lg tile-blue">
             <Icon name="ballot" />
@@ -388,7 +388,7 @@ export function VoterFlow({
   const label = [election.title, ELECTION_TYPE_LABELS[election.election_type]].filter(Boolean).join(' · ')
 
   return (
-    <div className="voter-shell voter-shell-narrow">
+    <div className="voter-shell">
       <StageSteps activeStep={activeStep} />
 
       {stage !== 'results' && (

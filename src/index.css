@@ -132,13 +132,29 @@
   /*
    * The page measure.
    *
-   * One value, shared by the header, the content column, the progress indicator
-   * and the footer, so all four share a left edge at every viewport. The page is
-   * fluid up to this width and centred above it: a fixed narrow column on a wide
-   * screen strands the content in the middle of an empty page, which is the one
-   * layout failure that no amount of good typography recovers from.
+   * Two values, and the second is what makes the first one safe. `--page-max` is
+   * the width of the *content*; `--page-gutter` is the minimum breathing room
+   * between that content and the viewport edge. Every full-width surface is
+   * therefore the same box: `calc(--page-max + 2 * --page-gutter)` wide, centred,
+   * with the gutter as padding inside it.
+   *
+   * Deriving the outer box from the gutter is the whole point. When each surface
+   * carried its own padding and its own cap, the header and the content column
+   * agreed only while the viewport was narrower than the cap — past that they
+   * drifted apart by exactly the difference between their paddings, which is how
+   * a page ends up with a wordmark 24px left of the cards it sits above. One
+   * formula, applied everywhere, cannot drift.
+   *
+   * The measure is generous because cards are not prose: four of them across a
+   * laptop, five across a desktop, and a sixth on a wide one. A narrower column
+   * strands them in the middle of an empty page, which is the one layout failure
+   * no amount of good typography recovers from.
    */
-  --page-max: 1560px;
+  --page-max: 1920px;
+  --page-gutter: 40px;
+  /* The single-column stages keep their own, much narrower measure. Same
+     gutter arithmetic, so they still align with the header and footer. */
+  --narrow-max: 900px;
 
   /* Depth. On a dark ground a shadow only has to separate two surfaces, so
      these stay shallow and tinted to the ground rather than to grey. */
@@ -313,12 +329,12 @@ a { color: inherit; }
 .brand-name .brand-dot { color: var(--green); }
 
 /* The dark band that opens the voter portal and both auth screens.
-   Full-bleed, so the hairline runs edge to edge; the row inside it is held to the
-   page measure so the wordmark sits on the same left edge as the content below. */
+   Full-bleed, so the hairline runs edge to edge; the row inside it carries the
+   gutter and the measure, so the wordmark sits on the same left edge as the
+   content below it. */
 .site-bar {
   background: var(--navy);
   border-bottom: 1px solid var(--border);
-  padding: 0 40px;
   position: relative;
   z-index: 20;
 }
@@ -328,7 +344,8 @@ a { color: inherit; }
   justify-content: space-between;
   gap: 20px;
   width: 100%;
-  max-width: var(--page-max);
+  max-width: calc(var(--page-max) + var(--page-gutter) * 2);
+  padding: 0 var(--page-gutter);
   min-height: 62px;
   margin: 0 auto;
 }
@@ -370,15 +387,14 @@ a { color: inherit; }
  * The footer.
  *
  * The bar is full-bleed so its hairline runs edge to edge; the block inside is
- * held to the page measure, so the wordmark sits on the same left edge as the
- * content above. Two zones — identity, then fine print — with the meta
- * baseline-aligned rather than centred, because it is a caption to the statement
- * and not a peer of it.
+ * the same measure-plus-gutter box the header and the content column use, so the
+ * wordmark sits on the same left edge as everything above it. Two zones —
+ * identity, then fine print — with the meta baseline-aligned rather than
+ * centred, because it is a caption to the statement and not a peer of it.
  */
 .site-foot {
   border-top: 1px solid var(--border);
   background: var(--navy);
-  padding: 0 40px;
 }
 .site-foot-inner {
   display: flex;
@@ -386,9 +402,9 @@ a { color: inherit; }
   justify-content: space-between;
   gap: 20px 56px;
   flex-wrap: wrap;
-  max-width: var(--page-max);
+  max-width: calc(var(--page-max) + var(--page-gutter) * 2);
   margin: 0 auto;
-  padding: 40px 0 36px;
+  padding: 40px var(--page-gutter) 36px;
 }
 .site-foot-identity { min-width: 0; }
 .site-foot-brand {
@@ -863,12 +879,15 @@ a { color: inherit; }
   grid-template-columns: minmax(0, 1fr) 460px;
   align-items: center;
   gap: 80px;
-  /* Below the page measure: the hero column already stops at 15ch, and letting the
-     panel drift too far from it would separate the two halves of the page. */
-  max-width: 1320px;
+  /* The same measure-plus-gutter box as the header, content column and footer, so
+     the wordmark sits above the hero rather than 340px to the left of it. On a
+     wide screen the two halves become poles — hero hard left, panel hard right —
+     which is how a split screen is meant to read, and it uses the width instead
+     of centring a narrow composition inside it. */
+  max-width: calc(var(--page-max) + var(--page-gutter) * 2);
   width: 100%;
   margin: 0 auto;
-  padding: 56px 40px 64px;
+  padding: 56px var(--page-gutter) 64px;
 }
 .auth-hero { min-width: 0; }
 .auth-hero .eyebrow { margin-bottom: 20px; }
@@ -1624,7 +1643,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
    bar but drops the page measure, because it is a picture of a phone-width page
    rather than a page. */
 .preview-bar { padding: 0 20px; }
-.preview-bar .site-bar-inner { min-height: 52px; max-width: none; }
+.preview-bar .site-bar-inner { min-height: 52px; max-width: none; padding: 0; }
 .preview-bar .brand-mark { width: 24px; height: 24px; border-radius: 7px; box-shadow: none; }
 .preview-bar .brand-mark svg { width: 14px; height: 14px; }
 .preview-bar .brand-name { font-size: 17px; }
@@ -1665,11 +1684,28 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
 }
 .app-content { flex: 1; }
 
-/* Fluid up to the page measure, centred above it. */
-.voter-shell { max-width: var(--page-max); margin: 0 auto; padding: 48px 24px 72px; width: 100%; }
+/* Fluid up to the page measure, centred above it. The outer box carries the
+   gutter so the content column lands on exactly the same left edge as the
+   header row and the footer block — at every viewport, not only below the
+   measure. */
+.voter-shell {
+  max-width: calc(var(--page-max) + var(--page-gutter) * 2);
+  margin: 0 auto;
+  padding: 48px var(--page-gutter) 72px;
+  width: 100%;
+}
 /* The single-column stages — identify, code, ballot, receipt, results — keep a
-   readable measure rather than stretching a form across the page. */
-.voter-shell-narrow { max-width: 900px; }
+   readable measure rather than stretching a form across the page.
+   The shell stays full-measure so the progress indicator and the back link line
+   up with the header and the footer. The cards and the ballot column already
+   carry their own measure; these three did not, and without one they would span
+   the whole page on a wide screen. */
+.voter-shell > .voter-results,
+.voter-shell > .empty-state,
+.voter-shell > .alert {
+  max-width: var(--narrow-max);
+  margin-inline: auto;
+}
 
 /* ---- Step indicator ----
    A bar per stage with the label beneath it. The bar is the state: filled and
@@ -1713,7 +1749,17 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   color: var(--ink);
   margin-top: 12px;
 }
-.election-list-header p { color: var(--muted); font-size: 14px; margin-top: 10px; line-height: 1.6; }
+/* The measure may now be very wide, but the sentence under the heading is prose
+   and prose has a comfortable length. Left uncapped it set a single line across
+   1712px, which is not a paragraph — it is a rule with words on it. */
+.election-list-header p {
+  color: var(--muted);
+  font-size: 14px;
+  margin-top: 10px;
+  line-height: 1.6;
+  max-width: 62ch;
+  text-wrap: pretty;
+}
 /* Auto-fit rather than a fixed column count: the picker gains a column as the
    page widens — two, three, four, and a fifth past 1900px — instead of holding
    two cards in a widening void. */
@@ -3398,15 +3444,15 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
 /* ========================================
    Responsive
    ======================================== */
-@media (min-width: 1900px) {
+@media (min-width: 2200px) {
   /*
-   * A fifth column, not just wider cards.
+   * A sixth column, not just wider cards.
    *
-   * Past this width, holding four columns and letting the margins grow leaves the
-   * page reading as an island. Adding a column keeps the density constant, so the
-   * layout scales by *using* the extra room rather than by centring in it.
+   * Past this width, holding five columns and letting the margins grow leaves
+   * the page reading as an island. Adding a column keeps the density constant,
+   * so the layout scales by *using* the extra room rather than centring in it.
    */
-  :root { --page-max: 1760px; }
+  :root { --page-max: 2160px; }
 }
 @media (max-width: 1280px) {
   .col-secondary { display: none; }
@@ -3417,8 +3463,9 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
 }
 @media (max-width: 1080px) {
   .control-grid-2-1, .control-grid-1-2 { grid-template-columns: 1fr; }
-  .site-bar { padding-left: 24px; padding-right: 24px; }
-  .site-foot { padding-left: 24px; padding-right: 24px; }
+  /* The gutter is the one thing that has to shrink with the viewport; the
+     measure simply stops binding, because the content is now viewport-bound. */
+  :root { --page-gutter: 24px; }
 }
 @media (max-width: 1024px) {
   .auth-split-body { grid-template-columns: 1fr; gap: 32px; padding: 40px 24px 48px; }
@@ -3448,13 +3495,12 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   .step-label { font-size: 11.5px; }
 }
 @media (max-width: 720px) {
-  .site-bar { padding: 0 16px; }
+  :root { --page-gutter: 16px; }
   .site-bar-inner { min-height: 58px; }
   /* Below this width the two zones stop competing for one line: the identity
      keeps its gutter and the meta drops beneath it, still left-aligned to the
      same edge rather than hanging off the right. */
-  .site-foot { padding: 30px 16px 28px; }
-  .site-foot-inner { flex-direction: column; align-items: flex-start; gap: 20px; padding: 0; }
+  .site-foot-inner { flex-direction: column; align-items: flex-start; gap: 20px; padding-top: 30px; padding-bottom: 28px; }
   .site-foot-meta { text-align: left; padding-bottom: 0; }
   .site-foot-brand { margin-bottom: 12px; }
   .site-foot-blurb { font-size: 16px; max-width: none; }
@@ -3471,7 +3517,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   .auth-hero h1 { font-size: 32px; }
   .page-center { padding: 28px 16px; }
   .save-status { right: 14px; bottom: 14px; }
-  .voter-shell { padding: 28px 16px 48px; }
+  .voter-shell { padding-top: 28px; padding-bottom: 48px; }
   .admin-election-meta { grid-template-columns: 1fr; }
   .inline-form { grid-template-columns: 1fr; }
   .lifecycle-status { flex-direction: column; gap: 16px; }
