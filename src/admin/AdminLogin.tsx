@@ -48,6 +48,15 @@ const HERO = {
    * icon now marks the second-factor step on the card where it is actionable.
    */
   statement: 'No credentials leave this server.',
+  /*
+   * The line reversed out of the photograph, bottom-left.
+   *
+   * It was "Ballot administrator access · 2026 cycle", which named the surface
+   * twice — once here and once in the wordmark above — and then spent its second
+   * line on the word "cycle". What is worth saying here is which product this is
+   * and how old it is; the rest was the line talking about itself.
+   */
+  meta: `Ballot administrator ${YEAR}`,
 }
 
 /**
@@ -181,7 +190,7 @@ export function AdminLogin({
 
   if (stage === 'choose') {
     return (
-      <AuthFrame statement={HERO.statement} meta={`Ballot administrator access · ${YEAR} cycle`}>
+      <AuthFrame statement={HERO.statement} meta={HERO.meta}>
         <AuthHero />
 
         <div className="auth-frame-work">
@@ -230,7 +239,7 @@ export function AdminLogin({
 
   if (stage === 'mfa') {
     return (
-      <AuthFrame statement={HERO.statement} meta={`Ballot administrator access · ${YEAR} cycle`}>
+      <AuthFrame statement={HERO.statement} meta={HERO.meta}>
         <div className="auth-frame-work">
           <button type="button" className="entry-back" onClick={() => { setStage('password'); setCode(''); setError(null) }}>
             <Icon name="arrow-left" />
@@ -294,7 +303,7 @@ export function AdminLogin({
   }
 
   return (
-    <AuthFrame statement={HERO.statement} meta={`Ballot administrator access · ${YEAR} cycle`}>
+    <AuthFrame statement={HERO.statement} meta={HERO.meta}>
       <div className="auth-frame-work">
         {/*
           Always shown. The chooser is the origin of every path into this form, so
