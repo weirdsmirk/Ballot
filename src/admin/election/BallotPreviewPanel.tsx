@@ -112,18 +112,22 @@ export function BallotPreviewPanel({ electionId, serverOffsetMs }: { electionId:
           {/* The voter's own frame, not a decoration: an administrator checking a
               ballot should see the card a voter will see, header and all. */}
           <div className="site-bar preview-bar">
-            <span className="brand">
-              <span className="brand-mark" aria-hidden="true">
-                <Icon name="ballot" strokeWidth={2} />
+            {/* The same inner row the real header uses, so this miniature cannot
+                drift from the layout it is a miniature of. */}
+            <div className="site-bar-inner">
+              <span className="brand">
+                <span className="brand-mark" aria-hidden="true">
+                  <Icon name="ballot" strokeWidth={2} />
+                </span>
+                <span className="brand-name">
+                  ballot<span className="brand-dot">.</span>
+                </span>
               </span>
-              <span className="brand-name">
-                ballot<span className="brand-dot">.</span>
+              <span className="site-bar-meta">
+                <Icon name="lock" />
+                Secure voter session
               </span>
-            </span>
-            <span className="site-bar-meta">
-              <Icon name="lock" />
-              Secure voter session
-            </span>
+            </div>
           </div>
           <div className="preview-voter-body">
             <Eyebrow tone="blue">

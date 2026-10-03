@@ -31,16 +31,20 @@ export function Brand({ onNavigate, sub }: { onNavigate?: () => void; sub?: stri
 export function SiteBar({ meta, children }: { meta?: ReactNode; children?: ReactNode }) {
   return (
     <header className="site-bar">
-      <Brand onNavigate={() => { window.location.hash = '#/' }} />
-      {meta ?? (
-        <span className="site-bar-meta">
-          <Icon name="lock" />
-          Local workspace
-          <span className="site-bar-sep">·</span>
-          {typeof window !== 'undefined' ? window.location.host : 'local'}
-        </span>
-      )}
-      {children}
+      {/* The row is a separate element so the bar itself can stay full-bleed while
+          its contents line up with the page measure below. */}
+      <div className="site-bar-inner">
+        <Brand onNavigate={() => { window.location.hash = '#/' }} />
+        {meta ?? (
+          <span className="site-bar-meta">
+            <Icon name="lock" />
+            Local workspace
+            <span className="site-bar-sep">·</span>
+            {typeof window !== 'undefined' ? window.location.host : 'local'}
+          </span>
+        )}
+        {children}
+      </div>
     </header>
   )
 }
