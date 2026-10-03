@@ -366,6 +366,15 @@ a { color: inherit; }
  * letterspaced meta line. Both are already muted, so neither needs a rule to
  * sit quietly underneath the page.
  */
+/*
+ * The footer.
+ *
+ * The bar is full-bleed so its hairline runs edge to edge; the block inside is
+ * held to the page measure, so the wordmark sits on the same left edge as the
+ * content above. Two zones — identity, then fine print — with the meta
+ * baseline-aligned rather than centred, because it is a caption to the statement
+ * and not a peer of it.
+ */
 .site-foot {
   border-top: 1px solid var(--border);
   background: var(--navy);
@@ -373,33 +382,52 @@ a { color: inherit; }
 }
 .site-foot-inner {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
-  gap: 10px 32px;
+  gap: 20px 56px;
   flex-wrap: wrap;
   max-width: var(--page-max);
   margin: 0 auto;
-  min-height: 66px;
+  padding: 40px 0 36px;
 }
-.site-foot-statement {
+.site-foot-identity { min-width: 0; }
+.site-foot-brand {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
-  min-width: 0;
-  font-family: var(--font-serif);
-  font-size: 16px;
-  line-height: 1.3;
-  color: var(--muted);
+  gap: 10px;
+  margin-bottom: 16px;
 }
-.site-foot-statement svg { width: 13px; height: 13px; color: var(--muted-2); flex: none; }
+.site-foot-brand .brand-mark {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  box-shadow: none;
+}
+.site-foot-brand .brand-mark svg { width: 15px; height: 15px; }
+.site-foot-brand .brand-name { font-size: 19px; }
+
+/* The closing remark. Sized to read as a sentence rather than a label, and held
+   to a measure so it never becomes one long line across a wide page. */
+.site-foot-blurb {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  line-height: 1.45;
+  color: var(--muted);
+  max-width: 44ch;
+  text-wrap: balance;
+}
 .site-foot-meta {
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.13em;
   text-transform: uppercase;
   line-height: 1.5;
   color: var(--muted-2);
   text-align: right;
+  white-space: nowrap;
+  /* Optically level with the serif statement's baseline, which sits lower than
+     the sans line box would on its own. */
+  padding-bottom: 4px;
 }
 
 /* ========================================
@@ -3422,13 +3450,14 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
 @media (max-width: 720px) {
   .site-bar { padding: 0 16px; }
   .site-bar-inner { min-height: 58px; }
-  /* Below this width the two zones stop competing for one line: the statement
+  /* Below this width the two zones stop competing for one line: the identity
      keeps its gutter and the meta drops beneath it, still left-aligned to the
      same edge rather than hanging off the right. */
-  .site-foot { padding: 18px 16px; }
-  .site-foot-inner { flex-direction: column; align-items: flex-start; gap: 7px; }
-  .site-foot-meta { text-align: left; }
-  .site-foot-statement { font-size: 15px; }
+  .site-foot { padding: 30px 16px 28px; }
+  .site-foot-inner { flex-direction: column; align-items: flex-start; gap: 20px; padding: 0; }
+  .site-foot-meta { text-align: left; padding-bottom: 0; }
+  .site-foot-brand { margin-bottom: 12px; }
+  .site-foot-blurb { font-size: 16px; max-width: none; }
   .focus-card, .focus-card-lg { padding: 24px 20px; }
   .auth-card { padding: 24px 20px; }
   .confirmed-title { font-size: 26px; }

@@ -52,21 +52,32 @@ export function SiteBar({ meta, children }: { meta?: ReactNode; children?: React
 /**
  * The page footer.
  *
- * One bar, one statement, one quiet meta line. The statement is set in the
- * display serif because it is the only sentence the product makes on its way
- * out, and a serif is what turns a line of small print into a closing remark;
- * the meta beside it is letterspaced sans, the same language every other machine
- * fact in the product uses. Nothing else belongs here — a footer that starts
- * behaving like a second navigation has stopped being a footer.
+ * Two zones and nothing else: the product's identity with the one sentence it
+ * makes on its way out, and a line of fine print. That is deliberately short —
+ * a footer that starts behaving like a second navigation has stopped being a
+ * footer — but it is a *block*, not two labels pinned to opposite ends of a wide
+ * bar. The statement is set in the display serif because it is the closing
+ * remark rather than a label, and the fine print uses the letterspaced sans that
+ * every other machine fact in the product uses.
+ *
+ * The wordmark is a figure here, not a link: the header already owns navigation,
+ * and a second control labelled "Ballot home" is a duplicate landmark.
  */
 export function SiteFoot({ left, right }: { left: ReactNode; right?: ReactNode }) {
   return (
     <footer className="site-foot">
       <div className="site-foot-inner">
-        <p className="site-foot-statement">
-          <Icon name="lock" />
-          <span>{left}</span>
-        </p>
+        <div className="site-foot-identity">
+          <span className="site-foot-brand" aria-hidden="true">
+            <span className="brand-mark">
+              <Icon name="ballot" strokeWidth={2} />
+            </span>
+            <span className="brand-name">
+              ballot<span className="brand-dot">.</span>
+            </span>
+          </span>
+          <p className="site-foot-blurb">{left}</p>
+        </div>
         {right && <p className="site-foot-meta">{right}</p>}
       </div>
     </footer>
