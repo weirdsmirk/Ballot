@@ -1146,9 +1146,11 @@ a { color: inherit; }
   line-height: 1.6;
   color: var(--muted);
   margin-top: 7px;
-  /* Held to a measure so the row does not become a single line of text stretched
-     across a wide card, which reads as a banner rather than a button. */
-  max-width: 62ch;
+  /* Wide enough that the card's own track governs the line length rather than
+     this cap. At 62ch it bound at roughly 450px inside a 760px card, so a
+     one-line description still wrapped — the measure was overriding the layout it
+     was supposed to protect. */
+  max-width: 78ch;
 }
 /* Green at rest, not only on hover: the arrow is the part of the row that says
    "this goes somewhere", and it should say so before a pointer arrives. */

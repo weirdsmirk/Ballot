@@ -72,6 +72,12 @@ const ABOUT = {
  * console, and a voter is looking for their ballot. Both are one click, so the
  * order only has to be the more likely intent first.
  *
+ * Each description is one line by design. They used to run to two, which made
+ * the doors twice as tall as they needed to be and read as paragraphs rather
+ * than as captions under a title. Trimming them lost nothing: the second factor
+ * is announced on the form itself, live, once the server says the account has
+ * one — which is more use than a line promising it in advance.
+ *
  * The administrator row swaps the form into this same half of the screen; the
  * voter row navigates, because the portal is a different surface with its own
  * header and footer.
@@ -84,12 +90,12 @@ const DESTINATIONS: {
   {
     id: 'admin',
     label: 'Continue to the admin console',
-    detail: 'Sign in with your administrator credentials. A second factor is asked for when one is configured.',
+    detail: 'Sign in with your administrator credentials.',
   },
   {
     id: 'vote',
     label: 'Continue to the voter portal',
-    detail: 'Cast your ballot. No account and no password — your identifier and one-time codes are all it takes.',
+    detail: 'Cast your ballot. No account and no password needed.',
   },
 ]
 
