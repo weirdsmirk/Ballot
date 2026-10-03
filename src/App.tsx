@@ -1,25 +1,35 @@
 /**
  * Application root.
  *
- * Two surfaces share one server: the voter portal and the administration
- * workspace. The root owns the bootstrap poll, the server clock offset, and the
- * distinction between the two. There is deliberately no offline voting path: the
- * server is the only authority for election state and timing.
+ * Three surfaces share one server: the front door, the voter portal and the
+ * administration workspace. The root owns the bootstrap poll, the server clock
+ * offset, and the routing between them. There is deliberately no offline voting
+ * path: the server is the only authority for election state and timing.
+ *
+ * `#/` is the front door — the photograph, the argument, and the two ways in.
+ * `#/vote` is the voter portal and `#/admin` is the console. The door exists
+ * because the two destinations need genuinely different opening moves, one of
+ * which is a password: putting a sign-in form in front of everyone would be a
+ * form in the way of the thing the product is actually for.
  */
 
 import { useCallback, useEffect, useState } from 'react'
 import { fetchState, getServerOffset, ServerUnavailableError, type Bootstrap } from './lib/api'
 import { AdminApp } from './admin/AdminApp'
+import { AdminLogin } from './admin/AdminLogin'
 import { VoterFlow } from './voter/VoterFlow'
 import { SiteBar, SiteFoot } from './ui/Shell'
 import { Icon } from './ui/Icon'
 import { Alert, Spinner } from './ui/primitives'
 
-type Surface = 'voter' | 'admin'
+type Surface = 'start' | 'voter' | 'admin'
 
 function readSurface(): Surface {
   const hash = window.location.hash.replace('#/', '')
-  return hash.startsWith('admin') ? 'admin' : 'voter'
+  if (hash.startsWith('admin')) return 'admin'
+  if (hash.startsWith('vote')) return 'voter'
+  // The root, and anything unrecognised, is the front door.
+  return 'start'
 }
 
 export default function App() {
@@ -96,6 +106,29 @@ export default function App() {
 
   const serverOffsetMs = getServerOffset()
 
+  /*
+   * The front door. It renders the same sign-in component the console does, in
+   * its "entry" mode: the photograph and the argument, with the two ways in, and
+   * the administrator form swapping into the right-hand half in place rather than
+   * by navigating away — so the page the voter chose is still the page behind
+   * the form.
+   *
+   * Signing in hands over to `#/admin`, because that is where the console
+   * actually lives and the two must not end up rendering each other.
+   */
+  if (surface === 'start') {
+    return (
+      <AdminLogin
+        entry
+        needsBootstrap={!bootstrap.admins_exist}
+        onAuthenticated={() => {
+          window.location.hash = '#/admin'
+          void load()
+        }}
+      />
+    )
+  }
+
   // The administration console owns the whole page. It is a separate surface with
   // its own navigation and identity strip, and deliberately does not share the
   // voter portal's header or footer: an operator's screen and a voter's screen
@@ -120,7 +153,7 @@ export default function App() {
             <Icon name="lock" />
             Secure voter session
             <span className="site-bar-sep">·</span>
-            <button type="button" className="site-bar-link" onClick={() => { window.location.hash = '#/admin' }}>
+            <button type="button" className="site-bar-link" onClick={() => { window.location.hash = '#/vote' }}>
               Exit portal
             </button>
           </span>

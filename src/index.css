@@ -1035,25 +1035,129 @@ a { color: inherit; }
   padding: 2px 0 2px 14px;
 }
 
+/* ---- The two ways in ----
+ *
+ * Two rows rather than two cards. The page just lost a box for having no job,
+ * and these are the same kind of thing: full-width rows divided by a hairline,
+ * where the rule between them does the work a gap would otherwise have to. A row
+ * reads as a target the moment it is a row; a card reads as a component.
+ *
+ * The label is the display serif at a size close to the headline, because these
+ * two sentences are the only thing on the page a visitor has to act on. The
+ * detail beneath is the smallest type in the composition and the least important.
+ */
+.entry-ways {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--border);
+  margin-top: 4px;
+}
+.entry-way {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 22px;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  padding: 26px 4px;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  transition: background 160ms ease, padding 160ms ease;
+}
+.entry-way:hover,
+.entry-way:focus-visible {
+  background: rgba(126, 224, 168, 0.045);
+  padding-left: 14px;
+  padding-right: 14px;
+}
+.entry-way:focus-visible { outline: 2px solid var(--green); outline-offset: -2px; }
+.entry-way-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border-strong);
+  background: var(--card);
+  color: var(--green);
+  flex: none;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+.entry-way-icon svg { width: 21px; height: 21px; }
+.entry-way:hover .entry-way-icon { border-color: var(--green-line); background: var(--green-soft); }
+.entry-way-text { min-width: 0; display: block; }
+.entry-way-label {
+  display: block;
+  font-family: var(--font-serif);
+  font-size: clamp(23px, 1.9vw, 31px);
+  font-weight: 400;
+  letter-spacing: -0.014em;
+  line-height: 1.14;
+  color: var(--ink);
+  transition: color 160ms ease;
+}
+.entry-way:hover .entry-way-label { color: var(--green); }
+.entry-way-detail {
+  display: block;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin-top: 8px;
+  max-width: 52ch;
+}
+.entry-way-arrow {
+  display: grid;
+  place-items: center;
+  color: var(--muted-2);
+  transition: color 160ms ease, transform 160ms ease;
+}
+.entry-way-arrow svg { width: 20px; height: 20px; }
+.entry-way:hover .entry-way-arrow { color: var(--green); transform: translateX(5px); }
+
+/* The way out of the form, back to the two ways in. Only rendered there. */
+.entry-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: 0;
+  padding: 0;
+  margin-bottom: 22px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 140ms ease;
+}
+.entry-back svg { width: 15px; height: 15px; }
+.entry-back:hover { color: var(--ink); }
+
 /* The hero */
 .auth-hero { min-width: 0; }
 .auth-hero .eyebrow { margin-bottom: 18px; }
 .auth-hero h1 {
   font-family: var(--font-serif);
-  font-size: clamp(38px, 3.4vw, 60px);
+  /* Bigger than the previous ceiling of 60px. This is the largest type in the
+     product outside the receipt stamp, and the front door is the one page whose
+     job is to be remembered. */
+  font-size: clamp(40px, 3.6vw, 68px);
   font-weight: 400;
-  letter-spacing: -0.02em;
-  line-height: 1.03;
+  letter-spacing: -0.022em;
+  line-height: 1.02;
   color: var(--ink);
-  max-width: 14ch;
+  max-width: 13ch;
 }
 .auth-hero h1 .accent { color: var(--green); display: block; }
 .auth-hero-lede {
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.7;
   color: var(--muted);
-  max-width: 42ch;
-  margin-top: 20px;
+  max-width: 44ch;
+  margin-top: 22px;
   text-wrap: pretty;
 }
 /* A short accent rule rather than a full-width divider: a mark, not a separator. */
@@ -1066,6 +1170,16 @@ a { color: inherit; }
 }
 
 /*
+ * The working half: the form, or the two ways in.
+ *
+ * Wrapped in one element so the column below always has exactly two children —
+ * the hero and this. Without it the back link would be a third grid item in the
+ * wide tier and land in the wrong column, and the layout would depend on which
+ * stage happened to be showing.
+ */
+.auth-frame-work { min-width: 0; }
+
+/*
  * The wide tier.
  *
  * Three fifths of a 1920px screen is 1150px, and a single column in the middle
@@ -1074,12 +1188,16 @@ a { color: inherit; }
  * measure, the two sit side by side: the argument on the left, the work on the
  * right, centred against each other.
  *
+ * This serves both stages. The second column holds whatever the visitor is being
+ * asked to do — the two ways in, or the sign-in form — so the front door and the
+ * form are the same composition at the same width rather than two layouts.
+ *
  * The breakpoint is set by the narrower of the two columns rather than by
  * taste, and the two numbers that fix it are: the form is not allowed past
  * 440px, because an input you have to chase is worse than one you can read,
  * and the headline must not overrun the column beside it. The first attempt at
  * 1660px left the hero 333px and the display-size headline overran it by 4px;
- * dropping the ceiling to 2.9vw makes the two fit with room to spare.
+ * dropping the ceiling gives the two room to spare.
  *
  * The row is then capped, so both columns grow together to a point and then
  * stop, rather than letting the hero drift away from the form on an ultrawide.
@@ -1093,8 +1211,8 @@ a { color: inherit; }
     align-items: center;
     gap: clamp(48px, 5vw, 96px);
   }
-  .auth-hero h1 { font-size: clamp(42px, 2.9vw, 60px); max-width: 12ch; }
-  .auth-hero-lede { font-size: 16px; max-width: 38ch; }
+  .auth-hero h1 { font-size: clamp(48px, 3.1vw, 64px); max-width: 12ch; }
+  .auth-hero-lede { font-size: 17px; max-width: 38ch; }
 }
 
 .auth-card-head { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }

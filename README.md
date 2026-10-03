@@ -356,9 +356,34 @@ same wording whether or not it exists — the screen never reveals roll membersh
 
 ---
 
+# The three surfaces
+
+The server hosts three surfaces, and the root is the front door to all of them.
+
+| Route | Surface |
+|---|---|
+| `#/` | The front door: the photograph, the argument, and the two ways in |
+| `#/vote` | The voter portal |
+| `#/admin` | The administration console |
+
+The front door exists because the two destinations need different opening moves.
+A voter needs an identifier and two codes; an operator needs a password and
+possibly a second factor. Putting the sign-in form first would mean every voter
+passes a password prompt to reach a ballot.
+
+Choosing **the admin console** swaps the sign-in form into the right-hand half
+of the same page rather than navigating, so the visitor can change their mind and
+go back. Choosing **the voter portal** navigates, because the portal is a
+separate surface with its own header and footer. Signing in from the front door
+hands over to `#/admin`.
+
+Anything that is neither `#/vote` nor `#/admin` resolves to the front door.
+
+---
+
 # Voter portal
 
-The portal is at `#/`. It polls the server every 10 seconds and shows a
+The portal is at `#/vote`. It polls the server every 10 seconds and shows a
 server-corrected clock, so a wrong local clock cannot make a closed poll look
 open.
 

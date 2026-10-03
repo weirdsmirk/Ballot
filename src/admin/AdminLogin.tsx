@@ -1,31 +1,42 @@
 /**
- * Administrator sign-in.
+ * The front door, and the administrator sign-in behind it.
  *
- * Three states, because the server distinguishes them and the interface has to
- * match: creating the first account, submitting a password, and satisfying a
- * second factor.
+ * Four states, because the server and the two destinations distinguish them:
+ * choosing which way in, creating the first account, submitting a password, and
+ * satisfying a second factor.
  *
  * A password alone never opens a session once a second factor is configured. The
  * server returns "a second factor is required" instead of a session, and this
  * screen asks for the code. That is why the MFA step is a separate state rather
  * than an extra field on the form: a hidden field would invite a client to send
  * a password and a code together, which is exactly what must not happen.
+ *
+ * In `entry` mode the component is the front door: the hero and the two ways in,
+ * with the form swapping into the same half of the screen rather than navigating
+ * away. It is the same component in both roles deliberately — the form must not
+ * exist in two versions that can drift apart.
  */
 
 import { useEffect, useState } from 'react'
 import { authApi } from '../lib/api'
 import type { ClientSession } from '../lib/adminTypes'
-import { Icon } from '../ui/Icon'
+import { Icon, type IconName } from '../ui/Icon'
 import { AuthFrame } from '../ui/Shell'
 import { Alert, DemoNote, Field } from '../ui/primitives'
 
-type Stage = 'password' | 'mfa'
+type Stage = 'choose' | 'password' | 'mfa'
 
 /** The footer names the cycle the console is administering this year. */
 const YEAR = new Date().getFullYear()
 
 const HERO = {
-  eyebrow: 'Administrator access',
+  /*
+   * The eyebrow is about the product, not about signing in. It used to say
+   * "Administrator access", which was wrong the moment this page became the way
+   * in for a voter as well — the headline below is the product's argument and
+   * the two destinations under it are its entry points.
+   */
+  eyebrow: 'Election workspace',
   headline: 'Run elections',
   accent: 'with confidence.',
   lede: 'Secure operations for every election, with clear roles and an audit-ready workspace.',
@@ -38,14 +49,48 @@ const HERO = {
   statement: 'No credentials leave this server.',
 }
 
+/**
+ * The two ways in.
+ *
+ * Order is deliberate: an operator arriving at a bare host is looking for the
+ * console, and a voter is looking for their ballot. Both are one click, so the
+ * order only has to be the more likely intent first.
+ *
+ * The administrator row swaps the form into this same half of the screen; the
+ * voter row navigates, because the portal is a different surface with its own
+ * header and footer.
+ */
+const DESTINATIONS: {
+  id: 'admin' | 'vote'
+  icon: IconName
+  label: string
+  detail: string
+}[] = [
+  {
+    id: 'admin',
+    icon: 'shield-check',
+    label: 'Continue to the admin console',
+    detail: 'Sign in with your administrator credentials. A second factor is asked for when one is configured.',
+  },
+  {
+    id: 'vote',
+    icon: 'vote',
+    label: 'Continue to the voter portal',
+    detail: 'Cast your ballot. No account and no password — your identifier and one-time codes are all it takes.',
+  },
+]
+
 export function AdminLogin({
   needsBootstrap,
   onAuthenticated,
+  entry = false,
 }: {
   needsBootstrap: boolean
   onAuthenticated: (session: ClientSession) => void
+  /** Show the two ways in first. Skipped when there are no accounts to sign into. */
+  entry?: boolean
 }) {
-  const [stage, setStage] = useState<Stage>('password')
+  const [stage, setStage] = useState<Stage>(entry && !needsBootstrap ? 'choose' : 'password')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [displayName, setDisplayName] = useState('')
@@ -116,12 +161,54 @@ export function AdminLogin({
     onAuthenticated(result.value.session)
   }
 
+  if (stage === 'choose') {
+    return (
+      <AuthFrame statement={HERO.statement} meta={`Ballot administrator access · ${YEAR} cycle`}>
+        <AuthHero />
+
+        <div className="auth-frame-work">
+          <nav className="entry-ways" aria-label="Choose where to go next">
+            {DESTINATIONS.map((destination) => (
+              <button
+                key={destination.id}
+                type="button"
+                className="entry-way"
+                onClick={() => {
+                  if (destination.id === 'admin') {
+                    // Swap the form into this same half. Navigating would throw away
+                    // the page the visitor chose, and there is nothing on the far
+                    // side of the sign-in they would want to come back to.
+                    setStage('password')
+                    return
+                  }
+                  window.location.hash = '#/vote'
+                }}
+              >
+                <span className="entry-way-icon" aria-hidden="true">
+                  <Icon name={destination.icon} />
+                </span>
+                <span className="entry-way-text">
+                  <span className="entry-way-label">{destination.label}</span>
+                  <span className="entry-way-detail">{destination.detail}</span>
+                </span>
+                <span className="entry-way-arrow" aria-hidden="true">
+                  <Icon name="arrow-right" />
+                </span>
+              </button>
+            ))}
+          </nav>
+        </div>
+      </AuthFrame>
+    )
+  }
+
   if (stage === 'mfa') {
     return (
       <AuthFrame statement={HERO.statement} meta={`Ballot administrator access · ${YEAR} cycle`}>
         <AuthHero />
 
-        <form className="auth-card" onSubmit={submitCode}>
+        <div className="auth-frame-work">
+          <form className="auth-card" onSubmit={submitCode}>
               <div className="auth-card-head">
                 <span className="icon-tile tile-green">
                   <Icon name="shield-check" />
@@ -179,7 +266,8 @@ export function AdminLogin({
                   Back to sign in
                 </button>
               </div>
-        </form>
+          </form>
+        </div>
       </AuthFrame>
     )
   }
@@ -188,7 +276,21 @@ export function AdminLogin({
     <AuthFrame statement={HERO.statement} meta={`Ballot administrator access · ${YEAR} cycle`}>
       <AuthHero />
 
-      <form className="auth-card" onSubmit={submitPassword}>
+      <div className="auth-frame-work">
+        {/*
+          Only from the front door. Arriving here by choosing "administrator" is a
+          decision the visitor can change their mind about, and a form with no way
+          out of it is a dead end. Someone who came straight to `#/admin` never saw
+          the two ways in, so there is nothing to go back to.
+        */}
+        {entry && (
+          <button type="button" className="entry-back" onClick={() => { setStage('choose'); setError(null) }}>
+            <Icon name="arrow-left" />
+            All ways in
+          </button>
+        )}
+
+        <form className="auth-card" onSubmit={submitPassword}>
             <div className="auth-card-head">
               <span className="icon-tile tile-blue">
                 <Icon name="lock" />
@@ -201,7 +303,7 @@ export function AdminLogin({
                   as a label. The second-factor step keeps its own, because
                   "Step 2 of 2" tells the operator something the hero does not.
                 */}
-                <h2>{needsBootstrap ? 'Create the first administrator' : 'Sign in'}</h2>
+                <h2>{needsBootstrap ? 'Create the first administrator' : 'Administrator sign in'}</h2>
               </div>
             </div>
             <p className="card-subtitle">
@@ -326,7 +428,8 @@ export function AdminLogin({
                 This account has a second factor, so you will be asked for a code after your password.
               </p>
             )}
-      </form>
+        </form>
+      </div>
     </AuthFrame>
   )
 }

@@ -313,7 +313,7 @@ function ControlCentre({
               <span>Data stays on this device</span>
             </div>
           </div>
-          <button type="button" className="control-portal" onClick={() => { window.location.hash = '#/' }}>
+          <button type="button" className="control-portal" onClick={() => { window.location.hash = '#/vote' }}>
             <Icon name="logout" />
             Open voter portal
             <Icon name="arrow-right" />
@@ -388,7 +388,7 @@ function ControlCentre({
                 />
               )}
             </button>
-            <button type="button" className="btn-primary" onClick={() => { window.location.hash = '#/' }}>
+            <button type="button" className="btn-primary" onClick={() => { window.location.hash = '#/vote' }}>
               <Icon name="logout" />
               Voter portal
             </button>
