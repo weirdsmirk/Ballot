@@ -1023,11 +1023,12 @@ a { color: inherit; }
   box-shadow: none;
   padding: 0;
   width: 100%;
-  /* Its own measure, narrower than the column it sits in, and centred under the
-     hero. In the two-column tier the grid track is already this width, so the
-     cap simply does not bind. */
+  /* Its own measure, narrower than the column it sits in. Left-aligned rather
+     than centred: the back link above it is on the column's left edge, and a
+     centred form sits 70px in from that edge on a wide screen — the same class
+     of misalignment the doors had. */
   max-width: 620px;
-  margin-inline: auto;
+  margin-inline: 0;
 }
 
 /* With the box gone, the two remaining callouts would be the only rectangles on
@@ -1071,13 +1072,15 @@ a { color: inherit; }
 .entry-ways {
   display: flex;
   flex-direction: column;
-  /* Shrink each door to its own content and anchor it to the right edge, rather
-     than stretching it across the column. A 960px card holding a 28px label and
-     a 460px sentence is not a button, it is a banner with two words on it — and
-     the arrow ends up marooned halfway across the empty middle. Sizing to
-     content removes that gap entirely and puts the arrow back next to the text
-     it belongs to. */
-  align-items: flex-end;
+  /*
+   * Full width, not sized to content.
+   *
+   * Shrinking each door to its own words was tried and it is what broke the
+   * spacing: the cards became 537px wide against a 960px column, so their left
+   * edge sat 400px to the right of the headline above them and of the rule below
+   * them. One left edge for the whole column is worth more than a tight fit
+   * around two sentences.
+   */
   gap: 14px;
   margin-top: 34px;
 }
@@ -1130,7 +1133,7 @@ a { color: inherit; }
   margin-top: 7px;
   /* Held to a measure so the row does not become a single line of text stretched
      across a wide card, which reads as a banner rather than a button. */
-  max-width: 56ch;
+  max-width: 62ch;
 }
 /* Green at rest, not only on hover: the arrow is the part of the row that says
    "this goes somewhere", and it should say so before a pointer arrives. */
@@ -1255,7 +1258,16 @@ a { color: inherit; }
  * beside something.
  */
 @media (min-width: 1620px) {
-  .auth-frame-inner { max-width: 960px; }
+  /*
+   * 760px, not the 960px this used to allow.
+   *
+   * The wider measure was only ever a way of avoiding the empty middle, and it
+   * did that by making the doors wide enough to read as banners rather than
+   * buttons. Capping at the same 760px the base tier uses means the headline, the
+   * two doors and the claim below them all share one left edge and one right
+   * edge, which is the thing that was actually broken.
+   */
+  .auth-frame-inner { max-width: 760px; }
 
   .auth-hero h1 { font-size: clamp(56px, 3.9vw, 80px); max-width: 15ch; }
   .auth-hero-lede { font-size: 18px; max-width: 50ch; margin-top: 26px; }
