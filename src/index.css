@@ -1158,7 +1158,11 @@ a { color: inherit; }
   border-left: 2px solid var(--amber);
   border-radius: 0;
   background: none;
-  padding: 2px 0 2px 14px;
+  /* 16px, matching the green role readout above it. Both are 2px rules on the
+     same edge and they stack within 160px of each other, so their text has to
+     start on the same line — it was 14px here and 16px there, which put the two
+     sentences 2px apart for no reason anyone could have intended. */
+  padding: 2px 0 2px 16px;
 }
 
 /* ---- The two ways in ----
@@ -1690,7 +1694,9 @@ a { color: inherit; }
   line-height: 1.6;
   color: var(--amber-text);
 }
-.demo-note svg { width: 15px; height: 15px; flex: none; margin-top: 2px; }
+/* No icon rule. There used to be a 15px sparkle with a 10px gap holding it off
+   the text, and `gap` is what set the left inset on the boxed variant. The
+   padding now does that job on its own. */
 .demo-note code {
   font-family: var(--font-mono);
   font-size: 12px;

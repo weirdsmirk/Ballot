@@ -160,11 +160,22 @@ export function Switch({
   )
 }
 
-/** The amber strip that names a demo-only affordance. Never used for anything else. */
+/**
+ * The amber strip.
+ *
+ * No icon. It carried a sparkle, which named nothing: on the sign-in the note
+ * says accounts are created by a Super Admin, and on the MFA step it explains
+ * where a code comes from. Neither is a demo affordance and neither is a
+ * discovery, so a sparkle was decorating a sentence that stands on its own. The
+ * amber rule on the left is enough to say "this is a note, not an input".
+ *
+ * The doc comment on this used to claim it was only ever used for demo-only
+ * affordances, which two of its three call sites already contradicted. It is a
+ * note. That is the whole rule.
+ */
 export function DemoNote({ children }: { children: ReactNode }) {
   return (
     <div className="demo-note">
-      <Icon name="sparkle" />
       <span>{children}</span>
     </div>
   )
