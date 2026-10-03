@@ -988,11 +988,24 @@ a { color: inherit; }
      becoming something you have to chase. What fills the extra width is the
      layout, not the type: see the two-column tier below. */
   max-width: 760px;
-  /* Auto margins rather than `justify-content: center`: centring a flex child
-     that is taller than its container clips the top, which on this page would
-     mean the headline. Auto margins centre when there is room and simply start
-     at the top when there is not. */
-  margin: auto;
+  /*
+   * Anchored right, not centred.
+   *
+   * Centring the column in the half meant the same gutter on both sides, which
+   * put the text hard up against the photograph with the slack pushed to the
+   * window edge — the photograph and the words competed for the same seam.
+   * Absorbing all of that slack on the left instead gives the picture air on its
+   * open side and lands the words against the edge of the screen, which is where
+   * the eye finishes.
+   *
+   * Vertical auto-margins are kept deliberately: they centre the block when it
+   * fits and start it at the top when it does not, where `justify-content:
+   * center` would clip the headline off the top of a short window.
+   */
+  margin-top: auto;
+  margin-bottom: auto;
+  margin-left: auto;
+  margin-right: 0;
 }
 
 /* The card is gone.
@@ -1046,11 +1059,20 @@ a { color: inherit; }
  * two sentences are the only thing on the page a visitor has to act on. The
  * detail beneath is the smallest type in the composition and the least important.
  */
+/*
+ * Two ways in.
+ *
+ * These are the only two things on the page anyone can act on, so they are the
+ * only elements here with a surface, an edge and a shadow. They were hairline
+ * rows when the page had no box anywhere; read alone they looked like a list of
+ * links rather than the two decisions the product is asking for. The form's box
+ * was removed for having no job — these have one.
+ */
 .entry-ways {
   display: flex;
   flex-direction: column;
-  border-top: 1px solid var(--border);
-  margin-top: 4px;
+  gap: 14px;
+  margin-top: 34px;
 }
 .entry-way {
   display: grid;
@@ -1059,36 +1081,40 @@ a { color: inherit; }
   gap: 22px;
   width: 100%;
   text-align: left;
-  background: none;
-  border: 0;
-  border-bottom: 1px solid var(--border);
-  padding: 26px 4px;
+  /* A green wash over the card rather than a flat fill, so the tint reads as
+     light falling on a surface instead of as a coloured box. */
+  background: linear-gradient(180deg, rgba(126, 224, 168, 0.055), rgba(126, 224, 168, 0.014) 62%), var(--card);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-lg);
+  padding: 26px 24px;
   cursor: pointer;
   color: inherit;
   font: inherit;
-  transition: background 160ms ease, padding 160ms ease;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
 }
-.entry-way:hover,
-.entry-way:focus-visible {
-  background: rgba(126, 224, 168, 0.045);
-  padding-left: 14px;
-  padding-right: 14px;
+.entry-way:hover {
+  border-color: var(--green-line);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md), var(--green-glow);
 }
-.entry-way:focus-visible { outline: 2px solid var(--green); outline-offset: -2px; }
+.entry-way:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
 .entry-way-icon {
   display: grid;
   place-items: center;
-  width: 46px;
-  height: 46px;
+  width: 52px;
+  height: 52px;
   border-radius: var(--r-md);
-  border: 1px solid var(--border-strong);
-  background: var(--card);
+  /* Filled rather than outlined: at rest these tiles are the brightest thing in
+     the composition after the accent line, which is the point. */
+  border: 1px solid var(--green-soft-2);
+  background: var(--green-soft);
   color: var(--green);
   flex: none;
-  transition: border-color 160ms ease, background 160ms ease;
+  transition: background 160ms ease, color 160ms ease;
 }
-.entry-way-icon svg { width: 21px; height: 21px; }
-.entry-way:hover .entry-way-icon { border-color: var(--green-line); background: var(--green-soft); }
+.entry-way-icon svg { width: 23px; height: 23px; }
+.entry-way:hover .entry-way-icon { background: var(--green); color: var(--green-ink); }
 .entry-way-text { min-width: 0; display: block; }
 .entry-way-label {
   display: block;
@@ -1109,14 +1135,16 @@ a { color: inherit; }
   margin-top: 8px;
   max-width: 52ch;
 }
+/* Green at rest, not only on hover: the arrow is the part of the row that says
+   "this goes somewhere", and it should say so before a pointer arrives. */
 .entry-way-arrow {
   display: grid;
   place-items: center;
-  color: var(--muted-2);
-  transition: color 160ms ease, transform 160ms ease;
+  color: var(--green);
+  transition: transform 160ms ease;
 }
-.entry-way-arrow svg { width: 20px; height: 20px; }
-.entry-way:hover .entry-way-arrow { color: var(--green); transform: translateX(5px); }
+.entry-way-arrow svg { width: 22px; height: 22px; }
+.entry-way:hover .entry-way-arrow { transform: translateX(6px); }
 
 /* The way out of the form, back to the two ways in. Only rendered there. */
 .entry-back {
