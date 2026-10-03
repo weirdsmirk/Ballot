@@ -1071,22 +1071,33 @@ a { color: inherit; }
 .entry-ways {
   display: flex;
   flex-direction: column;
+  /* Shrink each door to its own content and anchor it to the right edge, rather
+     than stretching it across the column. A 960px card holding a 28px label and
+     a 460px sentence is not a button, it is a banner with two words on it — and
+     the arrow ends up marooned halfway across the empty middle. Sizing to
+     content removes that gap entirely and puts the arrow back next to the text
+     it belongs to. */
+  align-items: flex-end;
   gap: 14px;
   margin-top: 34px;
 }
 .entry-way {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  /* Two tracks, not three. The icon column is gone: a 52px tile beside a line of
+     display serif was decoration competing with the label, and it pushed the
+     text off the card's own left padding. The arrow is the only thing a row
+     needs beyond its words. */
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 22px;
-  width: 100%;
+  gap: 24px;
+  max-width: 100%;
   text-align: left;
   /* A green wash over the card rather than a flat fill, so the tint reads as
      light falling on a surface instead of as a coloured box. */
   background: linear-gradient(180deg, rgba(126, 224, 168, 0.055), rgba(126, 224, 168, 0.014) 62%), var(--card);
   border: 1px solid var(--border-strong);
   border-radius: var(--r-lg);
-  padding: 26px 24px;
+  padding: 24px 26px;
   cursor: pointer;
   color: inherit;
   font: inherit;
@@ -1099,30 +1110,14 @@ a { color: inherit; }
   box-shadow: var(--shadow-md), var(--green-glow);
 }
 .entry-way:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
-.entry-way-icon {
-  display: grid;
-  place-items: center;
-  width: 52px;
-  height: 52px;
-  border-radius: var(--r-md);
-  /* Filled rather than outlined: at rest these tiles are the brightest thing in
-     the composition after the accent line, which is the point. */
-  border: 1px solid var(--green-soft-2);
-  background: var(--green-soft);
-  color: var(--green);
-  flex: none;
-  transition: background 160ms ease, color 160ms ease;
-}
-.entry-way-icon svg { width: 23px; height: 23px; }
-.entry-way:hover .entry-way-icon { background: var(--green); color: var(--green-ink); }
 .entry-way-text { min-width: 0; display: block; }
 .entry-way-label {
   display: block;
   font-family: var(--font-serif);
-  font-size: clamp(23px, 1.9vw, 31px);
+  font-size: clamp(22px, 1.7vw, 29px);
   font-weight: 400;
   letter-spacing: -0.014em;
-  line-height: 1.14;
+  line-height: 1.16;
   color: var(--ink);
   transition: color 160ms ease;
 }
@@ -1132,8 +1127,10 @@ a { color: inherit; }
   font-size: 13px;
   line-height: 1.6;
   color: var(--muted);
-  margin-top: 8px;
-  max-width: 52ch;
+  margin-top: 7px;
+  /* Held to a measure so the row does not become a single line of text stretched
+     across a wide card, which reads as a banner rather than a button. */
+  max-width: 56ch;
 }
 /* Green at rest, not only on hover: the arrow is the part of the row that says
    "this goes somewhere", and it should say so before a pointer arrives. */
@@ -1141,9 +1138,10 @@ a { color: inherit; }
   display: grid;
   place-items: center;
   color: var(--green);
+  flex: none;
   transition: transform 160ms ease;
 }
-.entry-way-arrow svg { width: 22px; height: 22px; }
+.entry-way-arrow svg { width: 21px; height: 21px; }
 .entry-way:hover .entry-way-arrow { transform: translateX(6px); }
 
 /* The way out of the form, back to the two ways in. Only rendered there. */
@@ -1263,30 +1261,30 @@ a { color: inherit; }
   .auth-hero-lede { font-size: 18px; max-width: 50ch; margin-top: 26px; }
   .auth-hero-rule { width: 60px; margin: 32px 0 34px; }
 
-  .entry-way { padding: 30px 4px; gap: 26px; }
-  .entry-way-icon { width: 54px; height: 54px; }
-  .entry-way-icon svg { width: 24px; height: 24px; }
-  .entry-way-label { font-size: clamp(28px, 2vw, 35px); }
-  .entry-way-detail { font-size: 14px; margin-top: 10px; }
+  .entry-way { padding: 26px 28px; gap: 28px; }
+  .entry-way-label { font-size: clamp(24px, 1.55vw, 28px); }
+  .entry-way-detail { font-size: 13px; margin-top: 8px; }
 
-  .entry-about { margin-top: 36px; padding-top: 32px; }
-  .entry-about-headline { font-size: clamp(25px, 1.9vw, 33px); max-width: 34ch; }
-  .entry-about-detail { font-size: 14px; max-width: 64ch; }
+  .entry-about { margin-top: 32px; padding-top: 30px; }
+  .entry-about-headline { font-size: clamp(24px, 1.7vw, 30px); max-width: 34ch; }
+  .entry-about-detail { font-size: 13.5px; max-width: 62ch; }
 }
 
 /*
- * Ultrawide.
+ * There is deliberately no ultrawide tier, and the reason is worth writing down.
  *
- * Half a 3440px screen is 1720px, and a column capped for a 1920px display fills
- * barely half of it. The form itself keeps its 620px measure — an input that wide
- * is worse than one you can read — but the hero, the two ways in and the claim
- * below them are allowed to use the room, and it is those three that carry the
- * composition. Past this width the remainder is symmetric margin, which is the
- * intended result rather than something left over.
+ * Three decisions are now in tension on a very wide screen: the split is half and
+ * half, the column is anchored to the right edge, and each door is sized to its
+ * own content. On a 3440px display those three together put roughly a third of
+ * the viewport between the photograph and the words, and no amount of padding
+ * fixes it — the card is flush right, so moving the gutter cannot move it.
+ *
+ * Something has to give, and the alternatives were all worse: stretching the
+ * doors turns them into banners (the thing this commit removes), and centring
+ * them again puts the same gutter on both sides, which is what "align right" was
+ * asked to stop. So the gap is left alone rather than papered over, and the
+ * measure stops at the 1620px value so nothing inflates to disguise it.
  */
-@media (min-width: 2400px) {
-  .auth-frame-inner { max-width: 1120px; }
-}
 
 .auth-card-head { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
 .auth-card-head .eyebrow { margin-bottom: 4px; }

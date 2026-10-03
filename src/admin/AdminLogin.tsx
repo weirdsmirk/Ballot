@@ -21,7 +21,7 @@
 import { useEffect, useState } from 'react'
 import { authApi } from '../lib/api'
 import type { ClientSession } from '../lib/adminTypes'
-import { Icon, type IconName } from '../ui/Icon'
+import { Icon } from '../ui/Icon'
 import { AuthFrame } from '../ui/Shell'
 import { Alert, DemoNote, Field } from '../ui/primitives'
 
@@ -78,19 +78,16 @@ const ABOUT = {
  */
 const DESTINATIONS: {
   id: 'admin' | 'vote'
-  icon: IconName
   label: string
   detail: string
 }[] = [
   {
     id: 'admin',
-    icon: 'shield-check',
     label: 'Continue to the admin console',
     detail: 'Sign in with your administrator credentials. A second factor is asked for when one is configured.',
   },
   {
     id: 'vote',
-    icon: 'vote',
     label: 'Continue to the voter portal',
     detail: 'Cast your ballot. No account and no password — your identifier and one-time codes are all it takes.',
   },
@@ -199,9 +196,6 @@ export function AdminLogin({
                   window.location.hash = '#/vote'
                 }}
               >
-                <span className="entry-way-icon" aria-hidden="true">
-                  <Icon name={destination.icon} />
-                </span>
                 <span className="entry-way-text">
                   <span className="entry-way-label">{destination.label}</span>
                   <span className="entry-way-detail">{destination.detail}</span>
