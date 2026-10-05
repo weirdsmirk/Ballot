@@ -50,8 +50,28 @@
    * it has arguments in sentences, and a sentence 1800px wide is a sentence
    * nobody finishes.
    */
-  --land-max: 1240px;
-  --land-gutter: clamp(20px, 4vw, 64px);
+  /*
+   * The measure, and it is the product's own rather than a new number.
+   *
+   * It was 1240px, chosen when the page was measured against a laptop. On a wide
+   * display that left every section floating in the middle of the viewport with
+   * dead ground at both sides — three columns of coverage types ending 400px
+   * short of each edge, and a lifecycle rail whose six states had been compressed
+   * to fit a column that was never the constraint. The screenshot that prompted
+   * this was a 2000px window with content stopping at 1240.
+   *
+   * So it is `--page-max`, the value the console, the portal and the footer all
+   * measure against. One measure across the product, and no second number to keep
+   * in step with the first.
+   *
+   * Reading measure is still capped separately, and it has to be. A measure is
+   * about how wide the *type* runs, not how wide the page is: the grids and the
+   * rail use the full width, while every headline, paragraph and caption keeps
+   * its own cap in `ch`. Widening the page does not mean setting a sentence
+   * 1900px long.
+   */
+  --land-max: var(--page-max);
+  --land-gutter: clamp(20px, 3.2vw, 56px);
   /*
    * The page's easing. Longer and flatter than the interface's `--ease`: a control
    * answers a pointer, a page is a shot. The front-load is what stops the tail
@@ -586,10 +606,28 @@
  * voice. The evidence also sits slightly lower, so the eye reads down the
  * argument and then across into the thing that backs it.
  */
+/*
+ * An asymmetric two-column split: the claim on the left at the widest measure on
+ * the page, the mechanism on the right at a narrower one. Asymmetric rather than
+ * balanced because the two halves are not equal in weight — one is the argument
+ * and one is the evidence for it — and a 50/50 grid would give them the same
+ * voice.
+ *
+ * The left column is a fixed 640px rather than a fraction, which is the whole
+ * reason this section still reads at 2000px. At `1.15fr` on a full-width page it
+ * came out around 1090px wide and held a 480px headline, leaving 700px of nothing
+ * between the claim and the evidence — which does not read as editorial space, it
+ * reads as the two halves having come apart. Sizing the column to what the text in
+ * it actually needs keeps the pair together and puts the slack at the right edge,
+ * where the records' own rule already anchors it.
+ *
+ * The evidence column then takes everything left, and its rule runs to the page
+ * edge, which is what makes the right-hand side of the section look deliberate.
+ */
 .land-split {
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
-  gap: clamp(40px, 6vw, 96px);
+  grid-template-columns: minmax(0, 640px) minmax(0, 1fr);
+  gap: clamp(40px, 5vw, 120px);
   align-items: start;
 }
 .land-split-text { min-width: 0; }
@@ -613,6 +651,39 @@
   height: 1px;
   background: var(--border-soft);
   margin-block: 26px;
+}
+.land-record { min-width: 0; }
+
+/*
+ * The two records, side by side, once there is room for it.
+ *
+ * Stacked they are two short blocks left-aligned in a column over 1100px wide at
+ * 2000 — the caption ended 600px short of the rule above it and the rest was
+ * nothing. Two records are a pair, and a pair is the one thing on this page that
+ * wants a second column rather than a wider one. Filling the space by stretching
+ * the caption to 1100px would be the wrong fix; a 1100px sentence is a sentence
+ * nobody finishes.
+ *
+ * The rule between them becomes the middle grid track, so it stays the same
+ * element and the same 1px and simply turns a corner — horizontal to vertical —
+ * which is the reason it is a separate node in the markup at all.
+ *
+ * 1600px is where the evidence column is wide enough for two of these: below it
+ * the record column is under 800px and the receipt code alone needs 290 of it.
+ */
+@media (min-width: 1600px) {
+  .land-records {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: clamp(28px, 3vw, 56px);
+    align-items: start;
+  }
+  .land-record-rule {
+    width: 1px;
+    height: 100%;
+    /* The stacked version's vertical rhythm does not survive the change of axis. */
+    margin: 0;
+  }
 }
 .land-record-value {
   display: block;
