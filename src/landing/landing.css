@@ -434,22 +434,38 @@
      left and the photograph reduced to a margin. */
   font-size: inherit;
 }
+/*
+ * The accent line: italic, and white.
+ *
+ * It was green, and the colour was carrying the emphasis. Colour and italic are the
+ * same weight in a title card — using both is what made it read as decoration
+ * rather than as type — so the style now carries it alone and the line is the same
+ * colour as the line above it.
+ *
+ * Instrument Serif ships a real italic (the stylesheet imports `ital@0;1`), so this
+ * is a drawn italic and not a synthesised slant — at 158px the difference between
+ * the two is the difference between a serif and an oblique.
+ *
+ * One consequence worth stating: the claim's measure is set in `ch` on the parent,
+ * and italic advances differently from roman, so the width this line needs is not
+ * the width the roman version needed. The cap has enough slack for both; if the
+ * claim ever wraps at 158px, this is the first number to look at.
+ */
 .land-claim-accent {
-  color: var(--green);
-  /*
-   * The accent is only a colour now.
-   *
-   * It used to be *written on* — a clip-path wipe from the left, its own keyframe,
-   * its own duration, an exclusion in the shared arrival rule so the two would not
-   * compete, and a longhand declaration to stop the shorthand overwriting the
-   * sequence's delay. That was four declarations and a specificity trap to make one
-   * line of type arrive differently from the line above it.
-   *
-   * It now arrives exactly as everything else in the opening does: one shared fade
-   * and rise, one stagger. The gesture was the point at the time; with a photograph
-   * fading up underneath it, a wipe across the middle of the type was the second
-   * thing happening at once and the frame no longer read as one moment.
-   */
+  font-style: italic;
+  color: var(--ink);
+}
+
+/*
+ * The full stop, upright.
+ *
+ * Set as its own span rather than left inside the italic. A period is punctuation
+ * and the italic is emphasis, and an italic period at display size leans away from
+ * the word it belongs to — at 158px the difference is the difference between a full
+ * stop and a comma. White, so it matches the line it closes.
+ */
+.land-claim-stop {
+  font-style: normal;
 }
 
 .land-open-lede {

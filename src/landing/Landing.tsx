@@ -68,12 +68,16 @@ const OPEN = {
    * The claim, and nothing above it.
    *
    * There used to be an "Election workspace" eyebrow here. It went because the claim
-   * is two lines of display serif at up to 168px with a photograph behind it, and
+   * is two lines of display serif at up to 158px with a photograph behind it, and
    * an eyebrow above it is a third horizontal element competing with the only two
    * that matter — and because the photograph already says what this is. A ballot
    * box with a hand above it is the product's subject, not its caption.
+   *
+   * The accent line carries no full stop. It is set separately, one span, upright,
+   * because a period is punctuation and the italic is emphasis — an italic period
+   * at 158px reads as a comma.
    */
-  claim: ['Run elections', 'with confidence.'],
+  claim: ['Run elections', 'with confidence'],
   lede:
     'Ballot runs the whole election from one machine. Five roles decide who may open the poll, certify the result or only read, and every administrative action is written down.',
 }
@@ -441,7 +445,19 @@ export function Landing() {
                 as that class was on it. It is excluded in the stylesheet too, so
                 the two cannot disagree again.
               */}
-              <span className="land-claim-line land-claim-accent" data-open="2">{OPEN.claim[1]}</span>
+              {/*
+                The accent line: white, italic, and the full stop upright.
+
+                It was green, and the colour was doing the emphasis. Emphasis by
+                colour and emphasis by italic are the same weight in a title card —
+                using both is what made it read as decoration — and Instrument Serif
+                ships a real italic, so the style can carry it on its own. That also
+                hands the green back to the one place it means "go": the button.
+              */}
+              <span className="land-claim-line land-claim-accent" data-open="2">
+                {OPEN.claim[1]}
+                <span className="land-claim-stop">.</span>
+              </span>
             </h1>
             <p className="land-open-lede land-open-item" data-open="3">{OPEN.lede}</p>
             <div className="land-open-actions land-open-item" data-open="4">
