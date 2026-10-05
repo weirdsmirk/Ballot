@@ -1663,7 +1663,28 @@
        room in "confidence." is what pushes the period below the button above it. */
     line-height: 0.98;
   }
-  .land-open-actions { flex-direction: column; align-items: stretch; }
+  /*
+   * The single action goes full width.
+   *
+   * `flex-direction: column` stays, and it is load-bearing. `align-items: stretch`
+   * stretches along whichever axis is the *cross* axis, so in a row it stretches
+   * vertically and does nothing to the button's width — which is why dropping the
+   * column direction alongside the second button left a 194px button centred under
+   * a 280px claim.
+   *
+   * Full width is right for one button on a phone: a bigger target, and it reads
+   * as the page's single action rather than as one of a pair.
+   *
+   * The row needs `width: 100%` as well as the stretch. It is a flex item of a
+   * column that is `align-items: center`, so it shrink-wraps to its content —
+   * 191px — and stretching the button inside a 191px row is stretching it to 191px.
+   * Two buttons hid that, because the row was as wide as the wider of them.
+   */
+  .land-open-actions {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
   .land-open-actions .btn,
   .land-open-actions button { width: 100%; }
 

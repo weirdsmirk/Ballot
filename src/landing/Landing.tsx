@@ -460,14 +460,22 @@ export function Landing() {
               </span>
             </h1>
             <p className="land-open-lede land-open-item" data-open="3">{OPEN.lede}</p>
+            {/*
+              One button.
+
+              The second one went, and the arrow with it. Both were saying the same
+              thing twice: that the thing to do is enter the workspace. The arrow on
+              the primary repeated a fact the button's own position and its green
+              fill already carry, and a second button offering the voter portal gave
+              a visitor who came here to read a document a path they did not need.
+
+              The portal is still one click away — the bar's Sign in, and the pair
+              of doors at the foot of the page. Nothing is lost, and the opening now
+              has exactly one thing to do.
+            */}
             <div className="land-open-actions land-open-item" data-open="4">
               <button type="button" className="btn-primary btn-lg" onClick={() => go('#/enter')}>
                 Enter the workspace
-                <Icon name="arrow-right" />
-              </button>
-              <button type="button" className="btn-outline btn-lg" onClick={() => go('#/vote')}>
-                <Icon name="vote" />
-                Cast a ballot
               </button>
             </div>
           </div>
