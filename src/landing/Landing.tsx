@@ -64,7 +64,15 @@ import './landing.css'
  * only way to check that claim is to click.
  */
 const OPEN = {
-  eyebrow: 'Election workspace',
+  /*
+   * The claim, and nothing above it.
+   *
+   * There used to be an "Election workspace" eyebrow here. It went because the claim
+   * is two lines of display serif at up to 168px with a photograph behind it, and
+   * an eyebrow above it is a third horizontal element competing with the only two
+   * that matter — and because the photograph already says what this is. A ballot
+   * box with a hand above it is the product's subject, not its caption.
+   */
   claim: ['Run elections', 'with confidence.'],
   lede:
     'Ballot runs the whole election from one machine. Five roles decide who may open the poll, certify the result or only read, and every administrative action is written down.',
@@ -425,15 +433,19 @@ export function Landing() {
           <div className="land-open-scrim" aria-hidden="true" />
 
           <div className="land-open-body">
-            <span className="eyebrow eyebrow-blue land-open-item" data-open="1">
-              {OPEN.eyebrow}
-            </span>
             <h1 className="land-claim">
-              <span className="land-claim-line land-open-item" data-open="2">{OPEN.claim[0]}</span>
-              <span className="land-claim-line land-claim-accent land-open-item" data-open="3">{OPEN.claim[1]}</span>
+              <span className="land-claim-line land-open-item" data-open="1">{OPEN.claim[0]}</span>
+              {/*
+                No `land-open-item` on the accent. It arrives by being written on
+                rather than by rising, and the shared arrival rule was silently
+                winning on source order — the accent did a plain fade-up for as long
+                as that class was on it. It is excluded in the stylesheet too, so
+                the two cannot disagree again.
+              */}
+              <span className="land-claim-line land-claim-accent" data-open="2">{OPEN.claim[1]}</span>
             </h1>
-            <p className="land-open-lede land-open-item" data-open="4">{OPEN.lede}</p>
-            <div className="land-open-actions land-open-item" data-open="5">
+            <p className="land-open-lede land-open-item" data-open="3">{OPEN.lede}</p>
+            <div className="land-open-actions land-open-item" data-open="4">
               <button type="button" className="btn-primary btn-lg" onClick={() => go('#/enter')}>
                 Enter the workspace
                 <Icon name="arrow-right" />

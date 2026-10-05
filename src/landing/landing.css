@@ -386,14 +386,25 @@
 .land-claim {
   font-family: var(--font-serif);
   font-weight: 400;
-  /* Tracking tightened further than anywhere else in the product, because two
-     lines of a display serif standing alone need to read as one object. */
-  letter-spacing: -0.028em;
+  /* -0.018em, down from -0.028em.
+   *
+   * It was the tightest tracking anywhere in the product — the page title is
+   * -0.022em at 40px, this was tighter at 168px. At that size the space between
+   * letters is large enough in absolute terms that -0.028em pulls the pairs in the
+   * serif apart from each other: the f and i of "confidence" and the c and t of
+   * "elections" read as a single mass rather than as letters.
+   *
+   * Display type wants *less* negative tracking as it grows, not more. The cut that
+   * reads correctly at 40px over-tightens at 168px, because a proportion of an em
+   * is a much bigger number of pixels when the em is four times the size.
+   */
+  letter-spacing: -0.018em;
   line-height: 0.92;
   color: var(--ink);
-  /* Tight to the eyebrow above it. The eyebrow's own line box already supplies
-     most of the separation, so a nominal margin here is a hole. */
-  margin-top: clamp(14px, 1.8vh, 22px);
+  /* No margin: with the eyebrow gone the claim is the first thing in the block, and
+     a top margin on the first flex item does not collapse — it would push the
+     headline down into the plate for no reason. */
+  margin: 0;
 }
 .land-claim-line {
   display: block;
@@ -404,11 +415,23 @@
 }
 .land-claim-accent {
   color: var(--green);
-  /* Written on rather than revealed, in the same direction as the claim is
-     asserted: left to right, as a pen would. Longer than anything else in the
-     opening because `--cine` front-loads so hard that a shorter one is over
-     before the eye has committed to it. */
-  animation: land-claim-in 1500ms var(--cine) both;
+  /*
+   * Written on rather than revealed, left to right, in the same direction as the
+   * claim is asserted — the same gesture as the tally line crossing the register
+   * further down the page.
+   *
+   * Longhand, not the `animation` shorthand, so the arrival delay comes from one
+   * place: the `data-open` sequence below. The shorthand sets `animation-delay`
+   * itself, and the sequence rule is the more specific of the two, so a shorthand
+   * here was writing a delay that the sequence immediately overwrote.
+   *
+   * 1500ms because `--cine` front-loads so hard that a shorter run is over before
+   * the eye has committed to it.
+   */
+  animation-name: land-claim-in;
+  animation-duration: 1500ms;
+  animation-timing-function: var(--cine);
+  animation-fill-mode: both;
 }
 @keyframes land-claim-in {
   from { opacity: 0; clip-path: inset(0 100% 0 0); }
@@ -495,14 +518,23 @@
  * These are the only timed delays on the page that are written out longhand; from
  * section two on, the reveal observer takes over and the order is the DOM's.
  */
-.land-open-item { animation: land-rise 1000ms var(--cine) both; }
-.land-open [data-open='1'] { animation-delay: 520ms; }
-.land-open [data-open='2'] { animation-delay: 660ms; }
-/* The claim is written on, so it starts where the line above it has finished
-   arriving and takes its own longer run. */
-.land-open [data-open='3'] { animation-delay: 800ms; }
-.land-open [data-open='4'] { animation-delay: 1120ms; }
-.land-open [data-open='5'] { animation-delay: 1300ms; }
+/*
+ * The shared arrival, and the accent's exclusion from it.
+ *
+ * `:not(.land-claim-accent)` is load-bearing. Both this rule and the accent's own
+ * were single class selectors, so whichever came later in the file won — and this
+ * one does. The accent therefore arrived with a plain fade-up and its "written on"
+ * wipe never ran, which is invisible in the stylesheet and only shows up in the
+ * computed animation name. Excluding it means the two rules stop competing
+ * altogether, so neither source order nor a future reorder can break it again.
+ */
+.land-open-item:not(.land-claim-accent) { animation: land-rise 1000ms var(--cine) both; }
+.land-open [data-open='1'] { animation-delay: 560ms; }
+/* The claim is written on, so it starts just after the line above it has arrived
+   and takes its own longer run. */
+.land-open [data-open='2'] { animation-delay: 760ms; }
+.land-open [data-open='3'] { animation-delay: 1120ms; }
+.land-open [data-open='4'] { animation-delay: 1300ms; }
 
 @keyframes land-rise {
   from { opacity: 0; transform: translateY(18px); }
@@ -1544,6 +1576,17 @@
  * grain keeps its tooth, and the scroll cue keeps its label — because a cue is
  * information, and the only way to deliver it without the motion is to leave it
  * sitting there. The register stops drifting, since parallax is motion.
+ *
+ * `!important` on this block and nowhere else on the page.
+ *
+ * It is a kill switch, and a kill switch that can lose a specificity fight is not
+ * one. The arrivals are declared as `.land-open-item:not(.land-claim-accent)`,
+ * which is (0,2,0) — and a plain `.land-open-item` here is (0,1,0), so it silently
+ * stopped switching them off. That is not hypothetical: it happened the moment
+ * `:not()` was added to fix a different specificity bug, three rules above this
+ * one, and nothing about the failure was visible except that three animations were
+ * still running for a reader who had asked for none. A reader's motion preference
+ * is not something that should be contingent on selector arithmetic.
  */
 @media (prefers-reduced-motion: reduce) {
   .land-open-image,
@@ -1555,7 +1598,7 @@
   .land-bar,
   .land-node-detail,
   [data-reveal] {
-    animation: none;
+    animation: none !important;
   }
   .land-rail-edge::after { transition: none; }
   /* The register is positioned by script for its parallax; without motion there is
