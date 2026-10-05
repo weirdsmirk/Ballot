@@ -358,7 +358,7 @@ export function Landing() {
   }, [])
 
   const scrubbed = pinned && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  const { ref: lifeRef, step } = useLifecycleProgress<HTMLElement>(scrubbed)
+  const { ref: lifeRef, step } = useLifecycleProgress<HTMLDivElement>(scrubbed)
 
   const figures = useMemo(() => liveFigures(bootstrap), [bootstrap])
 
@@ -497,114 +497,182 @@ export function Landing() {
           </div>
         </section>
 
-        {/* ---- 3. The lifecycle ---------------------------------------------
-            Pinned and scrubbed on a wide viewport, a plain annotated list
-            anywhere else. The diagram is the point: six states that only move
-            forward, and the branch off `open` that a row of status pills would
-            hide. */}
-        <section
-          className={scrubbed ? 'land-band land-life land-life-pinned' : 'land-band land-life'}
-          id="land-life"
-          ref={lifeRef}
-          aria-labelledby="land-life-h"
-        >
-          <div className="land-wrap land-life-sticky">
-            <div className="land-life-head">
-              <span className="eyebrow eyebrow-blue land-reveal" data-reveal>The lifecycle</span>
-              <h2 className="land-headline land-headline-sm land-reveal" id="land-life-h" data-reveal>
-                Seven states, and the poll can go back.
-              </h2>
-              <p className="land-detail land-detail-sm land-reveal" data-reveal>
-                Six states only move forward. One does not: a poll can be paused and resumed and
-                arrive exactly where it started. Certification is not optional on the way to the
-                archive — a finished poll cannot be filed away uncertified.
-              </p>
-            </div>
+{/* ---- 3. The lifecycle ---------------------------------------------
+            Rebuilt from scratch twice now. The first version was a 1px wire
+            stretched across the middle of a pinned frame with the description in
+            a third band at the bottom: three disconnected rows, most of the
+            screen empty, and 340vh of scrolling attached to all of it.
 
-            {/*
-              The rail is one list, because it is one graph: six stops on the
-              spine and a seventh hanging off the third. The description of the
-              current state lives outside the list, in the readout below, so the
-              rail itself stays a single short row — putting it inside a stop made
-              the whole rail as tall as the tallest description and pushed the
-              branch a long way below the spine it branches from.
-            */}
-            <ul className="land-rail">
-              {SPINE.map((status, i) => {
-                const reached = i <= step
-                const current = i === step
-                // The edge belongs to the state it leaves, not the one it arrives
-                // at, so it is drawn to the right of this stop. Indexing by i-1
-                // put every connector half a cell out of place.
-                const edge = SPINE_EDGES[i]
-                const state = (
-                  <span
-                    className={
-                      current ? 'land-node land-node-current'
-                        : reached ? 'land-node land-node-on'
-                          : 'land-node'
-                    }
-                  >
-                    <span className="land-node-dot" aria-hidden="true" />
-                    <span className="land-node-label">{STATUS_LABELS[status]}</span>
-                  </span>
-                )
-                return (
-                  <li className="land-rail-stop" key={status}>
-                    {state}
-                    {/* Unpinned only. With no scrub to drive a single readout,
-                        every state has to carry its own description, or the
-                        section loses the half of the argument that says what
-                        each state actually means. */}
-                    <p className="land-rail-detail land-rail-detail-static">
-                      {STATUS_DESCRIPTIONS[status]}
-                    </p>
-                    {edge && (
-                      <span
-                        className={reached ? 'land-rail-edge land-rail-edge-on' : 'land-rail-edge'}
-                        aria-hidden="true"
-                      >
-                        <span className="land-rail-action">{reached ? edge.action : ''}</span>
-                      </span>
-                    )}
-                  </li>
-                )
-              })}
+            It is a full-bleed horizontal rail now, with the state being described
+            set large above it. Two decisions do the work:
 
-              {/* The branch. Placed on row 2 of column 3 — under `open`, which is
-                  where it hangs from. */}
-              <li className="land-rail-branch">
-                <span className="land-rail-stem" aria-hidden="true" />
-                <span className="land-node land-node-branch">
-                  <span className="land-node-dot" aria-hidden="true" />
-                  <span className="land-node-label">{STATUS_LABELS[BRANCH]}</span>
-                </span>
-                <span className="land-rail-branch-action">Pause · Resume</span>
-                {/* Always in the DOM, not only when pinned: with the scrub off this
-                    is the only place a reader sees what a pause actually is, so
-                    dropping it would quietly lose half the argument. */}
-                <p className="land-rail-detail land-rail-branch-detail">
-                  {STATUS_DESCRIPTIONS[BRANCH]}
-                </p>
-              </li>
-            </ul>
+            · **Full bleed.** The rail runs the width of the viewport rather than
+              the width of the measure. A timeline is the one thing on a page that
+              ought not to be boxed — it is a span of time, and the measure is a
+              column of text. The narrative above it stays on the measure, so the
+              section still has one reading column and one edge-to-edge object.
 
-            {/*
-              The readout: what the current state means, and where in the graph
-              the reader has got to. Not a live region — a scroll-driven value
-              announced on every state change would talk over a screen-reader
-              user who is simply scrolling, and the six state names are already
-              in the list above for anyone reading it linearly.
-            */}
-            <div className="land-rail-readout">
-              <span className="land-rail-count" aria-hidden="true">
-                {String(step + 1).padStart(2, '0')}<span className="land-rail-of"> / {SPINE.length}</span>
-              </span>
-              <p className="land-rail-detail" key={SPINE[step]}>
-                {STATUS_DESCRIPTIONS[SPINE[step]]}
-              </p>
-            </div>
+            · **The narrative is above, not beside.** Side by side, the sentence
+              and the diagram each got half the width and neither was big enough to
+              read as the thing it was. Stacked, the sentence can be enormous and
+              the rail can be long, and the frame fills.
+
+            The rail draws itself left to right as the reader scrolls, which is the
+            page's own gesture — a record being written — and the same one the
+            tally line and the claim already use. The previous version was the one
+            place on the page that did not. */}
+        <section className="land-life" id="land-life" aria-labelledby="land-life-h">
+          <div className="land-wrap land-life-intro">
+            <span className="eyebrow eyebrow-blue land-reveal" data-reveal>The lifecycle</span>
+            <h2 className="land-headline land-headline-sm land-reveal" id="land-life-h" data-reveal>
+              Seven states, and the poll can go back.
+            </h2>
+            <p className="land-detail land-detail-sm land-reveal" data-reveal>
+              Six of them only move forward. One does not: a poll can be paused and resumed
+              and arrive exactly where it started. And certification is not optional on the
+              way to the archive — a finished poll cannot be filed away uncertified.
+            </p>
           </div>
+
+          {/*
+            The track is what the scrub is measured against, kept separate from the
+            section so the progress calculation is the distance the sticky frame
+            actually travels. It only exists when scrubbing.
+          */}
+          {scrubbed ? (
+            <div className="land-life-track" ref={lifeRef}>
+              <div className="land-life-sticky">
+                {/* The narrative, on the measure. */}
+                <div className="land-wrap land-life-story">
+                  <div className="land-life-top">
+                    <span className="eyebrow eyebrow-blue">Now</span>
+                    <span className="land-life-step" aria-hidden="true">
+                      {String(step + 1).padStart(2, '0')}
+                      <span className="land-life-step-of">/ {String(SPINE.length).padStart(2, '0')}</span>
+                    </span>
+                  </div>
+
+                  {/*
+                    `key` so React remounts it on every change and the arrival
+                    animation runs. Replacing the text of an already-mounted
+                    element does not restart a CSS animation, which is why the key
+                    has to be here rather than on the text inside.
+                  */}
+                  <div className="land-life-say" key={SPINE[step]}>
+                    <h3 className="land-life-name">{STATUS_LABELS[SPINE[step]]}</h3>
+                    <p className="land-life-copy">{STATUS_DESCRIPTIONS[SPINE[step]]}</p>
+                  </div>
+
+                  <p className="land-life-key">
+                    <span className="land-life-key-dot" aria-hidden="true" />
+                    Every transition on this rail is enforced by the server, not by
+                    which buttons are showing.
+                  </p>
+                </div>
+
+                {/* The rail, edge to edge. */}
+                <div className="land-life-railwrap">
+                  <ol
+                    className="land-life-rail"
+                    style={{ '--life-progress': step / (SPINE.length - 1) } as React.CSSProperties}
+                    aria-label="The six forward states of an election"
+                  >
+                    {SPINE.map((status, i) => {
+                      const reached = i <= step
+                      const current = i === step
+                      // The edge belongs to the state it leaves. Indexing by i-1
+                      // puts every connector a column out of place.
+                      const edge = SPINE_EDGES[i]
+                      return (
+                        <li
+                          className={
+                            current ? 'life-stop life-stop-now'
+                              : reached ? 'life-stop life-stop-past'
+                                : 'life-stop'
+                          }
+                          key={status}
+                        >
+                          {edge && (
+                            <span
+                              className={reached ? 'life-edge life-edge-on' : 'life-edge'}
+                              aria-hidden="true"
+                            >
+                              <span className="life-edge-label">{reached ? edge.action : ''}</span>
+                            </span>
+                          )}
+
+                          <span className="life-node" aria-hidden="true" />
+
+                          <span className="life-name">{STATUS_LABELS[status]}</span>
+
+                          {/*
+                            The branch, hanging under `open` in every mode. It is
+                            the reason this section exists — a poll that can stop
+                            and come back is not a straight line through six
+                            states — and a rail that hid it while scrubbing would
+                            be drawing six things and claiming seven.
+                          */}
+                          {status === 'open' && (
+                            <span className="life-branch">
+                              <span className="life-branch-stem" aria-hidden="true" />
+                              <span className="life-branch-cap" aria-hidden="true" />
+                              <span className="life-branch-name">{STATUS_LABELS[BRANCH]}</span>
+                              <span className="life-branch-note">
+                                Pause and resume — back to exactly where it left off
+                              </span>
+                            </span>
+                          )}
+                        </li>
+                      )
+                    })}
+                  </ol>
+                </div>
+              </div>
+            </div>
+          ) : (
+            /*
+             * No scrub — a phone, a short window, or reduced motion. A horizontal
+             * rail cannot work here: six states and five labels across 390px puts
+             * roughly 60px on each, and the action names are longer than that. So
+             * this is the honest fallback rather than a squeezed version of the
+             * same thing — the same seven states, vertical, each carrying its own
+             * description, because with no readout panel there is nowhere else for
+             * them to go.
+             */
+            <div className="land-wrap land-life-list">
+              <ol className="land-graph land-graph-static">
+                {SPINE.map((status, i) => {
+                  const edge = SPINE_EDGES[i]
+                  return (
+                    <li className="land-graph-row" key={status}>
+                      {edge && (
+                        <span className="land-graph-link land-graph-link-on" aria-hidden="true">
+                          <span className="land-graph-link-label">{edge.action}</span>
+                        </span>
+                      )}
+                      <span className="land-graph-node land-graph-node-past">
+                        <span className="land-graph-dot" aria-hidden="true" />
+                        <span className="land-graph-name">{STATUS_LABELS[status]}</span>
+                      </span>
+                      <p className="land-graph-desc">{STATUS_DESCRIPTIONS[status]}</p>
+                      {status === 'open' && (
+                        <div className="land-graph-branch">
+                          <span className="land-graph-branch-stem" aria-hidden="true" />
+                          <span className="land-graph-branch-stub" aria-hidden="true" />
+                          <span className="land-graph-branch-body">
+                            <span className="land-graph-branch-name">{STATUS_LABELS[BRANCH]}</span>
+                            <span className="land-graph-branch-note">
+                              {STATUS_DESCRIPTIONS[BRANCH]}
+                            </span>
+                          </span>
+                        </div>
+                      )}
+                    </li>
+                  )
+                })}
+              </ol>
+            </div>
+          )}
         </section>
 
         {/* ---- 4. Coverage --------------------------------------------------

@@ -571,10 +571,10 @@
 /*
  * The two band grounds, as flat values.
  *
- * The bands are gradients, and the lifecycle rail needs a *flat* colour to knock
- * its connector out behind each node label — a gradient would show as a visible
- * rectangle. These are the band ends sampled off that gradient: `--land-band` for
- * the upper half where the rail sits, `--land-band-lo` for the lower half.
+ * The bands are gradients, and the lifecycle graph needs a *flat* colour for its
+ * node dots — a gradient inside a 14px circle would show as a visible disc. These
+ * are the band ends sampled off that gradient: `--land-band` for the upper half
+ * where the graph sits, `--land-band-lo` for the lower half.
  */
 :root {
   --land-band: #0c0f0d;
@@ -743,30 +743,54 @@
 }
 
 /* ========================================
+/* ========================================
    3 — The lifecycle
-   ======================================== */
+   ========================================
+
+   Rebuilt from scratch twice. It began as a 1px wire stretched across the middle
+   of a pinned frame with the state's description in a third band at the bottom:
+   three disconnected rows, most of the screen empty, 340vh of scrolling attached
+   to all of it. The middle attempt made it vertical and paired with a column of
+   prose, which read better and still left the diagram small.
+
+   What it is now is a full-bleed horizontal rail with the state being described
+   set large above it. Two decisions carry it:
+
+     · **Full bleed.** The rail runs the width of the viewport, not the width of
+       the measure. A timeline is the one object on a page that ought not to be
+       boxed — it is a span of time, and the measure is a column of text. The
+       narrative above it stays on the measure, so the section still has one
+       reading column and one edge-to-edge object rather than two competing ones.
+
+     · **The narrative sits above, not beside.** Side by side, the sentence and
+       the diagram each got half the width and neither was big enough to be the
+       thing it was. Stacked, the sentence can be enormous and the rail can be
+       long, and the frame fills.
+
+   The rail draws itself left to right as the reader scrolls. That is the page's
+   own gesture — a record being written — and the same one the tally line and the
+   claim already use. The previous version was the one place on the page that did
+   not use it.
+*/
+
+.land-life {
+  position: relative;
+  z-index: 1;
+  padding-block: clamp(84px, 12vh, 168px) 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.022), rgba(255, 255, 255, 0.008));
+  border-block: 1px solid var(--border-soft);
+}
+.land-life-intro { padding-bottom: clamp(56px, 7vh, 104px); }
 
 /*
- * The pinned version.
+ * The track and the sticky frame.
  *
- * A tall section with a sticky child: the amount scrolled through the section is
- * the position in the election. This is the one place on the page where scroll
- * *is* the interaction rather than a way of moving past something, which is the
- * only honest reason to take a reader's scroll away from them.
- *
- * The height is the budget. At 340vh the reader gets roughly two and a half
- * viewport heights of travel to cross six states, so each state holds long enough
- * to be read rather than flashing past. Shorter and the lifecycle becomes a
- * strobe; longer and the page becomes a chore.
+ * Separate elements so the scrub is measured against the distance the frame
+ * actually travels. 280vh is about 46vh of scroll per state: enough to read the
+ * sentence and watch the line draw, without asking anyone to commit to a scroll
+ * that feels like a chore.
  */
-.land-life-pinned {
-  /* Padded rather than margined so the sticky child's containing block is this
-     section, which is what makes the progress calculation in `Landing.tsx`
-     agree with what is on screen. */
-  height: 340vh;
-  padding-block: 0;
-  overflow: clip;
-}
+.land-life-track { height: 280vh; }
 .land-life-sticky {
   position: sticky;
   top: 0;
@@ -775,348 +799,490 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: clamp(28px, 4vh, 52px);
-  padding-block: clamp(32px, 5vh, 64px);
-}
-.land-life-head { max-width: 66ch; }
-.land-life-head .land-detail-sm { max-width: 68ch; }
-
-/* The rail.
- *
- * Six stops on a horizontal spine with a branch hanging below the third. Built
- * from a flex row and pseudo-element connectors rather than SVG, so it reflows
- * with the grid instead of needing a second drawing for every breakpoint, and so
- * the semantic content stays a list that a screen reader reads in order.
- *
- * Each stop is a grid cell that owns its own leading connector, so the connector
- * and the node it points at cannot come apart at any width.
- */
-.land-rail {
-  list-style: none;
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  align-items: start;
-  position: relative;
-}
-.land-rail-stop {
-  position: relative;
-  /* Room for the action label that sits above the node. */
-  padding-top: 34px;
-  min-width: 0;
-}
-
-/*
- * The connector from a stop to the next one.
- *
- * Each stop is a `1fr` cell, so the cell's own right edge *is* the next stop's
- * left edge, which is where the next dot sits. That makes this a two-value
- * declaration: start at this stop's dot, run to the edge of this cell. Anything
- * that tries to be cleverer — measuring a node width out, extending past the
- * edge — is a guess about where the next dot is, and got it wrong both ways: too
- * short and the rail reads as six separate segments, too long and the line runs
- * through the next node's label.
- */
-/*
- * The connector.
- *
- * `left: 9px` is where this stop's dot is, so the line starts at the dot and runs
- * to the right edge of this cell — which is the left edge of the next cell, which
- * is where the next dot is. Two values, no measuring, and it lands on the next dot
- * exactly. Anything cleverer is a guess about where that dot is, and both guesses
- * were wrong: a line stretched to the full cell ran through the next node's label,
- * and one shortened to clear the label left a visible gap in the rail.
- *
- * The line passes *behind* the labels and they knock it out — see the background
- * on `.land-node-label`. That is the honest way to draw a labelled axis: the rule
- * is continuous, and each name sits on a small piece of ground.
- */
-.land-rail-edge {
-  position: absolute;
-  /* Level with the node dot: the label's line box is 12.5 * 1.6 = 20px and the
-     dot is 7px, so the dot's centre is 10px down from the top of the node row. */
-  top: 44px;
-  left: 9px;
-  right: 0;
-  height: 1px;
-  background: var(--border-strong);
-  z-index: 0;
-}
-.land-rail-edge-on { background: var(--green-line); }
-/* The green fills the edge as it is crossed, left to right — the same direction as
-   the claim being written on in the opening, which is what makes the page feel
-   like one idea rather than a sequence of effects. */
-.land-rail-edge::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  transform-origin: left center;
-  transform: scaleX(0);
-  background: var(--green);
-  transition: transform 620ms var(--cine);
-}
-.land-rail-edge-on::after { transform: scaleX(1); }
-.land-rail-action {
-  position: absolute;
-  /* Above the line, not on it. The labels are small uppercase type and a 1px rule
-     straight through the middle of them is unreadable — it was drawn through all
-     four of them before it was moved up here. */
-  bottom: 7px;
-  left: 0;
-  right: 0;
-  text-align: center;
-  font-size: 9.5px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  line-height: 1.4;
-  text-transform: uppercase;
-  color: var(--muted-2);
-  white-space: nowrap;
+  gap: clamp(36px, 5vh, 72px);
   overflow: hidden;
-  /* Present only once the edge is crossed, so the rail never names a transition
-     that has not happened. */
-  opacity: 0;
-  transition: color 400ms var(--cine-soft);
 }
-.land-rail-edge-on .land-rail-action { opacity: 1; color: var(--green-text); }
 
-.land-node {
+/* ---- The narrative ---- */
+
+.land-life-story {
   display: flex;
-  align-items: center;
-  gap: 9px;
-  min-width: 0;
-  /* Above the connector. See the note on `.land-node-label`. */
-  position: relative;
-  z-index: 1;
-}
-.land-node-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  flex: none;
-  background: var(--bg);
-  border: 1px solid var(--border-strong);
-  transition: background 420ms var(--cine-soft), border-color 420ms var(--cine-soft), box-shadow 420ms var(--cine-soft);
-}
-/* No ellipsis and no overflow clipping.
-   `text-overflow: ellipsis` was here and silently shortened the last state to
-   "Certifie", which is worse than a tight fit: the diagram's whole job is naming
-   the states, and it named one of them wrong. The label instead sets the node
-   width the connectors subtract, so a state that cannot fit its label is a layout
-   problem to fix in `--rail-node-w` rather than a word to drop. */
-/*
- * The node label, and the fix for the line running through it.
- *
- * `position: relative; z-index: 1` puts the label in front of its own connector.
- * The connector is a child of this stop and starts at `left: 9px` — which is where
- * the dot is, and the dot is 7px wide — so the line's first eight pixels sit
- * under the label's own text. Raising the label above it is the fix; moving the
- * line is not, because the line has to start at the dot.
- */
-.land-node-label {
-  position: relative;
-  z-index: 1;
-  font-size: 12.5px;
-  font-weight: 500;
-  letter-spacing: 0.01em;
-  color: var(--muted-2);
-  white-space: nowrap;
-  transition: color 420ms var(--cine-soft);
-  /*
-   * The knockout.
-   *
-   * The connector runs behind this label at the label's own vertical centre, and a
-   * rule struck through a state name makes the diagram unreadable. Raising the
-   * label with `z-index` alone is not enough — the line still visibly starts and
-   * stops either side of the word, which reads as a broken rule.
-   *
-   * So the label carries a small piece of the band's own ground and the rule
-   * passes behind it. Negative margins give the padding back, so the label still
-   * sits exactly where it would without it and the dot-to-label gap of 9px holds.
-   */
-  padding-inline: 7px;
-  margin-inline: -7px;
-  background: var(--land-band);
-}
-.land-node-on .land-node-dot { background: var(--green-line); border-color: var(--green-line); }
-.land-node-on .land-node-label { color: var(--ink-2); }
-/* The current state is the only one that is a light source on this page. */
-.land-node-current .land-node-dot {
-  background: var(--green);
-  border-color: var(--green);
-  box-shadow: var(--green-glow);
-}
-.land-node-current .land-node-label { color: var(--ink); font-weight: 600; }
-
-/* The description of the current state, under its own stop.
- *
- * Reserved space rather than inserted space: the rail does not reflow as the
- * description appears and disappears, which would move every stop after it by the
- * height of a paragraph seven times during one scroll. */
-.land-node-detail {
-  margin-top: 16px;
-  padding-left: 16px;
-  border-left: 1px solid var(--green-line);
-  font-size: 13px;
-  line-height: 1.66;
-  color: var(--muted);
-  max-width: 30ch;
-  min-height: 4.6em;
-  text-wrap: pretty;
-  animation: land-detail-in 620ms var(--cine) both;
-}
-@keyframes land-detail-in {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: none; }
-}
-
-/* The branch: `paused` hangs off `open` rather than sitting on the spine, because
-   that is what it is — a suspension the poll can come back from, not a stage it
-   passes through. Lining the seven states up in a row would claim otherwise, and
-   this is the one diagram on the page where the shape is the argument. */
-/*
- * The branch.
- *
- * `paused` hangs below `open` on a stem rather than sitting on the spine beside
- * the other states. That placement is the argument: a pause is a suspension the
- * poll returns from, not a stage it passes through, and lining the seven states
- * up in a row would claim otherwise. This is the one diagram on the page where
- * the shape is the claim, so it is drawn as the graph and not as a list.
- */
-.land-rail-branch {
-  position: relative;
-  grid-column: 3;
-  grid-row: 2;
-  padding-top: 40px;
+  flex-direction: column;
+  gap: clamp(20px, 3vh, 34px);
   min-width: 0;
 }
-/* The stem, from the spine's row down to the branch's node. */
-.land-rail-stem {
-  position: absolute;
-  top: 0;
-  left: 3px;
-  width: 1px;
-  height: 26px;
-  background: var(--border-strong);
-}
-.land-node-branch .land-node-label { color: var(--ink-2); }
-/* Amber, and only here. In this product amber means *waiting* everywhere else, and
-   a paused poll is exactly that: not live, not finished, holding. */
-.land-node-branch .land-node-dot {
-  background: var(--amber-soft);
-  border-color: var(--amber-soft-2);
-}
-.land-rail-branch-action {
-  display: block;
-  margin-top: 10px;
-  padding-left: 16px;
-  font-size: 9.5px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--amber-ink);
-}
-/* The branch's own description.
- *
- * Sits under the branch on every layout, because a pause is a state like any
- * other and the reader is owed the same sentence the spine states get. In the
- * pinned layout it is narrower than the readout's and deliberately offset to the
- * left of it, so the branch reads as attached to the graph rather than as a second
- * readout competing with the first.
- */
-.land-rail-branch-detail {
-  margin-top: 14px;
-  padding-left: 16px;
-  border-left: 1px solid var(--amber-soft-2);
-  font-size: 12.5px;
-  line-height: 1.62;
-  color: var(--muted);
-  max-width: 30ch;
-  text-wrap: pretty;
-}
 
-/*
- * The readout.
- *
- * Below the rail rather than under the current node, and in its own row with a
- * reserved height. Two reasons, and both are about the rail not moving: a
- * description inside a node makes the rail as tall as the tallest description and
- * drags the branch away from the spine it hangs off, and swapping the text in
- * place moves every node below it. Here the height is reserved once and the
- * number in the corner says how far along the reader is.
- */
-.land-rail-readout {
-  display: grid;
-  /* The counter is a fixed-width column rather than sitting in the flow after the
-     text, so the description's left edge does not move when the count changes
-     width between "1 / 6" and "6 / 6". */
-  grid-template-columns: 84px minmax(0, 1fr);
-  align-items: start;
-  gap: clamp(20px, 2.4vw, 32px);
-  margin-top: clamp(30px, 4vh, 52px);
-  padding-top: 24px;
-  border-top: 1px solid var(--border);
+/* Eyebrow and position on one line, the counter pushed to the measure's right edge
+   so the two ends of the row are anchored rather than both drifting left. */
+.land-life-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: clamp(16px, 2vh, 22px);
+  border-bottom: 1px solid var(--border-soft);
 }
-.land-rail-count {
+/* The position in the graph, in the page's own machine face. Green because it is
+   the only number on the page that changes as you read, and it belongs to the same
+   system as the figures further down. */
+.land-life-step {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 13px;
+  letter-spacing: 0.1em;
   color: var(--green-text);
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.04em;
-  /* Aligned to the first line of the description it sits beside, not to the top
-     of the row — a monospace label centred against 18px prose reads as floating. */
-  padding-top: 5px;
 }
-.land-rail-of { color: var(--muted-2); }
-.land-rail-detail {
-  font-size: clamp(15px, 1.25vw, 18px);
-  line-height: 1.62;
-  color: var(--ink-2);
+.land-life-step-of { color: var(--muted-2); margin-left: 8px; }
+
+/*
+ * The state name, and the sentence under it.
+ *
+ * Large on purpose. It is the thing the frame is currently about, and the rail
+ * below it is only legible as a diagram because this is legible as a sentence —
+ * a small name above a big graph inverts that and leaves the reader looking at
+ * decoration.
+ *
+ * `key` on the wrapper in the markup, so this animation restarts on every change.
+ */
+.land-life-say { animation: land-say-in 760ms var(--cine) both; }
+.land-life-name {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  /* The second-largest type on the page after the opening claim, and deliberately
+     close behind it — this is a title card too, one the reader is scrolling. */
+  font-size: clamp(52px, 7.4vw, 128px);
+  letter-spacing: -0.024em;
+  line-height: 0.98;
+  color: var(--ink);
+}
+.land-life-copy {
+  font-size: clamp(18px, 1.5vw, 25px);
+  line-height: 1.6;
+  color: var(--muted);
+  max-width: 44ch;
+  margin-top: clamp(18px, 2.6vh, 32px);
   text-wrap: pretty;
 }
 
-/* The readout's copy. Reserved so the rail above never reflows as the text
-   changes — four lines is the longest any of the seven descriptions runs. */
-.land-rail-readout .land-rail-detail {
-  /* Sized to one line, not four. The reserved height was 4.4em against
-     descriptions that are one or two lines, which left a large empty well under
-     every state and made the rail look broken rather than reserved. The rule above
-     it does the separating; the height does not need to as well. */
-  min-height: 2.4em;
-  max-width: 62ch;
-  padding-left: 18px;
-  border-left: 1px solid var(--green-line);
-  animation: land-detail-in 620ms var(--cine) both;
+/* The one line that names the thing enforcing the rest of the section. On the
+   spine's own terms, so it reads as a footnote to the diagram rather than as more
+   prose competing with the sentence above it. */
+.land-life-key {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted-2);
+  max-width: 52ch;
+  margin: 0;
 }
-/* The per-state copy inside a stop: unpinned layouts only. */
-.land-rail-detail-static {
-  display: none;
-  margin-top: 14px;
-  padding-left: 16px;
-  border-left: 1px solid var(--border);
-  font-size: 13.5px;
-  line-height: 1.64;
-  color: var(--muted);
-  max-width: 46ch;
+.land-life-key-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green-line);
+  flex: none;
+  margin-top: 7px;
 }
-@keyframes land-detail-in {
-  from { opacity: 0; transform: translateY(6px); }
+
+@keyframes land-say-in {
+  from { opacity: 0; transform: translateY(14px); }
   to { opacity: 1; transform: none; }
 }
 
-/* Unpinned — a phone, a print, reduced motion — there is no scrub to drive a
-   single readout, so the section becomes an ordinary annotated list and the
-   branch rejoins the sequence. */
-.land-life:not(.land-life-pinned) .land-rail-readout { display: none; }
-.land-life:not(.land-life-pinned) .land-rail-detail-static { display: block; }
-.land-life:not(.land-life-pinned) .land-rail-stop { padding-bottom: 26px; }
-.land-life:not(.land-life-pinned) .land-rail-branch { padding-top: 0; }
-.land-life:not(.land-life-pinned) .land-rail-stem { display: none; }
-/* Unpinned, the branch's description matches the stops' own rather than being the
-   smaller pinned-layout variant, so the list is uniform. */
-.land-life:not(.land-life-pinned) .land-rail-branch-detail {
-  max-width: 46ch;
+/* ---- The rail ---- */
+
+/*
+ * The rail, and the spine running through it.
+ *
+ * Six equal columns, each holding one state, with the line passing through the
+ * centre of its node. Because the columns are `1fr` the geometry is arithmetic
+ * rather than measurement: a node sits at `50%` of its column, so the spine runs
+ * from `1/12` of the rail to `11/12` — the first node's centre to the last one's —
+ * and an edge is this node's centre to the next, exactly one column wide. Nothing
+ * here has to know how wide a state name is.
+ *
+ * `--life-rail-y` is the one number the whole diagram turns on. The line, the
+ * nodes and the space reserved for the labels above all derive from it, so they
+ * cannot drift apart — which is the bug the horizontal version had, where the
+ * connectors were positioned independently and came out a node short.
+ */
+/*
+ * The railwrap.
+ *
+ * On the measure, not full bleed. Full bleed was tried first and it is a real
+ * idea — a timeline is a span of time, not a column of text — but the rail's
+ * first node then lands a seventh of the viewport in from the edge while the
+ * narrative above it starts at the gutter, so the section had two left edges and
+ * the page lost the alignment every other band has.
+ *
+ * Full bleed *and* alignment is not available here without either indenting the
+ * narrative to the first node or pulling the whole rail in, and the first of those
+ * throws away the reading column. So the rail is on the measure, which is still
+ * ~1800px of rail at a wide display — six columns of 300px, which is why the
+ * earlier version's problem was never that there was too little width, it was that
+ * there was too little *height* and the type was too small.
+ */
+.land-life-railwrap {
+  width: 100%;
+  max-width: calc(var(--land-max) + var(--land-gutter) * 2);
+  margin: 0 auto;
+  padding-inline: var(--land-gutter);
+}
+.land-life-rail {
+  --life-node: 24px;
+  --life-rail-y: 66px;
+  /*
+   * 120% wide, pulled out 10% on each side, so the *nodes* — not the box — land
+   * exactly on the measure's left and right edges. Without it the first node sits
+   * half a column in from the measure and therefore 157px to the right of the
+   * sentence above it, and the section had two left edges.
+   *
+   * The arithmetic, since the number is not obvious: a node is at `50%` of its
+   * column, so node one is at a twelfth of the rail's width and node six at
+   * eleven twelfths. With the box offset by −x and widened to M + 2x, node one
+   * falls at −x + (M + 2x)/12; setting that to zero gives x = M/10, and node six
+   * then lands at M without being asked to. Both ends fall on the measure from one
+   * number.
+   *
+   * The box therefore overhangs the measure by a tenth on each side, and the
+   * sticky frame clips it. Nothing visible does: the first and last labels are
+   * centred on nodes that are on the measure.
+   */
+  width: 120%;
+  margin-inline: -10%;
+  position: relative;
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+/* The spine: two runs, because one element cannot be both the whole line and the
+   drawn part of it. */
+.land-life-rail::before,
+.land-life-rail::after {
+  content: '';
+  position: absolute;
+  top: var(--life-rail-y);
+  /* Half a column in from each end is the first node's centre and the last one's. */
+  left: 8.3333%;
+  right: 8.3333%;
+  height: 1px;
+}
+.land-life-rail::before { background: var(--border); }
+.land-life-rail::after {
+  background: linear-gradient(90deg, var(--green-line), var(--green));
+  transform-origin: left center;
+  /* The section's motion. One composited transform on one 1px line. */
+  transform: scaleX(var(--life-progress, 0));
+  transition: transform 700ms var(--cine);
+}
+
+/*
+ * A stop.
+ *
+ * A flex column, so the state name and the branch below it are centred and flow
+ * in the order they appear. The branch used to be positioned off a guessed
+ * distance from the line — `4.4em`, which is the height of a one-line state name
+ * and therefore only correct as long as every name stays on one line and the font
+ * never changes. In flow it cannot be wrong.
+ */
+.life-stop {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Room for the action labels above the line and the state name below it. Every
+     stop gets the same padding-top, which is what keeps the six names on one
+     baseline — the names are in flow, not positioned. */
+  padding-top: calc(var(--life-rail-y) + var(--life-node) + 34px);
+  /*
+   * No padding-bottom for the branch. The branch is in flow, so the one stop that
+   * has it grows on its own and the grid row takes the height of the tallest — and
+   * reserving that space on all six columns is what left 200px of emptiness under
+   * five states that have nothing hanging below them.
+   */
+  min-width: 0;
+}
+
+/*
+ * The node: a ring on the spine, centred in its column.
+ *
+ * A ring rather than a filled dot. States ahead of the reader should read as
+ * places they have not been to, and a solid mark would claim they have — the
+ * difference between a diagram of a process and a progress bar wearing a diagram.
+ */
+.life-node {
+  position: absolute;
+  top: calc(var(--life-rail-y) - var(--life-node) / 2);
+  left: 50%;
+  transform: translateX(-50%);
+  width: var(--life-node);
+  height: var(--life-node);
+  border-radius: 50%;
+  /* The flat band ground, so the ring reads as a hole in the line rather than as
+     a disc sitting on top of it. A gradient inside 20px would show as a plate. */
+  background: var(--land-band);
+  border: 1px solid var(--border-strong);
+  transition: background 460ms var(--cine-soft), border-color 460ms var(--cine-soft), box-shadow 460ms var(--cine-soft);
+}
+.life-stop-past .life-node {
+  background: var(--green-line);
+  border-color: var(--green-line);
+}
+/* The current state, and the only light source in the section. */
+.life-stop-now .life-node {
+  background: var(--green);
+  border-color: var(--green);
+  box-shadow: 0 0 0 6px rgba(126, 224, 168, 0.09), var(--green-glow);
+}
+
+.life-name {
+  display: block;
+  text-align: center;
+  font-family: var(--font-serif);
+  font-size: clamp(20px, 1.75vw, 34px);
+  letter-spacing: -0.008em;
+  line-height: 1.18;
+  color: var(--muted);
+  transition: color 460ms var(--cine-soft);
+}
+.life-stop-past .life-name { color: var(--ink-2); }
+.life-stop-now .life-name { color: var(--ink); font-weight: 500; }
+
+/*
+ * The edge, and the action on it.
+ *
+ * `left: 50%; width: 100%` spans this node's centre to the next one, which is
+ * where the next column starts. The label is centred in that span, so it sits
+ * exactly in the gap between two states rather than over either of them — and it
+ * only appears once the edge has been crossed, because naming a transition that
+ * has not happened is a claim about where the reader is.
+ *
+ * Set in the machine face: these are the commands the server accepts, not
+ * sentences.
+ */
+.life-edge {
+  position: absolute;
+  top: var(--life-rail-y);
+  left: 50%;
+  width: 100%;
+  height: 1px;
+  background: var(--border);
+  transition: background 460ms var(--cine-soft);
+}
+.life-edge-on { background: var(--green-line); }
+.life-edge-label {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 14px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 420ms var(--cine-soft), color 420ms var(--cine-soft);
+}
+.life-edge-on .life-edge-label { opacity: 1; color: var(--green-text); }
+
+/*
+ * The branch: `paused`, hanging under `open`.
+ *
+ * In flow below the state name, not positioned against the spine — a stem drawn
+ * all the way up would cross the name of the state it hangs from. What it is, is
+ * an annotation on `open` rather than a fourth edge, and treating it as one (an
+ * elbow that clears the label) is the honest construction.
+ *
+ * Amber, because in this product amber means *waiting* everywhere else and a
+ * paused poll is exactly that: not live, not finished, holding.
+ */
+.life-branch {
+  margin-top: 30px;
+  width: clamp(240px, 17vw, 330px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  text-align: center;
+}
+.life-branch-stem {
+  width: 1px;
+  height: 30px;
+  background: var(--amber-soft-2);
+}
+/* The cap across the top of the branch's label, so it reads as a bracket rather
+   than as a stray rule floating above a word. */
+.life-branch-cap {
+  width: 30px;
+  height: 1px;
+  background: var(--amber-soft-2);
+}
+.life-branch-name {
+  font-family: var(--font-serif);
+  font-size: 21px;
+  letter-spacing: -0.004em;
+  line-height: 1.2;
+  color: var(--ink-2);
+}
+.life-branch-note {
+  font-size: 13px;
+  line-height: 1.58;
+  color: var(--muted-2);
+  text-wrap: pretty;
+}
+
+/* ---- The unscrubbed list ---- */
+
+/*
+ * A phone, a short window, or reduced motion.
+ *
+ * A horizontal rail cannot work below this: six states and five labels across
+ * 390px puts about 60px on each, and "CLOSE VOTING" is wider than that. So this
+ * is the same seven states vertical, each carrying its own description — with no
+ * readout panel there is nowhere else for them to go. The honest fallback rather
+ * than a squeezed version of the same object.
+ */
+.land-life-list { padding-bottom: clamp(84px, 12vh, 168px); }
+
+/*
+ * The vertical spine, shared by the static list only.
+ *
+ * One continuous line down the left of the whole list with every dot centred on
+ * it, drawn by two pseudo-elements on the list rather than a border on each row —
+ * six per-row borders cannot be one line, and the result reads as six segments
+ * rather than an axis. `--life-spine-x` and `--life-dot` are the two numbers
+ * everything else is derived from, so the dot and the line cannot drift apart.
+ */
+.land-graph {
+  --life-spine-x: 7px;
+  --life-dot: 16px;
+  --life-band: var(--land-band);
+  position: relative;
+  list-style: none;
+  min-width: 0;
+  padding: 0;
+}
+.land-graph::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--life-spine-x);
+  width: 1px;
+  background: var(--border);
+}
+.land-graph-row {
+  position: relative;
+  padding-left: calc(var(--life-spine-x) * 2 + var(--life-dot));
+  padding-bottom: 26px;
+  min-width: 0;
+}
+.land-graph-node {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 40px;
+  min-width: 0;
+}
+.land-graph-dot {
+  position: absolute;
+  left: 0;
+  width: var(--life-dot);
+  height: var(--life-dot);
+  border-radius: 50%;
+  background: var(--life-band);
+  border: 1px solid var(--green-line);
+}
+.land-graph-name {
+  font-family: var(--font-serif);
+  font-size: 21px;
+  letter-spacing: -0.004em;
+  line-height: 1.2;
+  color: var(--ink);
+}
+.land-graph-desc {
+  font-size: 14.5px;
+  line-height: 1.66;
+  color: var(--muted);
+  max-width: 54ch;
+  margin-top: 10px;
+  text-wrap: pretty;
+}
+
+/* The link between two states and the action on it. The action sits to the right
+   of the spine rather than centred on it, because in a vertical list the space
+   beside the line is the only place a label can go that is not on top of
+   something. */
+.land-graph-link {
+  position: relative;
+  display: block;
+  height: 26px;
+  margin-left: calc(var(--life-spine-x) * -1 - var(--life-dot));
+}
+.land-graph-link-label {
+  position: absolute;
+  left: calc(var(--life-spine-x) * 2 + var(--life-dot) + 16px);
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--green-text);
+  white-space: nowrap;
+}
+
+/* The branch, off to the side of the spine. Three tracks and three pieces of line
+   — a drop from the spine, a horizontal stub, then the state itself — because a
+   branch that is only indented does not read as being *off* the spine, and being
+   off the spine is the entire claim. */
+.land-graph-branch {
+  display: grid;
+  grid-template-columns: var(--life-spine-x) 40px minmax(0, 1fr);
+  align-items: center;
+  margin: 14px 0 4px;
+  margin-left: calc(var(--life-spine-x) * -1 - var(--life-dot));
+}
+.land-graph-branch-stem {
+  grid-column: 1;
+  justify-self: center;
+  width: 1px;
+  height: 22px;
+  background: var(--amber-soft-2);
+}
+.land-graph-branch-stub {
+  grid-column: 2;
+  height: 1px;
+  background: linear-gradient(90deg, var(--amber-soft-2), rgba(221, 145, 82, 0.14));
+}
+.land-graph-branch-body {
+  grid-column: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding-left: 16px;
+  min-width: 0;
+}
+.land-graph-branch-name {
+  font-family: var(--font-serif);
+  font-size: 19px;
+  letter-spacing: -0.004em;
+  color: var(--ink-2);
+}
+.land-graph-branch-note {
   font-size: 13.5px;
-  border-left-color: var(--border);
+  line-height: 1.6;
+  color: var(--muted);
+  max-width: 52ch;
+  text-wrap: pretty;
 }
 
 /* ========================================
@@ -1388,81 +1554,30 @@
 }
 
 /*
- * The lifecycle goes vertical.
+ * The lifecycle unpins.
  *
  * Breakpoint driven by the diagram, not by the device. The horizontal rail needs
- * about 1180px before its six columns are wide enough to hold a node *and* its
- * action label without the labels colliding — at 1024 the columns came out at
- * 157px and "CLOSE VOTING" ran straight through "CERTIFY". So below that width the
- * rail is a vertical spine, on a tablet exactly as on a phone, because the content
- * genuinely does not fit across.
+ * about 1180px before its six columns can hold a node, a state name and the action
+ * between them without the labels running into each other — at 1024 the columns
+ * came out at 157px and "CLOSE VOTING" struck through "CERTIFY". Below that width
+ * the rail is the vertical annotated list instead, on a tablet exactly as on a
+ * phone, because the content genuinely does not fit across.
  *
  * This is also the unpinning threshold, and it has to match the one in
- * `Landing.tsx` — the scrub is only enabled when the rail is horizontal, so the
- * query that decides whether to pin and the one that decides the rail's direction
- * are the same condition expressed twice. If they disagree, the page either pins a
- * vertical list or scrubs a rail that is not there.
+ * `Landing.tsx` — the scrub is only enabled when the rail exists at all, so the
+ * query that decides whether to pin and the one that decides which layout to use
+ * are the same condition stated twice. If they disagree, the page either pins a
+ * vertical list for 280vh or scrubs a rail that was never rendered.
+ *
+ * There is deliberately nothing in here about the rail's own geometry. A rail that
+ * needs rescuing below 1180px by a media query is a rail that was too tight at
+ * every width, and the fixes that used to live here — rotating the connector,
+ * re-seating the action label — were treating a squeeze as a direction change.
  */
 @media (max-width: 1179px) {
-  .land-life-pinned { height: auto; overflow: visible; }
-  .land-life-sticky { position: static; height: auto; padding-block: 0; }
-
-  /*
-   * The rail becomes a vertical spine.
-   *
-   * Same nodes, same branch, same order — the connector rotates from running to the
-   * right of a node to running beneath it, and the action label moves off the end
-   * of the line and onto its own row.
-   *
-   * `display: block` rather than a one-column grid, which is the fix for a bug that
-   * read as a typographic accident and was a layout one: keeping it a grid left the
-   * branch's `grid-column: 3` alive, which generated implicit tracks and sized every
-   * stop to a 26px sliver. Each description then set one word per line, in a column
-   * the width of the connector. A vertical list has no tracks to get wrong.
-   */
-  .land-rail { display: block; }
-  .land-rail-stop,
-  .land-rail-branch {
-    display: block;
-    position: relative;
-    padding-top: 0;
-    padding-bottom: 24px;
-    padding-inline-end: 0;
-    padding-left: 26px;
-    min-width: 0;
-  }
-  .land-rail-edge {
-    top: 20px;
-    bottom: -2px;
-    left: 3px;
-    right: auto;
-    width: 1px;
-    height: auto;
-  }
-  .land-rail-edge::after { transform-origin: center top; transform: scaleY(0); }
-  .land-rail-edge-on::after { transform: scaleY(1); }
-  .land-rail-action {
-    bottom: auto;
-    top: -4px;
-    left: 16px;
-    right: auto;
-    text-align: left;
-  }
-  .land-rail-stem { display: none; }
-  .land-rail-branch-action { padding-left: 0; margin-top: 10px; }
-  /*
-   * The label's knockout is undone here.
-   *
-   * Horizontally the connector no longer passes behind the label, so the ground
-   * patch — which exists only to hide the rule under the text — becomes a visible
-   * rectangle in the wrong place, the label now sitting above the line rather than
-   * on it.
-   */
-  .land-node-label { background: none; padding-inline: 0; margin-inline: 0; }
-  .land-rail-detail-static,
-  .land-rail-branch-detail { max-width: 52ch; }
+  .land-life-track { height: auto; }
+  .land-life-sticky { position: static; height: auto; }
 }
-
 @media (max-width: 900px) {
   /*
    * The lifecycle has already unpinned at 1180 (above). What is left at this width
@@ -1596,11 +1711,21 @@
   .land-cue,
   .land-cue-travel,
   .land-bar,
-  .land-node-detail,
+  .land-life-say,
   [data-reveal] {
     animation: none !important;
   }
-  .land-rail-edge::after { transition: none; }
+  /* The spine's fill is a transition, not an animation, so it needs stopping
+     separately. It settles at whatever `--life-progress` says, which under this
+     query is the last state — the diagram then reads as finished rather than as
+     half-drawn. */
+  .land-life-rail::after,
+  .life-node,
+  .life-name,
+  .life-edge,
+  .life-edge-label {
+    transition: none !important;
+  }
   /* The register is positioned by script for its parallax; without motion there is
      nothing to drift, so it is put back at the top of the page. */
   .land-register { transform: none !important; }
@@ -1611,7 +1736,7 @@
    worse than no print styles at all. */
 @media print {
   .land-vignette, .land-grain, .land-register, .land-cue, .land-bar { display: none; }
-  .land-life-pinned { height: auto; }
+  .land-life-track { height: auto; }
   .land-life-sticky { position: static; height: auto; }
   [data-reveal] { animation: none; }
 }
