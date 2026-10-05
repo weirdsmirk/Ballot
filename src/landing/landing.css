@@ -401,6 +401,11 @@
  * It is one line, "Make Count." Eleven characters against the thirty-one it had
  * across two lines, which is why the frame is 18ch and not fitted to the copy, and
  * why the opening is centred rather than bottom-anchored.
+ *
+ * At 124px it is no longer the largest type in the product by a wide margin — the
+ * receipt stamp is close behind it now — and it does not need to be. It is two words.
+ * What it needs is to be the first thing read and to sit above a sentence rather
+ * than beside one.
  */
 .land-claim {
   font-family: var(--font-sans);
@@ -411,8 +416,8 @@
    * A grotesque at this size needs more negative tracking than a serif does, not
    * less. Instrument Serif's letterforms are narrow and the fit between them was
    * doing most of the work; Google Sans is a wider face with more open counters, and
-   * at 158px the default spacing sets the whole line loose enough to read as three
-   * words rather than one.
+   * at this size the default spacing sets the whole line loose enough to read as two
+   * words with a gap in the middle rather than as one phrase.
    */
   letter-spacing: -0.03em;
   line-height: 0.96;
@@ -427,10 +432,10 @@
    * One cap on the whole claim gives the block a single measure, and
    * `margin-inline: auto` centres it.
    *
-   * 18ch, which is no longer load-bearing the way it was: at 158px, "Make Count." is
-   * eleven characters and about 830px, so the cap sits well clear of it on a desktop
-   * and does nothing at all. It is here for the narrow end — 18ch at the 46px floor
-   * is about 470px, so on a viewport narrower than that the claim wraps rather than
+   * 18ch, which is no longer load-bearing the way it was: at 124px, "Make Count." is
+   * eleven characters and about 690px, so the cap sits clear of it on a desktop and
+   * does nothing at all. It is here for the narrow end — 18ch at the 42px floor is
+   * about 430px, so on a viewport narrower than that the claim wraps rather than
    * overflowing — and it is a ceiling, not a target. Do not tighten it toward the
    * measured width of the current copy: the cap is what keeps the next, longer
    * headline from running edge to edge.
@@ -446,9 +451,27 @@
    * measuring the rendered box against the width the line needs.
    *
    * So the size is declared here, `ch` means what it looks like it means, and the
-   * lines inherit.
+   * line inherits.
    */
-  font-size: clamp(46px, 8vw, 158px);
+  /*
+   * 6vw, capped at 124px, down from 8vw and 158px.
+   *
+   * At 8vw the claim was 876px wide in a 2000px frame — 44% of the screen — and the
+   * lede under it is 590px. The headline was half again as wide as the sentence
+   * explaining it, which inverts the reading order: the eye lands on the type, then
+   * has to travel *down* to the thing that says what the type means. "Make Count." is
+   * two words and carries no argument, so it does not need to out-weigh the three
+   * sentences under it.
+   *
+   * 6vw lands the claim at 44% of frame on a desktop and 33% on a laptop, which puts
+   * it below the lede's width at neither and above it at both. The cap only bites
+   * above about 2050px; below that the `vw` term is what is setting the size.
+   *
+   * The floor is 42px, down from 46. At 390px the claim was 255px — 65% of the
+   * viewport — which is a phone-width headline on a phone, and it was pushing the
+   * lede down to where it wrapped to four lines.
+   */
+  font-size: clamp(42px, 6vw, 124px);
   /*
    * The cap is a safety rail on a narrow viewport, not a fit to the current copy.
    *
@@ -1745,7 +1768,7 @@
    its width, which is the only way a landscape phone gets a smaller claim. */
 @media (max-height: 620px) and (orientation: landscape) {
   .land-open { min-height: 100dvh; }
-  .land-claim { font-size: clamp(38px, 7.2vh, 76px); }
+  .land-claim { font-size: clamp(34px, 6.4vh, 64px); }
   .land-open-lede { font-size: 14px; max-width: 60ch; }
   .land-open-actions { margin-top: 18px; }
 }
