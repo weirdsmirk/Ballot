@@ -16,9 +16,10 @@
  *   1. Cold open.       The photograph, one claim, the door.
  *   2. Secrecy.         The central promise, and the artifact that keeps it —
  *                       a receipt the voter can check and the server cannot read.
- *   3. The lifecycle.   The real transition graph, scrubbed by scrolling. Not a
- *                       row of status pills: the actual states and the actual
- *                       edges, including the branch nobody's marketing page draws.
+ *   3. The lifecycle.   The real transition graph, drawn at the state the live
+ *                       election is actually in. Not a row of status pills: the
+ *                       actual states and the actual edges, including the branch
+ *                       nobody's marketing page draws.
  *   4. Coverage.        What one installation covers. Dense, typographic, small.
  *   5. This workspace.  Real figures, read from the running server. Never
  *                       invented — if the server is empty the section says so.
@@ -36,7 +37,7 @@
  *     watching. Everything else is arrival and emphasis.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { fetchState, type Bootstrap } from '../lib/api'
 import {
   ELECTION_STATUSES,
@@ -134,9 +135,12 @@ const SECRECY = {
  * this product does not do. So the spine is the six states that only move
  * forward, and the branch hangs below it.
  *
- * The rail is scrubbed by scrolling rather than by hovering or by a timer. The
- * section is worth the scroll height precisely because an election advancing is
- * the thing nobody can show you in a static diagram.
+ * The rail was scrubbed by scrolling rather than by hovering or by a timer, and the
+ * justification was that an election advancing is the thing nobody can show in a
+ * static diagram. It is shown here, statically, because the server already knows
+ * which state the election is in — so the reader gets the diagram on arrival instead
+ * of after a screen and a half of scrolling, and gets it right every time rather
+ * than depending on where they stopped reading.
  */
 const SPINE: ElectionStatus[] = ['draft', 'scheduled', 'open', 'closed', 'certified', 'archived']
 const BRANCH: ElectionStatus = 'paused'
@@ -229,62 +233,26 @@ function useReveal() {
 }
 
 /**
- * Scroll progress through the lifecycle section, as a state index.
+ * Where the live election actually is on the lifecycle.
  *
- * The section is tall and its content is sticky, so the amount scrolled past is
- * a direct measure of how far through the election the reader is. That number is
- * the state index — which is the whole reason this section exists. Nothing here
- * animates for its own sake.
+ * This used to be the reader's scroll position: the section was 280vh tall with a
+ * sticky frame, and the state index was how far they had scrolled. The rail drew
+ * itself as they moved and the section argued that an election advancing is the
+ * thing a static diagram cannot show.
  *
- * Read on a rAF, coalesced to one measurement per frame, rather than on `scroll`:
- * a scroll listener fires faster than the compositor can paint and ends up doing
- * layout-thrash nobody asked for.
+ * That argument was worth having once and is not worth 280vh of scroll. The live
+ * status answers the same question for real — the server already knows which state
+ * the election is in — so the diagram now shows where *this* election has got, and
+ * the reader gets it on arrival instead of after scrolling.
  *
- * Under reduced motion, and on any viewport too narrow to have the sticky rail,
- * this returns 0 and the section renders as an ordinary annotated list.
+ * `paused` is not on the spine, so it maps to `open`, which is the state it pauses.
+ * With no election on the server the rail starts at `draft` and stays there.
  */
-function useLifecycleProgress<T extends HTMLElement>(enabled: boolean) {
-  const ref = useRef<T>(null)
-  const [step, setStep] = useState(0)
-
-  useEffect(() => {
-    if (!enabled) {
-      setStep(0)
-      return
-    }
-    let frame = 0
-
-    const measure = () => {
-      frame = 0
-      const el = ref.current
-      if (!el) return
-      // How far the reader has travelled through the pinned section, 0 to 1.
-      const travel = el.offsetHeight - window.innerHeight
-      if (travel <= 0) return
-      const passed = -el.getBoundingClientRect().top
-      const progress = Math.min(1, Math.max(0, passed / travel))
-      // Rounded to the nearest state, so each one holds for the stretch of scroll
-      // that is roughly its own rather than sliding continuously past.
-      const next = Math.round(progress * (SPINE.length - 1))
-      setStep((current) => (current === next ? current : next))
-    }
-
-    const onScroll = () => {
-      if (frame) return
-      frame = requestAnimationFrame(measure)
-    }
-
-    measure()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    window.addEventListener('resize', onScroll)
-    return () => {
-      if (frame) cancelAnimationFrame(frame)
-      window.removeEventListener('scroll', onScroll)
-      window.removeEventListener('resize', onScroll)
-    }
-  }, [enabled])
-
-  return { ref, step }
+function liveStep(bootstrap: Bootstrap | null): number {
+  const status = bootstrap?.elections?.[0]?.status
+  if (status === BRANCH) return SPINE.indexOf('open')
+  const at = status ? SPINE.indexOf(status) : -1
+  return at < 0 ? 0 : at
 }
 
 /**
@@ -347,33 +315,31 @@ export function Landing() {
   }, [])
 
   /*
-   * The rail is pinned only where pinning makes sense, and "makes sense" is set by
-   * the diagram rather than by the device.
+   * The rail is horizontal only where horizontal fits, and that is set by the
+   * diagram rather than by the device.
    *
-   * Below 1180px the horizontal rail cannot hold six nodes and their action labels
-   * without the labels colliding — at 1024 the columns come out at 157px and "CLOSE
-   * VOTING" runs through "CERTIFY" — so the stylesheet turns the rail into a
-   * vertical list there. Pinning must switch off at exactly the same width, or the
-   * page either pins a vertical list inside a 340vh section or scrubs a rail that
-   * is not on screen.
+   * Below 1180px the rail cannot hold six nodes and their action labels without the
+   * labels colliding — at 1024 the columns come out at 157px and "CLOSE VOTING" runs
+   * through "CERTIFY" — so the stylesheet turns it into a vertical list there.
    *
-   * The height half of the query is the other way round: a short window cannot give
-   * a sticky block room, so the section is a list there too.
+   * The height half of the query is gone, and so is everything it was for. There is
+   * no sticky frame to give room to: the section is the height of its own content
+   * now, and nothing about it depends on the window's height.
    *
-   * These two numbers have to match the media query in `landing.css`. That is the
-   * one thing in this page stated in two places, and it is worth saying so in both.
+   * This number has to match the media query in `landing.css`. That is the one thing
+   * in this page stated in two places, and it is worth saying so in both.
    */
-  const [pinned, setPinned] = useState(false)
+  const [wide, setWide] = useState(false)
   useEffect(() => {
-    const query = window.matchMedia('(min-width: 1180px) and (min-height: 620px)')
-    const apply = () => setPinned(query.matches)
+    const query = window.matchMedia('(min-width: 1180px)')
+    const apply = () => setWide(query.matches)
     apply()
     query.addEventListener('change', apply)
     return () => query.removeEventListener('change', apply)
   }, [])
 
-  const scrubbed = pinned && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  const { ref: lifeRef, step } = useLifecycleProgress<HTMLDivElement>(scrubbed)
+  /* The live state, not a scroll position. See `liveStep`. */
+  const step = liveStep(bootstrap)
 
   const figures = useMemo(() => liveFigures(bootstrap), [bootstrap])
 
@@ -551,10 +517,12 @@ export function Landing() {
               read as the thing it was. Stacked, the sentence can be enormous and
               the rail can be long, and the frame fills.
 
-            The rail draws itself left to right as the reader scrolls, which is the
-            page's own gesture — a record being written — and the same one the
-            tally line and the claim already use. The previous version was the one
-            place on the page that did not. */}
+            The rail used to draw itself left to right as the reader scrolled, which
+            was the page's own gesture — a record being written — and the same one the
+            tally line and the claim already use. That cost 280vh of scroll and a
+            pinned frame to say something the election's own status says for free, so
+            the rail is static now: the gesture is still here, in the claim and the
+            tally line, and the diagram is just a diagram. */}
         <section className="land-life" id="land-life" aria-labelledby="land-life-h">
           <div className="land-wrap land-life-intro">
             <span className="eyebrow eyebrow-blue land-reveal" data-reveal>The lifecycle</span>
@@ -568,14 +536,23 @@ export function Landing() {
             </p>
           </div>
 
-          {/*
-            The track is what the scrub is measured against, kept separate from the
-            section so the progress calculation is the distance the sticky frame
-            actually travels. It only exists when scrubbing.
-          */}
-          {scrubbed ? (
-            <div className="land-life-track" ref={lifeRef}>
-              <div className="land-life-sticky">
+          {wide ? (
+            /*
+             * No track and no sticky frame.
+             *
+             * This was a 280vh section with a sticky frame, and the state index was
+             * the reader's scroll position: the rail drew itself as they moved. It is
+             * now the height of its own content, and the state index is the live
+             * election's actual status — so the diagram answers on arrival rather
+             * than after a screen and a half of scrolling, and it answers the same
+             * way every time instead of depending on where someone stopped reading.
+             *
+             * The consequence worth stating: the rail no longer *animates*. It is a
+             * static picture of where the election is, which is what a lifecycle
+             * diagram is. The `--life-progress` fill still shows how far it has got,
+             * and that is now a fact rather than an animation.
+             */
+            <div className="land-life-frame">
                 {/* The narrative, on the measure. */}
                 <div className="land-wrap land-life-story">
                   <div className="land-life-top">
@@ -587,12 +564,14 @@ export function Landing() {
                   </div>
 
                   {/*
-                    `key` so React remounts it on every change and the arrival
-                    animation runs. Replacing the text of an already-mounted
-                    element does not restart a CSS animation, which is why the key
-                    has to be here rather than on the text inside.
+                    No `key`, and that is the point. It was keyed on the state so
+                    React remounted the block on every change and this arrival
+                    animation replayed — necessary when the text swapped under the
+                    reader, and pointless now. The block is written once, on arrival,
+                    from the election's real status, and it does not change under
+                    anyone.
                   */}
-                  <div className="land-life-say" key={SPINE[step]}>
+                  <div className="land-life-say">
                     <h3 className="land-life-name">{STATUS_LABELS[SPINE[step]]}</h3>
                     <p className="land-life-copy">{STATUS_DESCRIPTIONS[SPINE[step]]}</p>
                   </div>
@@ -657,9 +636,7 @@ export function Landing() {
                           {/*
                             The branch, hanging under `open` in every mode. It is
                             the reason this section exists — a poll that can stop
-                            and come back is not a straight line through six
-                            states — and a rail that hid it while scrubbing would
-                            be drawing six things and claiming seven.
+                            and come back is not a straight line through six states.
                           */}
                           {status === 'open' && (
                             <span className="life-branch">
@@ -676,17 +653,15 @@ export function Landing() {
                     })}
                   </ol>
                 </div>
-              </div>
             </div>
           ) : (
             /*
-             * No scrub — a phone, a short window, or reduced motion. A horizontal
-             * rail cannot work here: six states and five labels across 390px puts
-             * roughly 60px on each, and the action names are longer than that. So
-             * this is the honest fallback rather than a squeezed version of the
-             * same thing — the same seven states, vertical, each carrying its own
-             * description, because with no readout panel there is nowhere else for
-             * them to go.
+             * Narrow. A horizontal rail cannot work here: six states and five
+             * labels across 390px puts roughly 60px on each, and the action names
+             * are longer than that. So this is the honest fallback rather than a
+             * squeezed version of the same thing — the same seven states, vertical,
+             * each carrying its own description, because with no readout panel there
+             * is nowhere else for them to go.
              */
             <div className="land-wrap land-life-list">
               <ol className="land-graph land-graph-static">

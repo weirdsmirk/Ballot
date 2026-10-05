@@ -24,9 +24,12 @@
  *     sits in the lower third where a title card sits, and the only thing that
  *     happens is light building across a near-black plate. It plays once, on
  *     load, over about two and a half seconds.
- *   · **The one scroll-driven sequence is the lifecycle**, because watching an
- *     election advance is the thing worth watching and cannot be shown in a
- *     still. Everything else arrives or emphasises; nothing else scrubs.
+ *   · **Nothing is scroll-driven.** The lifecycle used to be a 280vh pinned section
+ *     that scrubbed the rail as the reader moved through it, on the argument that
+ *     watching an election advance is the thing worth watching. The server already
+ *     knows which state the election is in, so the rail draws itself at the live
+ *     status on arrival instead: same information, no scroll, and the same answer
+ *     every time rather than one that depends on where the reader stopped.
  *   · **Nothing loops loudly.** Two things on this page move continuously and
  *     both are below the threshold of noticing: the plate's drift, and the
  *     segment in the scroll cue. There is no bobbing, no pulsing, no floating.
@@ -909,24 +912,21 @@
 .land-life-intro { padding-bottom: clamp(56px, 7vh, 104px); }
 
 /*
- * The track and the sticky frame.
+ * The frame.
  *
- * Separate elements so the scrub is measured against the distance the frame
- * actually travels. 280vh is about 46vh of scroll per state: enough to read the
- * sentence and watch the line draw, without asking anyone to commit to a scroll
- * that feels like a chore.
+ * It was `.land-life-track` at 280vh and `.land-life-sticky` inside it, pinned for
+ * the whole scroll: the state index was the reader's position, and the rail drew
+ * itself as they moved. Two elements and a scroll listener to make a diagram behave
+ * like an animation.
+ *
+ * Now it is one element, the height of its own content, and the state index is the
+ * live election's real status. The `gap` and the column are all that survive from the
+ * sticky version, and they are the whole of what the layout needed.
  */
-.land-life-track { height: 280vh; }
-.land-life-sticky {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  height: 100dvh;
+.land-life-frame {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   gap: clamp(36px, 5vh, 72px);
-  overflow: hidden;
 }
 
 /* ---- The narrative ---- */
@@ -963,12 +963,15 @@
 /*
  * The state name, and the sentence under it.
  *
- * Large on purpose. It is the thing the frame is currently about, and the rail
+ * Large on purpose. It is the state the live election is actually in, and the rail
  * below it is only legible as a diagram because this is legible as a sentence —
  * a small name above a big graph inverts that and leaves the reader looking at
  * decoration.
  *
- * `key` on the wrapper in the markup, so this animation restarts on every change.
+ * One arrival, once. It was keyed on the state so the animation replayed on every
+ * scroll step, which was the only way to animate it at all — replacing the text of
+ * a mounted element does not restart a CSS animation. With the text written once
+ * from the live status the key is gone and this plays exactly one time, on arrival.
  */
 .land-life-say { animation: land-say-in 760ms var(--cine) both; }
 .land-life-name {
@@ -1264,7 +1267,7 @@
   text-wrap: pretty;
 }
 
-/* ---- The unscrubbed list ---- */
+/* ---- The vertical list, below 1180px ---- */
 
 /*
  * A phone, a short window, or reduced motion.
@@ -1680,7 +1683,7 @@
 }
 
 /*
- * The lifecycle unpins.
+ * The lifecycle goes vertical.
  *
  * Breakpoint driven by the diagram, not by the device. The horizontal rail needs
  * about 1180px before its six columns can hold a node, a state name and the action
@@ -1689,25 +1692,20 @@
  * the rail is the vertical annotated list instead, on a tablet exactly as on a
  * phone, because the content genuinely does not fit across.
  *
- * This is also the unpinning threshold, and it has to match the one in
- * `Landing.tsx` — the scrub is only enabled when the rail exists at all, so the
- * query that decides whether to pin and the one that decides which layout to use
- * are the same condition stated twice. If they disagree, the page either pins a
- * vertical list for 280vh or scrubs a rail that was never rendered.
+ * The threshold has to match the one in `Landing.tsx`, because that is what chooses
+ * between the two markups. It is no longer also an unpinning threshold — nothing
+ * here is pinned — so the two conditions are the same only in the sense that they
+ * agree, and there is nothing left for them to disagree about.
  *
  * There is deliberately nothing in here about the rail's own geometry. A rail that
  * needs rescuing below 1180px by a media query is a rail that was too tight at
  * every width, and the fixes that used to live here — rotating the connector,
  * re-seating the action label — were treating a squeeze as a direction change.
  */
-@media (max-width: 1179px) {
-  .land-life-track { height: auto; }
-  .land-life-sticky { position: static; height: auto; }
-}
 @media (max-width: 900px) {
   /*
-   * The lifecycle has already unpinned at 1180 (above). What is left at this width
-   * is the rest of the page going single-column.
+   * The lifecycle has already gone vertical at 1180 (above, in the markup). What is
+   * left at this width is the rest of the page going single-column.
    */
   .land-split { grid-template-columns: 1fr; gap: clamp(34px, 6vh, 48px); }
   .land-split-text { max-width: none; }
@@ -1879,7 +1877,5 @@
    worse than no print styles at all. */
 @media print {
   .land-vignette, .land-grain, .land-register, .land-cue, .land-bar { display: none; }
-  .land-life-track { height: auto; }
-  .land-life-sticky { position: static; height: auto; }
   [data-reveal] { animation: none; }
 }
