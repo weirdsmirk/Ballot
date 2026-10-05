@@ -578,10 +578,25 @@ export function Landing() {
                     <p className="land-life-copy">{STATUS_DESCRIPTIONS[SPINE[step]]}</p>
                   </div>
 
+                  {/*
+                    The footnote, cut to one line.
+
+                    Two edits, both about spending words. "on this rail" went: the
+                    rail is directly above it, so naming it was fourteen characters
+                    spent pointing at something the reader is already looking at.
+                    "Every transition is" went too, leaving the sentence as a
+                    fragment — which is what a footnote under a diagram should be,
+                    and which also happens to be the length that fits one line at
+                    13px in a 52ch measure. At two lines it stranded "are showing."
+                    on its own.
+
+                    The contrast clause stayed. "not by which buttons are showing"
+                    is the half that separates this from a client-side state
+                    machine, and it is the half worth the line.
+                  */}
                   <p className="land-life-key">
                     <span className="land-life-key-dot" aria-hidden="true" />
-                    Every transition on this rail is enforced by the server, not by
-                    which buttons are showing.
+                    Enforced by the server, not by which buttons are showing.
                   </p>
                 </div>
 
