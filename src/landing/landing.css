@@ -798,13 +798,66 @@
   will-change: transform;
 }
 
+/* ========================================
+   Reduced motion
+   ======================================== */
+
 /*
- * Reduced motion: the two screens are two screens.
+ * The treatment is to stop everything and show the finished page, because every
+ * animation on this page terminates at its element's own resting value and the
+ * resting value is the design. Nothing is hidden by any of it, so nothing has to
+ * be unhidden here.
+ *
+ * What survives is deliberate and worth stating: the plate keeps its crop, the
+ * grain keeps its tooth, and the scroll cue keeps its label — because a cue is
+ * information, and the only way to deliver it without the motion is to leave it
+ * sitting there. The register stops drifting, since parallax is motion.
+ *
+ * `!important` on this block and nowhere else on the page.
+ *
+ * It is a kill switch, and a kill switch that can lose a specificity fight is not
+ * one. It stayed `!important` after the opening's `:not()` was removed, because
+ * the thing it protected against was not that one rule: a reader who has asked for
+ * no motion should not depend on every selector in the file being no more specific
+ * than this list. That failure was real — three animations kept running for a
+ * reader who had asked for none — and it was invisible except by counting
+ * `document.getAnimations()`.
+ *
+ * It has now failed a second time, in the same invisible way: this whole block was
+ * deleted while the sections below the opening were being removed, because it sat
+ * immediately after them and nothing in the file said the two were related. Six
+ * animations were running for a reduced-motion reader on a page whose only
+ * movement is six short arrivals. That is the second time this block has been lost
+ * to a change that had nothing to do with it, which is why the kill switch is worth
+ * more than it looks: it is the only thing standing between a well-meaning deletion
+ * and a reader being served motion they asked not to have.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .land-open-image,
+  .land-open-item,
+  .land-cue,
+  .land-bar,
+  [data-reveal] {
+    animation: none !important;
+  }
+  /* The register is positioned by script for its parallax; without motion there is
+     nothing to drift, so it is put back at the top of the page. */
+  .land-register { transform: none !important; }
+}
+
+/*
+ * And the curtain: two screens, not a lift.
  *
  * Not "the curtain opens faster" — the lift is the whole effect, so with motion off
- * there is nothing left to keep and the honest thing is two screens in flow. The stage
- * gives up its height, the pin is dropped, and the hero goes back to `position:
- * relative`, which is how it was before the curtain existed.
+ * there is nothing left to keep and the honest thing is two screens in flow. The
+ * stage gives up its height, the pin is dropped, and the hero goes back to
+ * `position: relative`, which is how it was before the curtain existed.
+ *
+ * Separate from the block above on purpose. The above is a kill switch on a list of
+ * selectors and needs `!important` because it is fighting the whole file. This one
+ * is ordinary layout, in a second block, so that a future edit to the kill switch's
+ * selector list cannot accidentally take the stage's layout with it — which is how
+ * the two got tangled once already.
  */
 @media (prefers-reduced-motion: reduce) {
   .land-stage { height: auto; }

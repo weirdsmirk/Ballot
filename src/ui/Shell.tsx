@@ -21,8 +21,8 @@ import { Icon } from './Icon'
  * product, and the one thing this product is arguing against is a ballot that
  * looks like a widget — so the name carries it on its own.
  *
- * Set in Inter, the body face, at weight 500 and tracked in tight, rather than
- * the serif display face it used to be. Instrument Serif is what this product
+ * Set in Google Sans, the body face, at weight 500 and tracked in tight, rather
+ * than the serif display face it used to be. Instrument Serif is what this product
  * uses for things being *said* — headlines, results, receipts — so putting the
  * name in it made the mark claim to be an argument rather than a name. A neutral
  * sans says "this is the thing" and nothing more. The green full stop is the only

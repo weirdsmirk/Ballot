@@ -57,10 +57,11 @@
    * The monospace token is gone, and nothing replaces it.
    *
    * It was `'JetBrains Mono'` plus the platform mono stack, and every one of its
-   * twenty-odd uses was machine data. Those are now Inter with tabular figures —
-   * the property is what was actually doing the work in a monospace, and dropping
-   * the typeface without carrying the property across would have made every
-   * timestamp, row number and receipt hash in the console go ragged.
+   * twenty-odd uses was machine data. Those are now set in the interface face
+   * with tabular figures — the property is what was actually doing the work in a
+   * monospace, and dropping the typeface without carrying the property across
+   * would have made every timestamp, row number and receipt hash in the console
+   * go ragged.
    *
    * Nothing should reintroduce a third face. Two is the number of distinctions
    * this product actually makes: a thing being named, and a thing being said.
@@ -69,8 +70,8 @@
   /*
    * The wordmark, and only the wordmark.
    *
-   * Inter, which is already the body face and already loaded. It is not aliased
-   * to the sans token because the wordmark is set differently from body text —
+   * Google Sans, which is already the body face and already loaded. It is not
+   * aliased to the sans token because the wordmark is set differently from body text —
    * heavier, tighter, larger — and reading `var(--font-wordmark)` in a rule says
    * "this is the lockup" in a way that `var(--font-sans)` does not. If the face
    * ever changes, this is the one line to change.
@@ -239,6 +240,33 @@
   box-sizing: border-box;
 }
 
+/*
+ * The elements the browser styles as code.
+ *
+ * `code`, `pre`, `kbd` and `samp` carry a `font-family: monospace` in the user-agent
+ * stylesheet, and nothing in this product overrode it — so every `<code>` in the
+ * console that no component had explicitly restyled was rendering in the platform's
+ * monospace. It was invisible to a search for the monospace token, because that token
+ * was removed two revisions ago and this never referenced it.
+ *
+ * Machine data is set in the interface face with tabular figures; the `.data`
+ * utility and the handful of rules that wrap a code span do that. This rule is the
+ * floor under all of them, so that a new `<code>` cannot reintroduce a third face by
+ * being added and never styled.
+ *
+ * `font-size: inherit` for the same reason: the UA also sets these a step smaller
+ * than their surrounding text, which is a second way for an unstyled `<code>` to look
+ * different from everything around it. Where a code span should be smaller — a
+ * permission name in a dense feed — a component says so.
+ */
+code,
+pre,
+kbd,
+samp {
+  font-family: var(--font-sans);
+  font-size: inherit;
+}
+
 html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -279,8 +307,8 @@ a { color: inherit; }
  * Machine data, in the interface face.
  *
  * Was `.mono`, and was the only consumer of the monospace token. Renamed because
- * it no longer sets a monospace and a class called `.mono` that renders Inter is a
- * lie the next person will believe.
+ * it no longer sets a monospace, and a class called `.mono` that renders the
+ * interface face is a lie the next person will believe.
  *
  * `font-variant-numeric: tabular-nums` is the load-bearing part. A monospace was
  * never being used here for its letterforms — it was being used because every
@@ -290,8 +318,9 @@ a { color: inherit; }
  * typeface without carrying this property across would have quietly ragged every
  * one of them.
  *
- * Also slightly wider tracking than `-0.01em` wants, because Inter needs its
- * default spacing at 12px where a monospace was carrying the rhythm itself.
+ * Also slightly wider tracking than `-0.01em` wants, because the interface face
+ * needs its default spacing at 12px where a monospace was carrying the rhythm
+ * itself.
  */
 .data {
   font-family: var(--font-sans);
@@ -309,8 +338,8 @@ a { color: inherit; }
    ======================================== */
 
 /* The small uppercase label. It is the system's connective tissue: it names
-   every region, list and field, and it is set in Inter rather than a monospace
-   because it is prose about a thing, not the thing itself. */
+   every region, list and field, and it is set in the interface face rather than
+   a monospace because it is prose about a thing, not the thing itself. */
 .eyebrow {
   display: block;
   font-family: var(--font-sans);
@@ -422,7 +451,7 @@ a { color: inherit; }
 /*
  * The name, in headers.
  *
- * Inter at 22px, weight 500, tracked in tight. It was the display serif, which
+ * Google Sans at 22px, weight 500, tracked in tight. It was the display serif, which
  * is the face this product uses for things being *said* — headlines, results,
  * receipts — so putting the name in it made the mark claim to be an argument
  * rather than a name.
@@ -432,7 +461,7 @@ a { color: inherit; }
  * - Weight. Body copy is 400 at 11–15px, where a light cut stays open. At 22px
  *   the same weight looks like a label; 500 gives the lockup enough presence to
  *   be read as a mark without going bold, which would make it shout.
- * - Tracking. Negative, roughly -0.022em. Inter's default spacing is set for
+ * - Tracking. Negative, roughly -0.022em. The face's default spacing is set for
  *   running text and is loose for six letters standing alone; pulled in, the
  *   word reads as one object rather than six.
  * - Leading. 1.1, so the name does not open a hole in the 62px header bar.
@@ -2554,9 +2583,9 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
 /*
  * The dates and times under an election on the voter portal.
  *
- * Tabular so the hours and minutes line up between rows. The tracking is Inter's
- * default rather than the -0.01em the monospace wanted — that value was undoing
- * spacing a proportional face needs, not adding any.
+ * Tabular so the hours and minutes line up between rows. The tracking is the
+ * face's default rather than the -0.01em the monospace wanted — that value was
+ * undoing spacing a proportional face needs, not adding any.
  */
 .voter-schedule {
   font-size: 12px;
