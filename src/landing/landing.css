@@ -515,8 +515,36 @@
   font-style: normal;
 }
 
+/*
+ * One line on a wide frame, a paragraph on a narrow one.
+ *
+ * It was `54ch`, which is a good measure for a paragraph and the wrong one for this
+ * sentence. 171 characters at 17px set 1278px wide, so a 54ch cap wrapped it to three
+ * lines: 590px of type, 88px of height — the tallest block in the opening by a
+ * distance — sitting directly under a 665px claim on one broad line. It read as a
+ * subtitle, not as a sentence. The copy has since been cut to 98 characters, which
+ * is most of the fix; the rest is the cap below.
+ *
+ * `84ch`, and the number is measured rather than counted. `ch` is the advance of `0`,
+ * so a character count is not a width: the previous 171-character lede set 1278px,
+ * not the ~1050px that count implies, and three intermediate values each looked wide
+ * enough by eye and each wrapped. The only reliable check is to render the line and
+ * walk a Range over the text node counting line boxes.
+ *
+ * 84ch is this copy's width with slack, not the width it used to need. The lede was
+ * rewritten: it is now 98 characters on one line, which is inside the 45-to-75
+ * comfortable measure at the narrow end and over it at the widest — a measure worth
+ * watching but no longer the 171-character outlier that made the cap look like a
+ * mistake. If the copy is rewritten again, remeasure rather than assuming: the
+ * comment above records the old figure so the next person knows what the number was
+ * fitted to.
+ *
+ * `min(100%, …)` because the cap is a ceiling for wide frames, not the width. Below
+ * about 950px the line cannot fit and wraps, and that is not a problem — a paragraph
+ * is the right shape for a narrow frame.
+ */
 .land-open-lede {
-  max-width: 54ch;
+  max-width: min(100%, 84ch);
   font-size: clamp(15px, 1.15vw, 17px);
   line-height: 1.72;
   color: var(--ink-2);

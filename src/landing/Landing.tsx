@@ -55,14 +55,7 @@ import './landing.css'
    Copy
    ======================================== */
 
-/**
- * The opening.
- *
- * The claim and the lede are the same words the front door uses, deliberately. A
- * landing page that says something different from the page you land on when you
- * click through is a landing page that is selling a different product, and the
- * only way to check that claim is to click.
- */
+/* The opening. */
 const OPEN = {
   /*
    * The claim, and nothing above it.
@@ -81,8 +74,23 @@ const OPEN = {
    * and separating it costs nothing.
    */
   claim: 'Make Count',
+  /*
+   * The lede, and why it no longer matches the front door.
+   *
+   * It used to open "Ballot runs the whole election from one machine" — the same
+   * sentence the front door shows, deliberately, so that a reader who clicks through
+   * finds the landing page and the page they land on saying the same thing. That
+   * parity is broken here on purpose: this lede no longer names Ballot, because the
+   * claim directly above it already does, and a line that repeats the wordmark is
+   * spending its one sentence on nothing.
+   *
+   * It is also 98 characters against 171, which is the reason the opening's
+   * measurement cap could come down. The lede is now a comfortable measure rather
+   * than a 171-character line, and the comment on the cap records the old number so
+   * the next person to widen it knows what it was.
+   */
   lede:
-    'Ballot runs the whole election from one machine. Five roles decide who may open the poll, certify the result or only read, and every administrative action is written down.',
+    'Run elections from one place, with controlled roles and a complete record of every action.',
 }
 
 /**
