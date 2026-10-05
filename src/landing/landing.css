@@ -1,0 +1,1469 @@
+/*
+ * ============================================================================
+ *  BALLOT — THE LANDING PAGE
+ * ============================================================================
+ *
+ * A separate file from `index.css`, on purpose. That file is the design system:
+ * tokens, primitives, and the components every product surface shares. This is
+ * one surface, with a job none of them has — it is the only page allowed to be
+ * long, to scroll, and to move on its own.
+ *
+ * It consumes that system rather than restating it. Every colour below is a
+ * `var(--…)` from the tokens; every button, eyebrow and door is a class from
+ * `index.css`. Nothing here redefines what green means. If this page needed its
+ * own green, it would be a different product.
+ *
+ * ---------------------------------------------------------------------------
+ * THE PREMISE
+ * ---------------------------------------------------------------------------
+ *
+ * An election is a record, and the record is the product. So the page is an
+ * argument rather than a feature list, and the motion follows from that:
+ *
+ *   · **The opening is a frame, not a hero.** The photograph owns it, the type
+ *     sits in the lower third where a title card sits, and the only thing that
+ *     happens is light building across a near-black plate. It plays once, on
+ *     load, over about two and a half seconds.
+ *   · **The one scroll-driven sequence is the lifecycle**, because watching an
+ *     election advance is the thing worth watching and cannot be shown in a
+ *     still. Everything else arrives or emphasises; nothing else scrubs.
+ *   · **Nothing loops loudly.** Two things on this page move continuously and
+ *     both are below the threshold of noticing: the plate's drift, and the
+ *     segment in the scroll cue. There is no bobbing, no pulsing, no floating.
+ *   · **Green stays a status light.** It marks what is live, what is reachable,
+ *     and the claim. It never becomes a glow on everything at once.
+ *   · **No decorative data.** Section five's numbers come from the election
+ *     database behind the page. There are no testimonials, no logos, no invented
+ *     adoption figures — on the landing page of a product whose argument is that
+ *     its claims are checkable, an invented metric would be the one thing that
+ *     could sink it.
+ */
+
+/* ========================================
+   The landing page's own tokens
+   ======================================== */
+.land {
+  /*
+   * The measure, and it is deliberately much narrower than the product's
+   * `--page-max` of 1920px. That one has to hold five cards across a laptop
+   * because the console is a tool for reading tables. This page has no tables:
+   * it has arguments in sentences, and a sentence 1800px wide is a sentence
+   * nobody finishes.
+   */
+  --land-max: 1240px;
+  --land-gutter: clamp(20px, 4vw, 64px);
+  /*
+   * The page's easing. Longer and flatter than the interface's `--ease`: a control
+   * answers a pointer, a page is a shot. The front-load is what stops the tail
+   * from dragging — distance is covered early and then the element coasts to a
+   * stop, which is what reads as weight rather than as latency.
+   */
+  --cine: cubic-bezier(0.14, 0.82, 0.26, 1);
+  /* A second, softer curve for things that only fade. Opacity has no mass to
+     carry, so easing it hard just looks like a mistake. */
+  --cine-soft: cubic-bezier(0.4, 0, 0.2, 1);
+
+  position: relative;
+  background: var(--bg);
+  color: var(--ink);
+  overflow-x: clip;
+}
+
+/* ========================================
+   The frame — three layers over everything
+   ======================================== */
+
+/* The vignette.
+ *
+ * Fixed and non-interactive, so the top bar and the edges of the page settle
+ * back rather than competing with the content in the middle. It is the only thing
+ * on this page that touches the far edges, and it does it by taking light out,
+ * never by adding it. */
+.land-vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  background:
+    radial-gradient(128% 96% at 50% 42%, transparent 46%, rgba(8, 10, 9, 0.5) 100%);
+}
+
+/* The register.
+ *
+ * The same measured grid the voter portal is set against — `--grid-line` and
+ * `--grid-size`, the product's own values, not a second set of numbers. It sits
+ * behind everything at a third of its portal weight, because here it is the
+ * texture of a whole page rather than a surface under a running vote.
+ *
+ * Drifted by a script on the page root (see `Landing.tsx`) at a fraction of the
+ * scroll distance. Enough that the grid is measurably not bolted to the viewport,
+ * far too little to be noticed as parallax.
+ */
+.land-register {
+  position: fixed;
+  inset: -14% 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.014) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.014) 1px, transparent 1px);
+  background-size: var(--grid-size) var(--grid-size);
+  -webkit-mask-image: radial-gradient(120% 76% at 50% 8%, #000 0%, transparent 68%);
+  mask-image: radial-gradient(120% 76% at 50% 8%, #000 0%, transparent 68%);
+  will-change: transform;
+}
+
+/* The grain.
+ *
+ * Over the whole page including the opening photograph, which is the only way it
+ * works: grain confined to a picture is a filter on that picture, grain across
+ * everything is a film frame. Static on purpose — an animated grain is a
+ * compositor cost on every frame and, on a page this long, a moving texture
+ * behind text is genuinely unpleasant.
+ *
+ * `overlay` at low opacity so it adds tooth to the mid-tones and leaves the
+ * blacks alone. The SVG is a fractal noise field desaturated to grey: coloured
+ * noise would tint the whole page.
+ */
+.land-grain {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  pointer-events: none;
+  opacity: 0.055;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+
+/* ========================================
+   Chrome
+   ======================================== */
+
+.land-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 22px var(--land-gutter);
+  /* Over the opening photograph, so it needs to survive against a picture. The
+     front door's bar sits on a flat ground and gets to be simple; this one
+     reverses out. */
+  animation: land-bar-in 1100ms var(--cine) 900ms both;
+}
+.land-bar-nav {
+  display: flex;
+  align-items: center;
+  gap: clamp(16px, 2.4vw, 30px);
+}
+.land-bar-nav a {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.62);
+  text-decoration: none;
+  padding-bottom: 2px;
+  border-bottom: 1px solid transparent;
+  transition: color 220ms var(--cine-soft), border-color 220ms var(--cine-soft);
+}
+.land-bar-nav a:hover { color: #fff; border-bottom-color: var(--green); }
+.land-bar-nav .btn-outline {
+  /* The one control in the bar that is a control. Against a photograph it needs
+     a surface of its own or it reads as text. */
+  color: var(--ink);
+  border-color: rgba(255, 255, 255, 0.28);
+  background: rgba(8, 10, 9, 0.3);
+  backdrop-filter: blur(6px);
+}
+.land-bar-nav .btn-outline:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.45); }
+
+.land-skip {
+  position: absolute;
+  left: var(--land-gutter);
+  top: -60px;
+  z-index: 80;
+  padding: 10px 16px;
+  background: var(--card);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  color: var(--ink);
+  font-size: 13px;
+  text-decoration: none;
+  transition: top 180ms var(--cine-soft);
+}
+.land-skip:focus { top: 18px; }
+
+.land-wrap {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: calc(var(--land-max) + var(--land-gutter) * 2);
+  margin: 0 auto;
+  padding-inline: var(--land-gutter);
+}
+
+/* ========================================
+   1 — The cold open
+   ======================================== */
+
+.land-open {
+  position: relative;
+  z-index: 1;
+  /* Pinned to the viewport so the whole opening is one frame with no scroll in
+     it. `100dvh` rather than `100vh` so a collapsing mobile toolbar cannot crop
+     the claim off the bottom. */
+  height: 100vh;
+  height: 100dvh;
+  min-height: 620px;
+  overflow: hidden;
+  display: grid;
+  /* The body takes the space above the cue; the cue is a fixed row. The body
+     aligns to the *end* of that space rather than the start, which is what puts
+     the type in the lower third and leaves the photograph reading above it. */
+  grid-template-rows: 1fr auto;
+  align-items: end;
+}
+
+.land-open-plate {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: #0a0d0b;
+}
+/*
+ * The plate developing.
+ *
+ * Opacity and a 4% push, resolving onto the crop the page is composed for, over
+ * two seconds. Transform and opacity only — a `filter` ramp across a full-bleed
+ * photograph re-rasterises on every frame, and the image is already graded.
+ */
+.land-open-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /*
+   * Held left of centre, and above centre vertically.
+   *
+   * Horizontally: the hand, the ballot and the slot are all in the left two thirds
+   * of the frame and the right third is two people standing. On a wide viewport
+   * the bias moves the hand off the centre line; on a phone `cover` crops the
+   * sides hard, and the bias is what keeps the hand and the slot in frame instead
+   * of leaving a close crop of somebody's leg.
+   *
+   * Vertically, the bias is the part that matters on a phone. `cover` on a 16:9
+   * plate inside a 390×844 frame crops to about a third of the image's height, and
+   * centred that third is a dark torso — the claim sat on top of a black shape and
+   * the photograph was not doing any work at all. Held up, the crop lands on the
+   * hand and the top of the ballot box, which is the subject.
+   */
+  object-position: 38% 30%;
+  animation:
+    land-plate-in 2200ms var(--cine) both,
+    land-plate-drift 58s ease-in-out 2600ms infinite alternate;
+}
+
+/*
+ * The drift.
+ *
+ * The one ambient movement on the page. A photograph that never moves is a
+ * screenshot; this is 2.5% of travel across nearly a minute, which is below the
+ * threshold of being seen and well above the threshold of the frame feeling
+ * dead. It starts after the developing sequence has finished so the two never
+ * overlap and fight.
+ */
+@keyframes land-plate-drift {
+  from { transform: scale(1) translate3d(0, 0, 0); }
+  to { transform: scale(1.045) translate3d(-0.8%, -1.1%, 0); }
+}
+
+/* The light raking across the plate.
+ *
+ * A wide, very soft highlight that crosses the frame once while the type is
+ * still arriving. This is the "light building" beat — the one piece of the
+ * opening that could not be achieved by fading things in, because a fade raises
+ * everything evenly and a rake moves the light across the frame from one side,
+ * which is what makes it read as an image being exposed rather than as a div
+ * being mounted.
+ *
+ * One transform and one opacity, both composited. It ends at zero, so what is
+ * left is the graded photograph and the scrim.
+ */
+.land-open-rake {
+  position: absolute;
+  inset: -20% -60%;
+  background: linear-gradient(
+    102deg,
+    transparent 38%,
+    rgba(255, 255, 255, 0.055) 47%,
+    rgba(214, 240, 224, 0.085) 50%,
+    rgba(255, 255, 255, 0.055) 53%,
+    transparent 62%
+  );
+  animation: land-rake 2900ms var(--cine) 240ms both;
+}
+@keyframes land-rake {
+  from { opacity: 0; transform: translate3d(-38%, 0, 0); }
+  30% { opacity: 1; }
+  to { opacity: 0; transform: translate3d(38%, 0, 0); }
+}
+
+/* The scrim over the plate.
+ *
+ * Four stops, because the type occupies two zones — the eyebrow and claim at the
+ * lower left, the wordmark at the upper left — and the middle of the frame has to
+ * stay open so the photograph is still a photograph. The heaviest wash is at the
+ * bottom and along the left edge, where every word on this page is set.
+ */
+/*
+ * The scrim over the plate.
+ *
+ * Four stops, because the type occupies two zones — the claim in the lower left,
+ * the wordmark in the upper left — and the middle of the frame has to stay open so
+ * the photograph is still a photograph.
+ *
+ * The bottom wash is the heaviest and the left edge carries a wash of its own,
+ * because in this frame the bottom-left is where the ballot box is: the brightest
+ * part of the photograph, and the exact corner the claim is set into. The top wash
+ * exists only to seat the wordmark.
+ */
+.land-open-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(0deg, rgba(8, 10, 9, 0.97) 0%, rgba(8, 10, 9, 0.82) 22%, rgba(8, 10, 9, 0.34) 44%, rgba(8, 10, 9, 0) 64%),
+    linear-gradient(90deg, rgba(8, 10, 9, 0.86) 0%, rgba(8, 10, 9, 0.42) 32%, rgba(8, 10, 9, 0.04) 56%, rgba(8, 10, 9, 0) 74%),
+    linear-gradient(180deg, rgba(8, 10, 9, 0.72) 0%, rgba(8, 10, 9, 0.12) 22%, rgba(8, 10, 9, 0) 40%);
+}
+
+.land-open-body {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: calc(var(--land-max) + var(--land-gutter) * 2);
+  margin: 0 auto;
+  /* `auto` is what does the work: it centres the block when it fits and starts it
+     at the top when it does not, so a short landscape window pushes nothing off
+     the top of the frame the way `justify-content: center` would. */
+  padding: 0 var(--land-gutter) clamp(20px, 3.4vh, 44px);
+}
+
+/*
+ * The claim.
+ *
+ * The largest type in the product by a wide margin, and the only place that is
+ * true: the receipt stamp and the front door's headline are both display-serif,
+ * but they are set to be *read*, and this is set to be *landed on*. The size is
+ * the composition, not decoration — at anything under about 90px the two lines
+ * stop being a title card and become a headline.
+ */
+.land-claim {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  /* Tracking tightened further than anywhere else in the product, because two
+     lines of a display serif standing alone need to read as one object. */
+  letter-spacing: -0.028em;
+  line-height: 0.92;
+  color: var(--ink);
+  /* Tight to the eyebrow above it. The eyebrow's own line box already supplies
+     most of the separation, so a nominal margin here is a hole. */
+  margin-top: clamp(14px, 1.8vh, 22px);
+}
+.land-claim-line {
+  display: block;
+  /* Two lines, so the measure is set by the type rather than by a container —
+     which is why this can be 172px on a wide screen and still not fall apart. */
+  max-width: 14ch;
+  font-size: clamp(50px, 9.6vw, 168px);
+}
+.land-claim-accent {
+  color: var(--green);
+  /* Written on rather than revealed, in the same direction as the claim is
+     asserted: left to right, as a pen would. Longer than anything else in the
+     opening because `--cine` front-loads so hard that a shorter one is over
+     before the eye has committed to it. */
+  animation: land-claim-in 1500ms var(--cine) both;
+}
+@keyframes land-claim-in {
+  from { opacity: 0; clip-path: inset(0 100% 0 0); }
+  to { opacity: 1; clip-path: inset(0 -0.05em 0 0); }
+}
+
+.land-open-lede {
+  max-width: 54ch;
+  font-size: clamp(15px, 1.15vw, 17px);
+  line-height: 1.72;
+  color: var(--ink-2);
+  /* Optical, not nominal. The claim's line box at 0.92 leading leaves very little
+     below its ink, so a nominal margin here reads as a hole rather than as a
+     separation between two blocks. */
+  margin-top: clamp(20px, 2.6vh, 30px);
+  text-wrap: pretty;
+}
+
+.land-open-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: clamp(26px, 3.4vh, 40px);
+}
+
+/* The scroll cue.
+ *
+ * A short rail and a segment that travels it, on a slow loop, fading at both
+ * ends. Deliberately not a bouncing arrow: the arrow is a piece of clip-art that
+ * every page uses and it tells you nothing except that the designer wanted you to
+ * scroll. This is the cue the page's own language already uses — a line crossing
+ * a measured surface — and it is quiet enough to sit in the frame for as long as
+ * the opening is on screen.
+ */
+.land-cue {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 var(--land-gutter) clamp(20px, 3.2vh, 34px);
+  width: 100%;
+  max-width: calc(var(--land-max) + var(--land-gutter) * 2);
+  margin: 0 auto;
+  animation: land-rise 900ms var(--cine) 1500ms both;
+}
+.land-cue-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.42);
+}
+.land-cue-rail {
+  position: relative;
+  width: 54px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.16);
+  overflow: hidden;
+}
+.land-cue-travel {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, var(--green), transparent);
+  animation: land-cue 2800ms var(--cine-soft) 1900ms infinite;
+}
+@keyframes land-cue {
+  0% { transform: translateX(-100%); opacity: 0; }
+  22% { opacity: 1; }
+  72% { opacity: 1; }
+  100% { transform: translateX(100%); opacity: 0; }
+}
+
+/* ========================================
+   The opening's own sequence
+   ========================================
+ *
+ * Timed on load rather than observed, because the opening is above the fold and
+ * has to play whether or not anything has scrolled. `data-open` carries the
+ * position in the sequence and nothing else — the delays live here, so the order
+ * of the opening is readable from this block and from nowhere else.
+ *
+ * These are the only timed delays on the page that are written out longhand; from
+ * section two on, the reveal observer takes over and the order is the DOM's.
+ */
+.land-open-item { animation: land-rise 1000ms var(--cine) both; }
+.land-open [data-open='1'] { animation-delay: 520ms; }
+.land-open [data-open='2'] { animation-delay: 660ms; }
+/* The claim is written on, so it starts where the line above it has finished
+   arriving and takes its own longer run. */
+.land-open [data-open='3'] { animation-delay: 800ms; }
+.land-open [data-open='4'] { animation-delay: 1120ms; }
+.land-open [data-open='5'] { animation-delay: 1300ms; }
+
+@keyframes land-rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes land-plate-in {
+  from { opacity: 0; transform: scale(1.045); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes land-bar-in {
+  from { opacity: 0; transform: translateY(-12px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ========================================
+   Bands — the shared section frame
+   ======================================== */
+
+.land-band {
+  position: relative;
+  z-index: 1;
+  padding-block: clamp(84px, 12vh, 168px);
+}
+
+/* Two of the bands step the ground one notch lighter than the page, so the page
+   has a rhythm rather than being six identical black rectangles: the diagram
+   needs a surface to be a diagram on, and the figures need somewhere to sit that
+   is not the same black as the argument above them. */
+.land-life,
+.land-figures {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.022), rgba(255, 255, 255, 0.008));
+  border-block: 1px solid var(--border-soft);
+}
+/*
+ * The two band grounds, as flat values.
+ *
+ * The bands are gradients, and the lifecycle rail needs a *flat* colour to knock
+ * its connector out behind each node label — a gradient would show as a visible
+ * rectangle. These are the band ends sampled off that gradient: `--land-band` for
+ * the upper half where the rail sits, `--land-band-lo` for the lower half.
+ */
+:root {
+  --land-band: #0c0f0d;
+  --land-band-lo: #0a0d0b;
+}
+
+.land-headline {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(34px, 4.6vw, 68px);
+  letter-spacing: -0.022em;
+  line-height: 1.06;
+  color: var(--ink);
+  margin-top: 18px;
+  text-wrap: balance;
+}
+.land-headline-sm {
+  font-size: clamp(30px, 3.5vw, 50px);
+  max-width: 22ch;
+}
+
+.land-detail {
+  font-size: clamp(15px, 1.15vw, 17px);
+  line-height: 1.74;
+  color: var(--muted);
+  margin-top: 22px;
+  text-wrap: pretty;
+}
+.land-detail-sm { font-size: 14.5px; margin-top: 16px; max-width: 62ch; }
+
+/* The reveal, shared by every section from here on.
+ *
+ * The resting state carries no opacity and no transform. The starting state lives
+ * in the keyframe and is only ever applied by `animation-fill-mode: both` — which
+ * means that if the observer never runs, or a reader has reduced motion on, or
+ * the page is printed, every element is simply *there*. That ordering is the
+ * whole safety property of a reveal: content must never depend on JavaScript
+ * having fired to be visible.
+ */
+[data-reveal] {
+  animation: land-rise 1000ms var(--cine) both;
+  animation-delay: 60ms;
+}
+/* Stagger within a group, by position rather than by class, so a section gains an
+   element without anyone having to renumber anything. */
+[data-reveal]:nth-of-type(2) { animation-delay: 130ms; }
+[data-reveal]:nth-of-type(3) { animation-delay: 200ms; }
+[data-reveal]:nth-of-type(4) { animation-delay: 270ms; }
+[data-reveal]:nth-of-type(5) { animation-delay: 340ms; }
+.land-reveal[data-revealed] { /* the marker the observer sets; nothing to style */ }
+
+/* ========================================
+   2 — Secrecy
+   ======================================== */
+
+/*
+ * An asymmetric two-column split: the claim on the left at the widest measure on
+ * the page, the mechanism on the right at a narrower one. Asymmetric rather than
+ * balanced because the two halves are not equal in weight — one is the argument
+ * and one is the evidence for it — and a 50/50 grid would give them the same
+ * voice. The evidence also sits slightly lower, so the eye reads down the
+ * argument and then across into the thing that backs it.
+ */
+.land-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: clamp(40px, 6vw, 96px);
+  align-items: start;
+}
+.land-split-text { min-width: 0; }
+.land-split-text .land-headline { max-width: 15ch; }
+.land-split-text .land-detail { max-width: 56ch; }
+
+/* The two records.
+ *
+ * Not cards. They are two rows of a register with a rule between them, because
+ * that is what they are: the same artifact in two states. A box around each would
+ * also be wrong in the useful direction — the whole point is that the voter's
+ * copy and the server's copy are two views of one record, and separate cards
+ * would read as two unrelated things.
+ */
+.land-records {
+  margin-top: clamp(8px, 4vh, 46px);
+  padding-top: clamp(20px, 3vh, 32px);
+  border-top: 1px solid var(--border);
+}
+.land-record-rule {
+  height: 1px;
+  background: var(--border-soft);
+  margin-block: 26px;
+}
+.land-record-value {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: clamp(15px, 1.5vw, 19px);
+  letter-spacing: 0.01em;
+  color: var(--ink);
+  margin-top: 14px;
+  /* The receipt code is a fixed-format machine value, so it is set at its own
+     measure and allowed to break nowhere: a receipt that wraps across two lines
+     cannot be read back off the screen or copied off it. */
+  white-space: nowrap;
+}
+/* The digest is a different colour on purpose. It is the part a person cannot use
+   — green is what is live and what a person can act on, and this is the one value
+   in the pair that is deliberately not for them. */
+.land-record-digest { color: var(--muted); }
+.land-record-caption {
+  font-size: 13px;
+  line-height: 1.66;
+  color: var(--muted);
+  margin-top: 12px;
+  max-width: 44ch;
+  text-wrap: pretty;
+}
+
+/* ========================================
+   3 — The lifecycle
+   ======================================== */
+
+/*
+ * The pinned version.
+ *
+ * A tall section with a sticky child: the amount scrolled through the section is
+ * the position in the election. This is the one place on the page where scroll
+ * *is* the interaction rather than a way of moving past something, which is the
+ * only honest reason to take a reader's scroll away from them.
+ *
+ * The height is the budget. At 340vh the reader gets roughly two and a half
+ * viewport heights of travel to cross six states, so each state holds long enough
+ * to be read rather than flashing past. Shorter and the lifecycle becomes a
+ * strobe; longer and the page becomes a chore.
+ */
+.land-life-pinned {
+  /* Padded rather than margined so the sticky child's containing block is this
+     section, which is what makes the progress calculation in `Landing.tsx`
+     agree with what is on screen. */
+  height: 340vh;
+  padding-block: 0;
+  overflow: clip;
+}
+.land-life-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(28px, 4vh, 52px);
+  padding-block: clamp(32px, 5vh, 64px);
+}
+.land-life-head { max-width: 66ch; }
+.land-life-head .land-detail-sm { max-width: 68ch; }
+
+/* The rail.
+ *
+ * Six stops on a horizontal spine with a branch hanging below the third. Built
+ * from a flex row and pseudo-element connectors rather than SVG, so it reflows
+ * with the grid instead of needing a second drawing for every breakpoint, and so
+ * the semantic content stays a list that a screen reader reads in order.
+ *
+ * Each stop is a grid cell that owns its own leading connector, so the connector
+ * and the node it points at cannot come apart at any width.
+ */
+.land-rail {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  align-items: start;
+  position: relative;
+}
+.land-rail-stop {
+  position: relative;
+  /* Room for the action label that sits above the node. */
+  padding-top: 34px;
+  min-width: 0;
+}
+
+/*
+ * The connector from a stop to the next one.
+ *
+ * Each stop is a `1fr` cell, so the cell's own right edge *is* the next stop's
+ * left edge, which is where the next dot sits. That makes this a two-value
+ * declaration: start at this stop's dot, run to the edge of this cell. Anything
+ * that tries to be cleverer — measuring a node width out, extending past the
+ * edge — is a guess about where the next dot is, and got it wrong both ways: too
+ * short and the rail reads as six separate segments, too long and the line runs
+ * through the next node's label.
+ */
+/*
+ * The connector.
+ *
+ * `left: 9px` is where this stop's dot is, so the line starts at the dot and runs
+ * to the right edge of this cell — which is the left edge of the next cell, which
+ * is where the next dot is. Two values, no measuring, and it lands on the next dot
+ * exactly. Anything cleverer is a guess about where that dot is, and both guesses
+ * were wrong: a line stretched to the full cell ran through the next node's label,
+ * and one shortened to clear the label left a visible gap in the rail.
+ *
+ * The line passes *behind* the labels and they knock it out — see the background
+ * on `.land-node-label`. That is the honest way to draw a labelled axis: the rule
+ * is continuous, and each name sits on a small piece of ground.
+ */
+.land-rail-edge {
+  position: absolute;
+  /* Level with the node dot: the label's line box is 12.5 * 1.6 = 20px and the
+     dot is 7px, so the dot's centre is 10px down from the top of the node row. */
+  top: 44px;
+  left: 9px;
+  right: 0;
+  height: 1px;
+  background: var(--border-strong);
+  z-index: 0;
+}
+.land-rail-edge-on { background: var(--green-line); }
+/* The green fills the edge as it is crossed, left to right — the same direction as
+   the claim being written on in the opening, which is what makes the page feel
+   like one idea rather than a sequence of effects. */
+.land-rail-edge::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  transform: scaleX(0);
+  background: var(--green);
+  transition: transform 620ms var(--cine);
+}
+.land-rail-edge-on::after { transform: scaleX(1); }
+.land-rail-action {
+  position: absolute;
+  /* Above the line, not on it. The labels are small uppercase type and a 1px rule
+     straight through the middle of them is unreadable — it was drawn through all
+     four of them before it was moved up here. */
+  bottom: 7px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  color: var(--muted-2);
+  white-space: nowrap;
+  overflow: hidden;
+  /* Present only once the edge is crossed, so the rail never names a transition
+     that has not happened. */
+  opacity: 0;
+  transition: color 400ms var(--cine-soft);
+}
+.land-rail-edge-on .land-rail-action { opacity: 1; color: var(--green-text); }
+
+.land-node {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  /* Above the connector. See the note on `.land-node-label`. */
+  position: relative;
+  z-index: 1;
+}
+.land-node-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex: none;
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  transition: background 420ms var(--cine-soft), border-color 420ms var(--cine-soft), box-shadow 420ms var(--cine-soft);
+}
+/* No ellipsis and no overflow clipping.
+   `text-overflow: ellipsis` was here and silently shortened the last state to
+   "Certifie", which is worse than a tight fit: the diagram's whole job is naming
+   the states, and it named one of them wrong. The label instead sets the node
+   width the connectors subtract, so a state that cannot fit its label is a layout
+   problem to fix in `--rail-node-w` rather than a word to drop. */
+/*
+ * The node label, and the fix for the line running through it.
+ *
+ * `position: relative; z-index: 1` puts the label in front of its own connector.
+ * The connector is a child of this stop and starts at `left: 9px` — which is where
+ * the dot is, and the dot is 7px wide — so the line's first eight pixels sit
+ * under the label's own text. Raising the label above it is the fix; moving the
+ * line is not, because the line has to start at the dot.
+ */
+.land-node-label {
+  position: relative;
+  z-index: 1;
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--muted-2);
+  white-space: nowrap;
+  transition: color 420ms var(--cine-soft);
+  /*
+   * The knockout.
+   *
+   * The connector runs behind this label at the label's own vertical centre, and a
+   * rule struck through a state name makes the diagram unreadable. Raising the
+   * label with `z-index` alone is not enough — the line still visibly starts and
+   * stops either side of the word, which reads as a broken rule.
+   *
+   * So the label carries a small piece of the band's own ground and the rule
+   * passes behind it. Negative margins give the padding back, so the label still
+   * sits exactly where it would without it and the dot-to-label gap of 9px holds.
+   */
+  padding-inline: 7px;
+  margin-inline: -7px;
+  background: var(--land-band);
+}
+.land-node-on .land-node-dot { background: var(--green-line); border-color: var(--green-line); }
+.land-node-on .land-node-label { color: var(--ink-2); }
+/* The current state is the only one that is a light source on this page. */
+.land-node-current .land-node-dot {
+  background: var(--green);
+  border-color: var(--green);
+  box-shadow: var(--green-glow);
+}
+.land-node-current .land-node-label { color: var(--ink); font-weight: 600; }
+
+/* The description of the current state, under its own stop.
+ *
+ * Reserved space rather than inserted space: the rail does not reflow as the
+ * description appears and disappears, which would move every stop after it by the
+ * height of a paragraph seven times during one scroll. */
+.land-node-detail {
+  margin-top: 16px;
+  padding-left: 16px;
+  border-left: 1px solid var(--green-line);
+  font-size: 13px;
+  line-height: 1.66;
+  color: var(--muted);
+  max-width: 30ch;
+  min-height: 4.6em;
+  text-wrap: pretty;
+  animation: land-detail-in 620ms var(--cine) both;
+}
+@keyframes land-detail-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* The branch: `paused` hangs off `open` rather than sitting on the spine, because
+   that is what it is — a suspension the poll can come back from, not a stage it
+   passes through. Lining the seven states up in a row would claim otherwise, and
+   this is the one diagram on the page where the shape is the argument. */
+/*
+ * The branch.
+ *
+ * `paused` hangs below `open` on a stem rather than sitting on the spine beside
+ * the other states. That placement is the argument: a pause is a suspension the
+ * poll returns from, not a stage it passes through, and lining the seven states
+ * up in a row would claim otherwise. This is the one diagram on the page where
+ * the shape is the claim, so it is drawn as the graph and not as a list.
+ */
+.land-rail-branch {
+  position: relative;
+  grid-column: 3;
+  grid-row: 2;
+  padding-top: 40px;
+  min-width: 0;
+}
+/* The stem, from the spine's row down to the branch's node. */
+.land-rail-stem {
+  position: absolute;
+  top: 0;
+  left: 3px;
+  width: 1px;
+  height: 26px;
+  background: var(--border-strong);
+}
+.land-node-branch .land-node-label { color: var(--ink-2); }
+/* Amber, and only here. In this product amber means *waiting* everywhere else, and
+   a paused poll is exactly that: not live, not finished, holding. */
+.land-node-branch .land-node-dot {
+  background: var(--amber-soft);
+  border-color: var(--amber-soft-2);
+}
+.land-rail-branch-action {
+  display: block;
+  margin-top: 10px;
+  padding-left: 16px;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--amber-ink);
+}
+/* The branch's own description.
+ *
+ * Sits under the branch on every layout, because a pause is a state like any
+ * other and the reader is owed the same sentence the spine states get. In the
+ * pinned layout it is narrower than the readout's and deliberately offset to the
+ * left of it, so the branch reads as attached to the graph rather than as a second
+ * readout competing with the first.
+ */
+.land-rail-branch-detail {
+  margin-top: 14px;
+  padding-left: 16px;
+  border-left: 1px solid var(--amber-soft-2);
+  font-size: 12.5px;
+  line-height: 1.62;
+  color: var(--muted);
+  max-width: 30ch;
+  text-wrap: pretty;
+}
+
+/*
+ * The readout.
+ *
+ * Below the rail rather than under the current node, and in its own row with a
+ * reserved height. Two reasons, and both are about the rail not moving: a
+ * description inside a node makes the rail as tall as the tallest description and
+ * drags the branch away from the spine it hangs off, and swapping the text in
+ * place moves every node below it. Here the height is reserved once and the
+ * number in the corner says how far along the reader is.
+ */
+.land-rail-readout {
+  display: grid;
+  /* The counter is a fixed-width column rather than sitting in the flow after the
+     text, so the description's left edge does not move when the count changes
+     width between "1 / 6" and "6 / 6". */
+  grid-template-columns: 84px minmax(0, 1fr);
+  align-items: start;
+  gap: clamp(20px, 2.4vw, 32px);
+  margin-top: clamp(30px, 4vh, 52px);
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+.land-rail-count {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--green-text);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  /* Aligned to the first line of the description it sits beside, not to the top
+     of the row — a monospace label centred against 18px prose reads as floating. */
+  padding-top: 5px;
+}
+.land-rail-of { color: var(--muted-2); }
+.land-rail-detail {
+  font-size: clamp(15px, 1.25vw, 18px);
+  line-height: 1.62;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+
+/* The readout's copy. Reserved so the rail above never reflows as the text
+   changes — four lines is the longest any of the seven descriptions runs. */
+.land-rail-readout .land-rail-detail {
+  /* Sized to one line, not four. The reserved height was 4.4em against
+     descriptions that are one or two lines, which left a large empty well under
+     every state and made the rail look broken rather than reserved. The rule above
+     it does the separating; the height does not need to as well. */
+  min-height: 2.4em;
+  max-width: 62ch;
+  padding-left: 18px;
+  border-left: 1px solid var(--green-line);
+  animation: land-detail-in 620ms var(--cine) both;
+}
+/* The per-state copy inside a stop: unpinned layouts only. */
+.land-rail-detail-static {
+  display: none;
+  margin-top: 14px;
+  padding-left: 16px;
+  border-left: 1px solid var(--border);
+  font-size: 13.5px;
+  line-height: 1.64;
+  color: var(--muted);
+  max-width: 46ch;
+}
+@keyframes land-detail-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Unpinned — a phone, a print, reduced motion — there is no scrub to drive a
+   single readout, so the section becomes an ordinary annotated list and the
+   branch rejoins the sequence. */
+.land-life:not(.land-life-pinned) .land-rail-readout { display: none; }
+.land-life:not(.land-life-pinned) .land-rail-detail-static { display: block; }
+.land-life:not(.land-life-pinned) .land-rail-stop { padding-bottom: 26px; }
+.land-life:not(.land-life-pinned) .land-rail-branch { padding-top: 0; }
+.land-life:not(.land-life-pinned) .land-rail-stem { display: none; }
+/* Unpinned, the branch's description matches the stops' own rather than being the
+   smaller pinned-layout variant, so the list is uniform. */
+.land-life:not(.land-life-pinned) .land-rail-branch-detail {
+  max-width: 46ch;
+  font-size: 13.5px;
+  border-left-color: var(--border);
+}
+
+/* ========================================
+   4 — Coverage
+   ======================================== */
+
+/*
+ * Four columns of small type and no images at all.
+ *
+ * This is the densest section on the page and the plainest, and it earns its
+ * place by changing the pace: two airy argument sections either side of it, with
+ * this one in between at reading size rather than display size. Four cards with
+ * icons in tinted squares would undo that — the whole section is a list of things
+ * the product covers, so it is set as lists, with a rule between columns doing the
+ * grouping that a card border would otherwise do.
+ */
+.land-coverage-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 clamp(24px, 3vw, 48px);
+  margin-top: clamp(40px, 5vh, 64px);
+}
+.land-coverage-cell {
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  min-width: 0;
+}
+.land-coverage-cell .land-detail { margin-bottom: 22px; }
+
+.land-tags {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+/* Pills imply status, selection or filtering. These are a list of nouns, so they
+   are a list: small, hairline, no fill. */
+.land-tags li {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+  padding: 5px 10px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-xs);
+}
+
+/*
+ * The roles band.
+ *
+ * A two-part row: the claim about roles on the left at a readable measure, the
+ * five roles across the rest on one line of rule. Same divider grammar as the
+ * figures below it, so the two dense sections read as the same kind of object.
+ */
+.land-roles-band {
+  display: grid;
+  /* 300px, not 260px. At 260 the roles got about 165px each and "Election
+     Administrator" — the longest name, and the one that most needs reading
+     exactly — wrapped to two lines while the description beside it was already six.
+     The column is sized by the longest name in the list. */
+  grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+  gap: clamp(28px, 3.4vw, 56px);
+  align-items: start;
+  margin-top: clamp(44px, 6vh, 76px);
+  padding-top: 28px;
+  border-top: 1px solid var(--border);
+}
+.land-roles-band-head { min-width: 0; }
+.land-roles-band-head .land-detail { margin-top: 14px; }
+
+.land-roles {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0 clamp(18px, 2vw, 30px);
+  min-width: 0;
+}
+.land-roles li {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding-left: clamp(18px, 2vw, 30px);
+  min-width: 0;
+}
+.land-roles li:first-child { padding-left: 0; }
+/* The dividers between roles, drawn on the left of each but the first — the same
+   rule the figures row uses, so the eye reads both as one device. */
+.land-roles li + li { border-left: 1px solid var(--border-soft); }
+.land-role-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+  letter-spacing: 0.005em;
+  /* No wrapping, for the same reason the lifecycle labels do not wrap: these are
+     the names the server enforces, and a name broken across two lines reads as
+     two roles. The grid column above is sized to fit the longest one. */
+  white-space: nowrap;
+}
+.land-role-detail {
+  font-size: 12px;
+  line-height: 1.62;
+  color: var(--muted-2);
+  text-wrap: pretty;
+}
+
+/* ========================================
+   5 — The real figures
+   ======================================== */
+
+.land-figures-head { max-width: 64ch; }
+
+/*
+ * Figures as a row of rules rather than a row of cards.
+ *
+ * A hairline between each pair of figures and nothing else. Five things measured
+ * against each other are a table with the labels removed, and a table is what a
+ * set of dividers makes; five floating panels would be five separate claims,
+ * which is the opposite of what this row is for.
+ */
+.land-figure-row {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin: clamp(40px, 5vh, 64px) 0 0;
+  border-top: 1px solid var(--border);
+}
+.land-figure {
+  padding: 28px clamp(14px, 1.6vw, 26px) 0;
+  min-width: 0;
+}
+.land-figure:first-child { padding-left: 0; }
+/* The dividers, drawn as borders on the left of every figure but the first. */
+.land-figure + .land-figure { border-left: 1px solid var(--border-soft); }
+
+.land-figure-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+.land-figure-value {
+  font-family: var(--font-serif);
+  /* Tabular figures: these are counts, they will be read against each other, and
+     proportional lining figures make a row of numbers look like a ransom note. */
+  font-variant-numeric: tabular-nums lining-nums;
+  font-size: clamp(32px, 3.4vw, 52px);
+  line-height: 1.06;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin-top: 12px;
+}
+.land-figure-note {
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--muted-2);
+  margin-top: 10px;
+  text-wrap: pretty;
+}
+
+.land-figures-empty {
+  margin-top: clamp(36px, 4vh, 56px);
+  padding: 26px 28px;
+  border: 1px solid var(--border-soft);
+  border-left: 2px solid var(--amber);
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  background: var(--amber-soft);
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--amber-ink);
+  max-width: 62ch;
+}
+
+/* ========================================
+   6 — The close
+   ======================================== */
+
+.land-doors {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 720px;
+  margin-top: clamp(30px, 4vh, 48px);
+}
+/*
+ * The same `entry-way` the front door uses — same component, same hover, same
+ * green. On the landing page it gets a longer settle than the interface's, for
+ * the reason the whole page does: this is a page being read, not a control being
+ * used. Everything else about it is untouched, because a reader who has just
+ * arrived from this page's primary action should meet the identical target.
+ */
+.land-door {
+  transition: border-color 280ms var(--cine), transform 280ms var(--cine), box-shadow 280ms var(--cine);
+}
+.land-door .entry-way-arrow { transition: transform 280ms var(--cine); }
+.land-door:hover .entry-way-arrow { transform: translateX(8px); }
+
+.land-close-foot {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px 48px;
+  flex-wrap: wrap;
+  margin-top: clamp(48px, 7vh, 96px);
+  padding-top: 28px;
+  border-top: 1px solid var(--border-soft);
+}
+.land-close-sub {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 0;
+}
+.land-close-docs {
+  display: flex;
+  align-items: baseline;
+  gap: 26px;
+  flex-wrap: wrap;
+}
+.land-close-docs a {
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  padding-bottom: 2px;
+  transition: color var(--ease), border-color var(--ease);
+}
+.land-close-docs a:hover { color: var(--ink); border-bottom-color: var(--green); }
+
+/* ========================================
+   Responsive
+   ========================================
+ *
+ * Composition, not stacking. Each breakpoint below answers "what has to survive
+ * here", not "what can be hidden to make it fit".
+ */
+@media (max-width: 1180px) {
+  .land-coverage-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap-block: clamp(28px, 4vh, 40px); }
+  /* The roles band loses its two-part split and stacks, because a 300px column
+     for the claim leaves the five roles about 150px each, which is below the
+     measure their names and descriptions need. */
+  .land-roles-band { grid-template-columns: 1fr; }
+  .land-roles { grid-template-columns: repeat(3, minmax(0, 1fr)); gap-block: 24px; }
+  .land-roles li:nth-child(4) { padding-left: 0; border-left: 0; }
+  .land-figure-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap-block: 28px; }
+  /* Reflowed to three columns, the dividers are no longer a continuous rule
+     between neighbours, so each figure starting a row needs no left border. */
+  .land-figure:nth-child(4) { border-left: 0; padding-left: 0; }
+}
+
+/*
+ * The lifecycle goes vertical.
+ *
+ * Breakpoint driven by the diagram, not by the device. The horizontal rail needs
+ * about 1180px before its six columns are wide enough to hold a node *and* its
+ * action label without the labels colliding — at 1024 the columns came out at
+ * 157px and "CLOSE VOTING" ran straight through "CERTIFY". So below that width the
+ * rail is a vertical spine, on a tablet exactly as on a phone, because the content
+ * genuinely does not fit across.
+ *
+ * This is also the unpinning threshold, and it has to match the one in
+ * `Landing.tsx` — the scrub is only enabled when the rail is horizontal, so the
+ * query that decides whether to pin and the one that decides the rail's direction
+ * are the same condition expressed twice. If they disagree, the page either pins a
+ * vertical list or scrubs a rail that is not there.
+ */
+@media (max-width: 1179px) {
+  .land-life-pinned { height: auto; overflow: visible; }
+  .land-life-sticky { position: static; height: auto; padding-block: 0; }
+
+  /*
+   * The rail becomes a vertical spine.
+   *
+   * Same nodes, same branch, same order — the connector rotates from running to the
+   * right of a node to running beneath it, and the action label moves off the end
+   * of the line and onto its own row.
+   *
+   * `display: block` rather than a one-column grid, which is the fix for a bug that
+   * read as a typographic accident and was a layout one: keeping it a grid left the
+   * branch's `grid-column: 3` alive, which generated implicit tracks and sized every
+   * stop to a 26px sliver. Each description then set one word per line, in a column
+   * the width of the connector. A vertical list has no tracks to get wrong.
+   */
+  .land-rail { display: block; }
+  .land-rail-stop,
+  .land-rail-branch {
+    display: block;
+    position: relative;
+    padding-top: 0;
+    padding-bottom: 24px;
+    padding-inline-end: 0;
+    padding-left: 26px;
+    min-width: 0;
+  }
+  .land-rail-edge {
+    top: 20px;
+    bottom: -2px;
+    left: 3px;
+    right: auto;
+    width: 1px;
+    height: auto;
+  }
+  .land-rail-edge::after { transform-origin: center top; transform: scaleY(0); }
+  .land-rail-edge-on::after { transform: scaleY(1); }
+  .land-rail-action {
+    bottom: auto;
+    top: -4px;
+    left: 16px;
+    right: auto;
+    text-align: left;
+  }
+  .land-rail-stem { display: none; }
+  .land-rail-branch-action { padding-left: 0; margin-top: 10px; }
+  /*
+   * The label's knockout is undone here.
+   *
+   * Horizontally the connector no longer passes behind the label, so the ground
+   * patch — which exists only to hide the rule under the text — becomes a visible
+   * rectangle in the wrong place, the label now sitting above the line rather than
+   * on it.
+   */
+  .land-node-label { background: none; padding-inline: 0; margin-inline: 0; }
+  .land-rail-detail-static,
+  .land-rail-branch-detail { max-width: 52ch; }
+}
+
+@media (max-width: 900px) {
+  /*
+   * The lifecycle has already unpinned at 1180 (above). What is left at this width
+   * is the rest of the page going single-column.
+   */
+  .land-split { grid-template-columns: 1fr; gap: clamp(34px, 6vh, 48px); }
+  .land-split-text { max-width: none; }
+  .land-records { margin-top: 0; }
+
+  /* The scroll cue is the first thing to go, and it is the only thing here that
+     can be: it exists to invite a scroll that a touch device has already started. */
+  .land-cue { display: none; }
+
+  .land-close-foot { flex-direction: column; align-items: flex-start; gap: 18px; }
+}
+
+@media (max-width: 700px) {
+  /* The section links in the bar go. The scroll cue is already gone at this
+     width and these are its replacement — except that a bar with five targets on
+     a phone is a menu, and this is not a menu. Sign in is the only destination a
+     reader on a phone has arrived here to reach. */
+  .land-bar-nav a { display: none; }
+  .land-bar { padding-top: 16px; }
+
+  .land-claim-line { max-width: 100%; }
+
+  /*
+   * The opening on a phone.
+   *
+   * The type has to fill the bottom third and the photograph the top, so the
+   * bottom wash is deepened and pulled up and the left wash is dropped entirely:
+   * on a narrow frame the text spans the full width, so a left-to-right gradient
+   * buys nothing and only muddies the left edge of the photograph.
+   *
+   * The scrim is also the reason the top of the plate can be as light as it now
+   * is — the wordmark needs a ground, and on a 16:9 plate cropped to a phone that
+   * ground is the ceiling and the back wall.
+   */
+  .land-open-scrim {
+    background:
+      linear-gradient(0deg, rgba(8, 10, 9, 0.98) 0%, rgba(8, 10, 9, 0.92) 30%, rgba(8, 10, 9, 0.5) 50%, rgba(8, 10, 9, 0.06) 68%, rgba(8, 10, 9, 0) 82%),
+      linear-gradient(180deg, rgba(8, 10, 9, 0.78) 0%, rgba(8, 10, 9, 0.18) 16%, rgba(8, 10, 9, 0) 34%);
+  }
+  .land-claim {
+    /* Held tighter than the desktop 0.92: at 50px on a 390px frame the descender
+       room in "confidence." is what pushes the period below the button above it. */
+    line-height: 0.98;
+  }
+  .land-open-actions { flex-direction: column; align-items: stretch; }
+  .land-open-actions .btn,
+  .land-open-actions button { width: 100%; }
+
+  .land-coverage-grid { grid-template-columns: 1fr; }
+  .land-roles { grid-template-columns: 1fr; gap-block: 20px; }
+  /* Back to one column, so the left-border dividers are right again and the
+     nth-child overrides from 1180 must not still be applying. */
+  .land-roles li { padding-left: 0; border-left: 0; padding-top: 18px; border-top: 1px solid var(--border-soft); }
+  .land-roles li:first-child { border-top: 0; padding-top: 0; }
+
+  .land-figure-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .land-figure { padding-left: 0; border-left: 0; }
+  .land-figure:nth-child(n) { border-left: 0; }
+  .land-figure:nth-child(2n) { border-left: 1px solid var(--border-soft); }
+  .land-figure:nth-child(4) { padding-left: 0; }
+
+  .land-record-value { font-size: 14px; }
+}
+
+@media (max-width: 420px) {
+  .land-figure-row { grid-template-columns: 1fr; gap-block: 24px; }
+  /* One column: a divider between two stacked figures would read as a rule to
+     the left of nothing, so each one takes a top edge instead. */
+  .land-figure { padding-top: 24px; border-top: 1px solid var(--border-soft); }
+  .land-figure:first-child { padding-top: 28px; border-top: 0; }
+  .land-figure:nth-child(2n) { border-left: 0; }
+  .land-open-body { padding-bottom: 24px; }
+}
+
+/* Short viewports. The opening is the problem: at 100dvh with a min-height of
+   620px, a landscape phone has less height than the minimum, so the claim would
+   be pushed out of the frame. The type scales off the viewport *height* here, not
+   its width, which is the only way a landscape phone gets a smaller claim. */
+@media (max-height: 620px) and (orientation: landscape) {
+  .land-open { min-height: 100dvh; }
+  .land-claim-line { font-size: clamp(38px, 7.2vh, 76px); }
+  .land-open-lede { font-size: 14px; max-width: 60ch; }
+  .land-open-actions { margin-top: 18px; }
+}
+
+/* ========================================
+   Reduced motion
+   ========================================
+ *
+ * The treatment is to stop everything and show the finished page, because every
+   animation on this page terminates at its element's own resting value and the
+   resting value is the design. Nothing is hidden by any of it, so nothing has to
+   be unhidden here.
+ *
+ * What survives is deliberate and worth stating: the plate keeps its crop, the
+ * grain keeps its tooth, and the scroll cue keeps its label — because a cue is
+ * information, and the only way to deliver it without the motion is to leave it
+ * sitting there. The register stops drifting, since parallax is motion.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .land-open-image,
+  .land-open-rake,
+  .land-claim-accent,
+  .land-open-item,
+  .land-cue,
+  .land-cue-travel,
+  .land-bar,
+  .land-node-detail,
+  [data-reveal] {
+    animation: none;
+  }
+  .land-rail-edge::after { transition: none; }
+  /* The register is positioned by script for its parallax; without motion there is
+     nothing to drift, so it is put back at the top of the page. */
+  .land-register { transform: none !important; }
+}
+
+/* Printed. A landing page is the one document here anybody might reasonably print,
+   and a print that opens on six blank sections because the observer never ran is
+   worse than no print styles at all. */
+@media print {
+  .land-vignette, .land-grain, .land-register, .land-cue, .land-bar { display: none; }
+  .land-life-pinned { height: auto; }
+  .land-life-sticky { position: static; height: auto; }
+  [data-reveal] { animation: none; }
+}
