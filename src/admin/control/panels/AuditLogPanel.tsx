@@ -153,7 +153,7 @@ export function AuditLogPanel({ elections }: { elections: ElectionSummary[] }) {
       width: '170px',
       render: (event) => (
         <div className="cell-stack">
-          <span className="mono">{formatInstant(event.created_at).slice(5)}</span>
+          <span className="data">{formatInstant(event.created_at).slice(5)}</span>
           <span className="cell-secondary">UTC</span>
         </div>
       ),
@@ -190,7 +190,7 @@ export function AuditLogPanel({ elections }: { elections: ElectionSummary[] }) {
       render: (event) => (
         <div className="cell-stack">
           <span>{event.summary}</span>
-          <span className="cell-secondary mono">{event.resource}</span>
+          <span className="cell-secondary data">{event.resource}</span>
         </div>
       ),
     },
@@ -199,7 +199,7 @@ export function AuditLogPanel({ elections }: { elections: ElectionSummary[] }) {
       header: 'Election',
       secondary: true,
       render: (event) =>
-        event.election_id ? <span className="mono">{event.election_id}</span> : <span className="cell-secondary">platform</span>,
+        event.election_id ? <span className="data">{event.election_id}</span> : <span className="cell-secondary">platform</span>,
     },
     {
       key: 'result',
@@ -215,7 +215,7 @@ export function AuditLogPanel({ elections }: { elections: ElectionSummary[] }) {
       header: 'Request',
       secondary: true,
       render: (event) => (
-        <span className="mono cell-secondary" title="Ties this record to the server log for the same request">
+        <span className="data cell-secondary" title="Ties this record to the server log for the same request">
           {event.request_id || '—'}
         </span>
       ),
@@ -226,7 +226,7 @@ export function AuditLogPanel({ elections }: { elections: ElectionSummary[] }) {
       secondary: true,
       sortable: false,
       value: () => '',
-      render: (event) => <span className="mono cell-secondary">{event.ip ?? '—'}</span>,
+      render: (event) => <span className="data cell-secondary">{event.ip ?? '—'}</span>,
     },
   ]
 

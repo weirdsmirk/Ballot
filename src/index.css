@@ -15,18 +15,29 @@
  *   · Instrument Serif carries every name: page titles, card titles, candidate
  *     names, the figures in a tally, the wordmark. It ships at one weight, so
  *     hierarchy inside it comes from size and colour, never from bold.
- *   · Inter carries every sentence, label and control. It is the interface.
- *   · A monospace is reserved for machine data — receipt codes, digests,
- *     one-time codes, command names. The moment text is prose it is Inter.
+ *   · Inter carries everything else: every sentence, label, control and name.
+ *     It is the interface.
+ *   · Machine data — receipt codes, digests, one-time codes, timestamps — is set
+ *     in Inter too, and distinguished by *tabular figures* rather than by a
+ *     different typeface. That is not a downgrade: a monospace is the usual way
+ *     to stop a column of digits from going ragged, but it is not the only way,
+ *     and `font-variant-numeric: tabular-nums` does that job in the face that is
+ *     already loaded, without putting a second alphabet on the page. The `.data`
+ *     utility sets it.
  *   · Green is the only action colour. Green means healthy, amber means waiting
  *     and red means refused. Those three never take a button.
  *   · Labels are small, uppercase and letterspaced. They name every region,
  *     list and field, and they are what holds the layout together.
  *   · The voter portal carries a faint measured grid. The console does not: an
  *     operator reading a log should not be reading it through a texture.
+ *
+ * Two typefaces, both already used for something else. The three that were here —
+ * serif, sans, monospace — were three ways of saying "this is a name", "this is a
+ * sentence" and "this is data", and only the first two turned out to be
+ * distinctions the product needed.
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;450;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;450;500;600;700&display=swap');
 @import "tailwindcss";
 
 /* ========================================
@@ -36,7 +47,18 @@
   /* Type */
   --font-serif: 'Instrument Serif', 'Iowan Old Style', 'Times New Roman', Georgia, serif;
   --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  /*
+   * The monospace token is gone, and nothing replaces it.
+   *
+   * It was `'JetBrains Mono'` plus the platform mono stack, and every one of its
+   * twenty-odd uses was machine data. Those are now Inter with tabular figures —
+   * the property is what was actually doing the work in a monospace, and dropping
+   * the typeface without carrying the property across would have made every
+   * timestamp, row number and receipt hash in the console go ragged.
+   *
+   * Nothing should reintroduce a third face. Two is the number of distinctions
+   * this product actually makes: a thing being named, and a thing being said.
+   */
 
   /*
    * The wordmark, and only the wordmark.
@@ -226,7 +248,30 @@ a { color: inherit; }
   border-radius: 3px;
 }
 
-.mono { font-family: var(--font-mono); font-size: 12px; letter-spacing: -0.01em; }
+/*
+ * Machine data, in the interface face.
+ *
+ * Was `.mono`, and was the only consumer of the monospace token. Renamed because
+ * it no longer sets a monospace and a class called `.mono` that renders Inter is a
+ * lie the next person will believe.
+ *
+ * `font-variant-numeric: tabular-nums` is the load-bearing part. A monospace was
+ * never being used here for its letterforms — it was being used because every
+ * glyph is the same width, so a column of timestamps, row numbers, digests and IP
+ * addresses lines up. That is exactly what tabular figures do, and the audit log,
+ * the security log and the backups table are all columns of one thing. Dropping the
+ * typeface without carrying this property across would have quietly ragged every
+ * one of them.
+ *
+ * Also slightly wider tracking than `-0.01em` wants, because Inter needs its
+ * default spacing at 12px where a monospace was carrying the rhythm itself.
+ */
+.data {
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  letter-spacing: 0.002em;
+}
 .sr-only, .sr-only-focusable:not(:focus) {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
@@ -263,8 +308,6 @@ a { color: inherit; }
   line-height: 1.3;
   color: var(--muted-2);
 }
-.mono-key { color: var(--muted); }
-
 /* Display serif. One weight, so every level below differs by size and colour. */
 .page-title {
   font-family: var(--font-serif);
@@ -294,8 +337,17 @@ a { color: inherit; }
   line-height: 1.6;
 }
 .muted { color: var(--muted); }
-.mono-key {
-  font-family: var(--font-mono);
+/*
+ * The quieter sibling of `.data`, for machine data that is a label rather than a
+ * value — an election's identifier beside its title, mostly.
+ *
+ * This was declared twice: a one-line `color` rule at the top of this section and
+ * the full rule below it. The second won, so the first did nothing for as long as
+ * it was there. One rule now.
+ */
+.data-key {
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
   font-size: 11px;
   letter-spacing: 0.01em;
   color: var(--muted);
@@ -1599,7 +1651,7 @@ a { color: inherit; }
 }
 
 .code-block {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 12px;
   background: var(--bg-sunken);
   color: var(--green-text);
@@ -1674,7 +1726,7 @@ a { color: inherit; }
   width: 100%;
   height: 58px;
   text-align: center;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 20px;
   font-weight: 400;
   letter-spacing: 0.62em;
@@ -1693,7 +1745,11 @@ a { color: inherit; }
   width: 52px;
   height: 56px;
   text-align: center;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
+  /* One digit per box, so alignment is not the issue here — but the code is read
+     left to right as a single number before it is typed, and tabular keeps that
+     number's rhythm as the boxes fill. */
+  font-variant-numeric: tabular-nums;
   font-size: 18px;
   font-weight: 400;
   color: var(--ink);
@@ -1722,7 +1778,7 @@ a { color: inherit; }
    the text, and `gap` is what set the left inset on the boxed variant. The
    padding now does that job on its own. */
 .demo-note code {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 12px;
   font-weight: 500;
   background: rgba(227, 181, 81, 0.14);
@@ -1747,7 +1803,7 @@ a { color: inherit; }
 .alert li { margin-bottom: 4px; }
 .alert a, .alert .link-button { color: inherit; font-weight: 600; }
 .alert code {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 11.5px;
   background: rgba(255, 255, 255, 0.07);
   padding: 1px 5px;
@@ -1833,7 +1889,7 @@ a { color: inherit; }
 .countdown { display: inline-flex; align-items: baseline; gap: 6px; font-variant-numeric: tabular-nums; }
 .countdown-prefix { color: var(--muted); font-size: 12px; }
 .countdown-value {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-weight: 400;
   font-size: 12px;
   color: var(--ink);
@@ -2083,7 +2139,19 @@ a { color: inherit; }
 .data-table tbody tr:hover { background: rgba(255, 255, 255, 0.022); }
 .data-table-dense th { padding: 9px 12px; font-size: 9.5px; }
 .data-table-dense td { padding: 9px 12px; font-size: 12.5px; }
-.data-table .col-pos { width: 44px; color: var(--muted-2); font-family: var(--font-mono); }
+/*
+ * The row-number column, in every console table.
+ *
+ * Tabular, because this is a column of numbers that run from one digit to three
+ * and the monospace it lost is exactly what kept them right-aligned against each
+ * other. Proportional digits in a 44px column is a ragged left edge on every row.
+ */
+.data-table .col-pos {
+  width: 44px;
+  color: var(--muted-2);
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+}
 .data-table .col-num { text-align: right; font-variant-numeric: tabular-nums; width: 78px; }
 .data-table .col-check { width: 38px; }
 .data-table .col-actions { text-align: right; white-space: nowrap; }
@@ -2456,7 +2524,20 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
 }
 .voter-state-headline { font-weight: 550; font-size: 13.5px; color: var(--ink-2); }
 .voter-state-detail { font-size: 13px; color: var(--muted); margin-top: 10px; line-height: 1.6; }
-.voter-schedule { font-size: 12px; color: var(--muted); margin-top: 6px; font-family: var(--font-mono); letter-spacing: -0.01em; }
+/*
+ * The dates and times under an election on the voter portal.
+ *
+ * Tabular so the hours and minutes line up between rows. The tracking is Inter's
+ * default rather than the -0.01em the monospace wanted — that value was undoing
+ * spacing a proportional face needs, not adding any.
+ */
+.voter-schedule {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 6px;
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+}
 .voter-secondary { margin-top: 24px; text-align: center; }
 .voter-results { display: flex; flex-direction: column; gap: 18px; }
 
@@ -2555,7 +2636,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
 .candidate-photo { width: 52px; height: 52px; border-radius: var(--r-sm); object-fit: cover; flex: none; border: 1px solid var(--border); }
 .candidate-symbol {
   display: inline-block;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 10px;
   font-weight: 400;
   color: var(--muted);
@@ -2620,7 +2701,13 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   margin-bottom: 10px;
 }
 .receipt-hash {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
+  /* A hex digest is the densest run of machine data in the product and the one a
+     voter is most likely to read aloud to somebody. Tabular keeps the hex digits
+     on a fixed pitch so a misread character stands out; in a proportional face a
+     wrong letter can look right because its neighbour happened to be the same
+     width. */
+  font-variant-numeric: tabular-nums;
   font-size: 17px;
   font-weight: 500;
   letter-spacing: 0.04em;
@@ -2659,7 +2746,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
 }
 .receipt-note p { font-size: 12.5px; color: var(--muted); line-height: 1.65; }
 .receipt-note code {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 11px;
   color: var(--ink-2);
   background: rgba(255, 255, 255, 0.06);
@@ -3385,7 +3472,10 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
 .activity-summary { font-size: 13.5px; font-weight: 600; color: var(--ink); line-height: 1.45; }
 .activity-meta { display: flex; gap: 9px; align-items: center; flex-wrap: wrap; margin-top: 5px; font-size: 12px; color: var(--muted); }
 .activity-meta code {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
+  /* Instant stamps, stacked down a feed. Tabular so the seconds column reads
+     straight. */
+  font-variant-numeric: tabular-nums;
   font-size: 10.5px;
   color: var(--ink-2);
   background: rgba(255, 255, 255, 0.06);
@@ -3465,7 +3555,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   background: var(--bg-sunken);
   border: 1px solid var(--border-soft);
   border-radius: var(--r-sm);
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   color: var(--ink-2);
   overflow-x: auto;
 }
@@ -3499,7 +3589,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
 }
 .elevation-reason-text { font-size: 13.5px; line-height: 1.6; color: var(--ink-2); }
 .elevation-reason-meta { font-size: 11.5px; color: var(--muted); margin-top: 7px; }
-.elevation-reason-meta code { font-family: var(--font-mono); font-size: 10.5px; }
+.elevation-reason-meta code { font-family: var(--font-sans); font-size: 10.5px; }
 
 /* ========================================
    Election workspace
@@ -3875,7 +3965,11 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
 .audit-summary { font-size: 13px; color: var(--muted); margin: 4px 0 7px; line-height: 1.6; }
 .audit-meta { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-size: 11.5px; color: var(--muted-2); }
 .audit-transition {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
+  /* Timestamps and identifiers in a long, dense column — the audit trail is the
+     one screen an operator reads end to end looking for a pattern, and patterns
+     need the numbers to line up. */
+  font-variant-numeric: tabular-nums;
   font-size: 10.5px;
   color: var(--ink-2);
   background: rgba(255, 255, 255, 0.06);

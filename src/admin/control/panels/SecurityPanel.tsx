@@ -400,7 +400,7 @@ const eventColumns: Column<SecurityEvent>[] = [
       width: '170px',
       render: (event) => (
         <div className="cell-stack">
-          <span className="mono">{formatInstant(event.created_at).slice(5)}</span>
+          <span className="data">{formatInstant(event.created_at).slice(5)}</span>
           <span className="cell-secondary">{formatAge(event.created_at)}</span>
         </div>
       ),
@@ -472,7 +472,7 @@ const sessionColumns: Column<AdminSessionSummary>[] = [
       header: 'Started',
       render: (session) => (
         <div className="cell-stack">
-          <span className="mono">{formatInstant(session.created_at).slice(5)}</span>
+          <span className="data">{formatInstant(session.created_at).slice(5)}</span>
           <span className="cell-secondary">{formatAge(session.created_at)}</span>
         </div>
       ),
@@ -493,7 +493,7 @@ const sessionColumns: Column<AdminSessionSummary>[] = [
           <span className="pill pill-draft">password only</span>
         ),
     },
-    { key: 'ip', header: 'Source', secondary: true, render: (session) => <span className="mono cell-secondary">{session.ip ?? '—'}</span> },
+    { key: 'ip', header: 'Source', secondary: true, render: (session) => <span className="data cell-secondary">{session.ip ?? '—'}</span> },
     {
       key: 'state',
       header: 'State',
@@ -733,7 +733,7 @@ function AccountsCard({
               {admin.display_name}
               {admin.id === adminId && <span className="pill pill-inline">you</span>}
             </span>
-            <span className="cell-secondary mono">{admin.username}</span>
+            <span className="cell-secondary data">{admin.username}</span>
           </div>
         ),
       },

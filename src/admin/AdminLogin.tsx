@@ -285,7 +285,7 @@ export function AdminLogin({
                 <Field label="Verification code" htmlFor="admin-code">
                   <input
                     id="admin-code"
-                    className="mono"
+                    className="data"
                     value={code}
                     onChange={(event) => setCode(event.target.value)}
                     autoComplete="one-time-code"

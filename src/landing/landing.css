@@ -745,7 +745,7 @@
 }
 .land-record-value {
   display: block;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: clamp(15px, 1.5vw, 19px);
   letter-spacing: 0.01em;
   color: var(--ink);
@@ -852,7 +852,7 @@
    the only number on the page that changes as you read, and it belongs to the same
    system as the figures further down. */
 .land-life-step {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 13px;
   letter-spacing: 0.1em;
   color: var(--green-text);
@@ -1106,7 +1106,7 @@
   right: 0;
   bottom: 14px;
   text-align: center;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 10.5px;
   font-weight: 500;
   letter-spacing: 0.11em;
@@ -1257,7 +1257,7 @@
   left: calc(var(--life-spine-x) * 2 + var(--life-dot) + 16px);
   top: 50%;
   transform: translateY(-50%);
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 10px;
   font-weight: 500;
   letter-spacing: 0.1em;

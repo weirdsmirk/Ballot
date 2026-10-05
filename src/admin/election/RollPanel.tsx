@@ -216,7 +216,7 @@ export function RollPanel({
                       />
                     </td>
                   )}
-                  <td className="mono">{voter.voter_id}</td>
+                  <td className="data">{voter.voter_id}</td>
                   <td>
                     {voter.full_name || (
                       <span className="cell-secondary" title="Requires the voter.view_pii permission">
@@ -282,7 +282,7 @@ export function RollPanel({
           </p>
           <pre className="code-block">{TEMPLATE}</pre>
           <Field label="CSV" htmlFor="r-csv">
-            <textarea id="r-csv" rows={10} value={bulk} onChange={(event) => setBulk(event.target.value)} className="mono" />
+            <textarea id="r-csv" rows={10} value={bulk} onChange={(event) => setBulk(event.target.value)} className="data" />
           </Field>
         </Modal>
       )}

@@ -102,7 +102,7 @@ export function ConfirmDialog({
           </label>
           <input
             id="confirm-typed"
-            className="mono"
+            className="data"
             autoComplete="off"
             spellCheck={false}
             value={typed}

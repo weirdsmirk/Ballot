@@ -171,7 +171,7 @@ export function ElectionWorkspace({
             <Icon name="flag" />
           </span>
           <StatusBadge status={election.status} effective={election.effective_status} />
-          <span className="mono-key">{election.id}</span>
+          <span className="data-key">{election.id}</span>
         </div>
 
         <div className="workspace-title-row">

@@ -138,7 +138,7 @@ export function RollImport({
         <textarea
           id="roll-csv"
           rows={10}
-          className="mono"
+          className="data"
           value={text}
           spellCheck={false}
           onChange={(event) => setText(event.target.value)}

@@ -250,7 +250,7 @@ export function SettingsPanel({ role, session, onChanged }: {
                 <Field label="Authenticator code" htmlFor="mfa-disable-code">
                   <input
                     id="mfa-disable-code"
-                    className="mono"
+                    className="data"
                     value={mfaCode}
                     onChange={(event) => setMfaCode(event.target.value)}
                     placeholder="000000"
@@ -275,7 +275,7 @@ export function SettingsPanel({ role, session, onChanged }: {
                     <label htmlFor="mfa-disable-code2">Current code</label>
                     <input
                       id="mfa-disable-code2"
-                      className="mono"
+                      className="data"
                       value={mfaCode}
                       onChange={(event) => setMfaCode(event.target.value)}
                       placeholder="000000"
@@ -510,7 +510,7 @@ function MfaEnrolment({
       <Field label="Code from your authenticator" htmlFor="mfa-code">
         <input
           id="mfa-code"
-          className="mono"
+          className="data"
           value={code}
           onChange={(event) => onCode(event.target.value)}
           placeholder="000000"

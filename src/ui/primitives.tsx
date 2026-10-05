@@ -15,7 +15,13 @@ import { Icon, type IconName } from './Icon'
 
 /* ------------------------------------------------------------- structure --- */
 
-/** The small uppercase monospace label that names a region, list or field. */
+/**
+ * The small uppercase label that names a region, list or field.
+ *
+ * It says "monospace" in its doc comment, which it did until the monospace went.
+ * It has always been the sans face — the tracking and the case were doing the
+ * work, and the size is what makes it read as a label rather than as text.
+ */
 export function Eyebrow({
   children,
   tone = 'muted',

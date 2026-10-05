@@ -112,7 +112,7 @@ export function VotersPanel({
         key: 'voter_id',
         header: idLabel,
         width: '16%',
-        render: (voter) => <span className="mono">{voter.voter_id}</span>,
+        render: (voter) => <span className="data">{voter.voter_id}</span>,
       },
       {
         key: 'full_name',

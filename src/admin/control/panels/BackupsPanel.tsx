@@ -108,7 +108,7 @@ export function BackupsPanel({ role }: { role: AdminRole }) {
       width: '190px',
       render: (backup) => (
         <div className="cell-stack">
-          <span className="mono">{formatInstant(backup.created_at).slice(5)}</span>
+          <span className="data">{formatInstant(backup.created_at).slice(5)}</span>
           <span className="cell-secondary">{formatAge(backup.created_at)}</span>
         </div>
       ),
@@ -119,7 +119,7 @@ export function BackupsPanel({ role }: { role: AdminRole }) {
       render: (backup) => (
         <div className="cell-stack">
           <span className="cell-primary">{backup.label}</span>
-          <span className="cell-secondary mono">{backup.filename}</span>
+          <span className="cell-secondary data">{backup.filename}</span>
         </div>
       ),
     },
