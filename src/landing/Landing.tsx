@@ -68,24 +68,19 @@ const OPEN = {
    * The claim, and nothing above it.
    *
    * There used to be an "Election workspace" eyebrow here. It went because the claim
-   * is two lines of display type at up to 158px with a photograph behind it, and an
-   * eyebrow above it is a third horizontal element competing with the only two that
-   * matter — and because the photograph already says what this is. A ballot box with
-   * a hand above it is the product's subject, not its caption.
+   * is display type at up to 158px with a photograph behind it, and an eyebrow above
+   * it is a third horizontal element competing with the only two that matter — and
+   * because the photograph already says what this is. A ballot box with a hand above
+   * it is the product's subject, not its caption.
    *
-   * Two words now, and they break across the two lines rather than sitting on one.
+   * One string, not two. It was split across a line break for two revisions, which
+   * put the verb over the noun and gave a two-word headline the width of a
+   * sixteen-word sentence. It reads as one line now, which is how it is written.
    *
-   * Set as a single line at this size, "Make Count." is about 620px of type on a
-   * 2000px plate — a headline with a great deal of empty frame around it, which is
-   * what a phrase this short does to a hero built for a sixteen-word sentence. The
-   * line break puts the verb over the noun, which is also the only reading of the
-   * phrase that sounds like a sentence rather than two nouns side by side, and it
-   * returns the claim to roughly the width it held before.
-   *
-   * The second line carries the full stop, set in its own span. A period is
-   * punctuation and the line is a title, and it costs nothing to separate.
+   * The full stop is a separate span. A period is punctuation and this is a title,
+   * and separating it costs nothing.
    */
-  claim: ['Make', 'Count'],
+  claim: 'Make Count',
   lede:
     'Ballot runs the whole election from one machine. Five roles decide who may open the poll, certify the result or only read, and every administrative action is written down.',
 }
@@ -445,29 +440,20 @@ export function Landing() {
 
           <div className="land-open-body">
             <h1 className="land-claim">
-              <span className="land-claim-line land-open-item" data-open="1">{OPEN.claim[0]}</span>
               {/*
-                No `land-open-item` on the accent. It arrives by being written on
-                rather than by rising, and the shared arrival rule was silently
-                winning on source order — the accent did a plain fade-up for as long
-                as that class was on it. It is excluded in the stylesheet too, so
-                the two cannot disagree again.
-              */}
-              {/*
-                The accent line: white, upright, and the full stop in its own span.
+                One line, and the accent line is gone.
 
-                It was green, and the colour was doing the emphasis; then italic
-                white, and the italic was doing it. Neither does now. The second
-                line is the same weight and the same colour as the first and is
-                distinguished by being the second — which leaves the green meaning
-                exactly one thing on this page, and that thing is the button.
+                It was a second `.land-claim-line` with its own colour, its own italic
+                and its own reveal step, which is three rules and a stagger buying a
+                distinction between two halves of the same sentence. With the phrase
+                on one line there is no second line to distinguish from.
               */}
-              <span className="land-claim-line land-claim-accent" data-open="2">
-                {OPEN.claim[1]}
+              <span className="land-claim-line land-open-item" data-open="1">
+                {OPEN.claim}
                 <span className="land-claim-stop">.</span>
               </span>
             </h1>
-            <p className="land-open-lede land-open-item" data-open="3">{OPEN.lede}</p>
+            <p className="land-open-lede land-open-item" data-open="2">{OPEN.lede}</p>
             {/*
               One button.
 
@@ -481,7 +467,7 @@ export function Landing() {
               of doors at the foot of the page. Nothing is lost, and the opening now
               has exactly one thing to do.
             */}
-            <div className="land-open-actions land-open-item" data-open="4">
+            <div className="land-open-actions land-open-item" data-open="3">
               <button type="button" className="btn-primary btn-lg" onClick={() => go('#/enter')}>
                 Enter the workspace
               </button>

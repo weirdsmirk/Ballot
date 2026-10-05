@@ -240,11 +240,28 @@
   min-height: 620px;
   overflow: hidden;
   display: grid;
-  /* The body takes the space above the cue; the cue is a fixed row. The body
-     aligns to the *end* of that space rather than the start, which is what puts
-     the type in the lower third and leaves the photograph reading above it. */
+  /* The body takes the space above the cue; the cue is a fixed row. The body is
+     centred in that space — see the note on `align-items` below. */
   grid-template-rows: 1fr auto;
-  align-items: end;
+  /* Centred, not `end`.
+   *
+   * It was `end`, which put the claim's optical centre about 150px below the middle
+   * of a 1200px frame — 597px of photograph above the type and nothing below it. That
+   * is a deliberate composition for a claim with a lede and a button under it: the
+   * photograph gets the upper two thirds and the type sits on the ground.
+   *
+   * It stopped being that composition when the claim went from two lines to one. The
+   * two-line claim was 552px tall in a 1200px frame, so anchoring it to the bottom
+   * put it in the lower third. The one-line claim is 400px, and bottom-anchored it
+   * now floats in the middle of an empty lower half — the photograph and the type
+   * were no longer arranged against each other, because the type had shrunk out of
+   * the arrangement.
+   *
+   * `center` puts the claim's optical centre on the frame's. Measured at 2000x1200:
+   * the stack (claim top to cue) centred lands at 600 against a viewport centre of
+   * 600, rather than 899.
+   */
+  align-items: center;
 }
 
 .land-open-plate {
@@ -381,10 +398,9 @@
  * a voter is meant to sit with, and the one thing that should be largest was the
  * one thing wearing the smaller face.
  *
- * Consequence, and it is a real one: the accent line was italic for two
- * revisions — a deliberate request, set in the serif's own drawn italic — and the
- * reference has no italic anywhere. Matching the reference drops it. If the italic
- * is wanted back, `.land-claim-accent` is the one rule to change.
+ * It is one line, "Make Count." Eleven characters against the thirty-one it had
+ * across two lines, which is why the frame is 18ch and not fitted to the copy, and
+ * why the opening is centred rather than bottom-anchored.
  */
 .land-claim {
   font-family: var(--font-sans);
@@ -406,16 +422,18 @@
    * The cap is on the *claim*, not on each line.
    *
    * It was 14ch per line, which meant each line was its own measure and the two
-   * were centred independently — so "Run elections" and "with confidence." shared
-   * a centre and nothing else, and the block read as two separate words rather
-   * than as a title. One cap on the whole claim gives both lines a common width,
-   * and `margin-inline: auto` centres it.
+   * were centred independently — so the claim shared a centre between its lines and
+   * nothing else, and the block read as two separate words rather than as a title.
+   * One cap on the whole claim gives the block a single measure, and
+   * `margin-inline: auto` centres it.
    *
-   * 20ch, and the number is load-bearing on two sides. Too narrow and the claim
-   * wraps to four lines instead of two, which is a paragraph; too wide and it runs
-   * the full width of the screen with no margin, which is not a title card. "with
-   * confidence." is sixteen characters, so 20ch leaves a little slack for it at
-   * 158px without letting "Run elections" break.
+   * 18ch, which is no longer load-bearing the way it was: at 158px, "Make Count." is
+   * eleven characters and about 830px, so the cap sits well clear of it on a desktop
+   * and does nothing at all. It is here for the narrow end — 18ch at the 46px floor
+   * is about 470px, so on a viewport narrower than that the claim wraps rather than
+   * overflowing — and it is a ceiling, not a target. Do not tighten it toward the
+   * measured width of the current copy: the cap is what keeps the next, longer
+   * headline from running edge to edge.
    */
   /*
    * The size lives here, not on the lines.
@@ -431,47 +449,44 @@
    * lines inherit.
    */
   font-size: clamp(46px, 8vw, 158px);
-  /* 18ch at 158px is about 1420px, and "with confidence." needs 1242. Enough slack
-     for the accent's own tracking and for a viewport where the clamp lands low,
-     without letting the claim reach the edges of the screen. */
+  /*
+   * The cap is a safety rail on a narrow viewport, not a fit to the current copy.
+   *
+   * It has done real work before. 14ch per line meant each line was its own measure
+   * and the claim shared nothing between them; then a `20ch` cap resolved against the
+   * inherited 14px body size rather than against the type it was measuring, which
+   * came out at 129px of width on a 158px headline and wrapped the claim to four
+   * lines inside a 130px box. Nothing in that is visible in a stylesheet — `ch` is an
+   * ordinary unit — and it only shows by measuring the rendered box against what the
+   * line needs.
+   */
   max-width: 18ch;
   margin-inline: auto;
 }
-.land-claim-line {
-  display: block;
-  /*
-   * 8vw, down from 9.6vw.
-   *
-   * At 9.6 the claim ran to 1920px on a 2000px display — the whole width of the
-   * screen, with the lede and the button hung off it at the left and the
-   * photograph reduced to a margin.
-   */
-  font-size: inherit;
-}
-
 /*
- * The accent line: white, upright.
+ * One line, so this is the whole claim.
  *
- * It was green, and then italic white. Both were carrying the emphasis and now
- * neither does — it is the same colour as the line above it and is distinguished
- * only by being the second line. That is the reference exactly: a title card whose
- * two lines are the same thing.
- *
- * The italic was asked for two revisions ago, in the serif's own drawn cut, and
- * matching the reference dropped it. It is one declaration away — `font-style:
- * italic` here and on `.land-claim-stop`. Google Sans ships a real italic, so it
- * would not be a synthesised slant.
+ * It is a block with `font-size: inherit` rather than the `display: block` it needed
+ * when there were two of them, because the size is declared on `.land-claim` and
+ * `ch` on the cap above has to resolve against the type it is measuring. Keeping the
+ * element means the reveal stagger has something to hang its delay off, and it means
+ * the next headline that wants two lines is a new span rather than a restructure.
  */
-.land-claim-accent {
-  color: var(--ink);
+.land-claim-line {
+  font-size: inherit;
 }
 
 /*
  * The full stop, as its own span.
  *
- * It was separate because an italic period leans away from the word it belongs to.
- * It stays separate because a period is punctuation and the line is a title, and it
- * costs nothing.
+ * It was separate to keep an italic period from leaning away from the word it closed.
+ * The italic is gone but the span stays, because a period is punctuation and this is
+ * a title, and separating it costs nothing.
+ *
+ * If the italic is ever wanted back — it was asked for, in the serif's own drawn cut,
+ * and the reference had none — `font-style: italic` here and on `.land-claim-line`
+ * is all it takes. Google Sans ships a real italic, so it would not be a synthesised
+ * slant.
  */
 .land-claim-stop {
   font-style: normal;
@@ -560,16 +575,17 @@
 /*
  * One arrival, shared by every element in the opening.
  *
- * The accent used to be excluded from this rule with `:not()`, because it had its
- * own animation and the two were single class selectors competing on source order.
- * It has none now, so the exclusion went with it — one rule, one keyframe, one
- * duration, and nothing that can silently lose a specificity fight.
+ * One rule, one keyframe, one duration, and nothing that can silently lose a
+ * specificity fight. The claim used to be two elements — a line and an accent line —
+ * and the accent had to be excluded here with `:not()`, because it had an animation
+ * of its own and the two were single class selectors competing on source order. That
+ * failure was real: the accent did a plain fade-up for as long as the class was on
+ * it. The claim is one line now, so there is one element and nothing to exclude.
  */
 .land-open-item { animation: land-rise 900ms var(--cine) both; }
 .land-open [data-open='1'] { animation-delay: 480ms; }
-.land-open [data-open='2'] { animation-delay: 600ms; }
-.land-open [data-open='3'] { animation-delay: 880ms; }
-.land-open [data-open='4'] { animation-delay: 1020ms; }
+.land-open [data-open='2'] { animation-delay: 820ms; }
+.land-open [data-open='3'] { animation-delay: 1020ms; }
 
 @keyframes land-rise {
   from { opacity: 0; transform: translateY(18px); }
@@ -1648,7 +1664,7 @@
   .land-bar-nav a { display: none; }
   .land-bar { padding-top: 16px; }
 
-  .land-claim-line { max-width: 100%; }
+  .land-claim { max-width: 100%; }
 
   /*
    * The opening on a phone.
@@ -1729,7 +1745,7 @@
    its width, which is the only way a landscape phone gets a smaller claim. */
 @media (max-height: 620px) and (orientation: landscape) {
   .land-open { min-height: 100dvh; }
-  .land-claim-line { font-size: clamp(38px, 7.2vh, 76px); }
+  .land-claim { font-size: clamp(38px, 7.2vh, 76px); }
   .land-open-lede { font-size: 14px; max-width: 60ch; }
   .land-open-actions { margin-top: 18px; }
 }
