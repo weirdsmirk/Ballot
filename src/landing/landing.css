@@ -282,24 +282,19 @@
    * hand and the top of the ballot box, which is the subject.
    */
   object-position: 38% 30%;
-  animation:
-    land-plate-in 2200ms var(--cine) both,
-    land-plate-drift 58s ease-in-out 2600ms infinite alternate;
+  animation: land-plate-in 1500ms var(--cine) both;
 }
 
 /*
- * The drift.
+ * The drift is gone.
  *
- * The one ambient movement on the page. A photograph that never moves is a
- * screenshot; this is 2.5% of travel across nearly a minute, which is below the
- * threshold of being seen and well above the threshold of the frame feeling
- * dead. It starts after the developing sequence has finished so the two never
- * overlap and fight.
+ * The plate used to carry a 58-second infinite alternate after its resolve, on the
+ * argument that a photograph which never moves is a screenshot. It was the one
+ * ambient loop on the page and it was not missed: with the raking light and the
+ * cue's travelling segment also running, the opening had three things moving at
+ * once inside a 100dvh frame, and none of them was the type. The frame reads as
+ * still now, which is what a photograph is.
  */
-@keyframes land-plate-drift {
-  from { transform: scale(1) translate3d(0, 0, 0); }
-  to { transform: scale(1.045) translate3d(-0.8%, -1.1%, 0); }
-}
 
 /* The light raking across the plate.
  *
@@ -313,32 +308,17 @@
  * One transform and one opacity, both composited. It ends at zero, so what is
  * left is the graded photograph and the scrim.
  */
-.land-open-rake {
-  position: absolute;
-  inset: -20% -60%;
-  background: linear-gradient(
-    102deg,
-    transparent 38%,
-    rgba(255, 255, 255, 0.055) 47%,
-    rgba(214, 240, 224, 0.085) 50%,
-    rgba(255, 255, 255, 0.055) 53%,
-    transparent 62%
-  );
-  animation: land-rake 2900ms var(--cine) 240ms both;
-}
-@keyframes land-rake {
-  from { opacity: 0; transform: translate3d(-38%, 0, 0); }
-  30% { opacity: 1; }
-  to { opacity: 0; transform: translate3d(38%, 0, 0); }
-}
-
-/* The scrim over the plate.
+/*
+ * The light raking across the plate is gone too.
  *
- * Four stops, because the type occupies two zones — the eyebrow and claim at the
- * lower left, the wordmark at the upper left — and the middle of the frame has to
- * stay open so the photograph is still a photograph. The heaviest wash is at the
- * bottom and along the left edge, where every word on this page is set.
+ * A wide highlight crossing the frame once, under the theory that a fade raises
+ * everything evenly while a rake moves the light from one side, and that the second
+ * is what makes an image look *exposed*. It is a nice effect in isolation. Over a
+ * photograph that is itself fading up, with the type arriving on its own stagger
+ * underneath it, it was a second thing happening in a frame that should have had
+ * one — and it was the longest-running thing in the opening at 2.9s.
  */
+
 /*
  * The scrim over the plate.
  *
@@ -362,15 +342,25 @@
     linear-gradient(180deg, rgba(8, 10, 9, 0.72) 0%, rgba(8, 10, 9, 0.12) 22%, rgba(8, 10, 9, 0) 40%);
 }
 
+/*
+ * The opening's type block, centred.
+ *
+ * Both declarations are needed and they do different jobs. `align-items: center`
+ * moves each block to the middle of the column; `text-align: center` then centres
+ * the lines inside each one. With only the first the claim is centred but the
+ * lede's lines are ragged on the right. With only the second every block still
+ * spans the column and its text floats in the middle of it.
+ */
 .land-open-body {
   position: relative;
   z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
   width: 100%;
   max-width: calc(var(--land-max) + var(--land-gutter) * 2);
   margin: 0 auto;
-  /* `auto` is what does the work: it centres the block when it fits and starts it
-     at the top when it does not, so a short landscape window pushes nothing off
-     the top of the frame the way `justify-content: center` would. */
   padding: 0 var(--land-gutter) clamp(20px, 3.4vh, 44px);
 }
 
@@ -401,41 +391,65 @@
   letter-spacing: -0.018em;
   line-height: 0.92;
   color: var(--ink);
-  /* No margin: with the eyebrow gone the claim is the first thing in the block, and
-     a top margin on the first flex item does not collapse — it would push the
-     headline down into the plate for no reason. */
   margin: 0;
+  /*
+   * The cap is on the *claim*, not on each line.
+   *
+   * It was 14ch per line, which meant each line was its own measure and the two
+   * were centred independently — so "Run elections" and "with confidence." shared
+   * a centre and nothing else, and the block read as two separate words rather
+   * than as a title. One cap on the whole claim gives both lines a common width,
+   * and `margin-inline: auto` centres it.
+   *
+   * 20ch, and the number is load-bearing on two sides. Too narrow and the claim
+   * wraps to four lines instead of two, which is a paragraph; too wide and it runs
+   * the full width of the screen with no margin, which is not a title card. "with
+   * confidence." is sixteen characters, so 20ch leaves a little slack for it at
+   * 158px without letting "Run elections" break.
+   */
+  /*
+   * The size lives here, not on the lines.
+   *
+   * It was on `.land-claim-line`, so `ch` on this element resolved against the
+   * inherited 14px body size rather than against the type it was measuring: a
+   * `20ch` cap came out at 129px on a 158px headline, and the claim wrapped to four
+   * lines inside a box 130px wide. Nothing about that is visible in the
+   * stylesheet — `ch` is a perfectly ordinary unit — and it only shows up by
+   * measuring the rendered box against the width the line needs.
+   *
+   * So the size is declared here, `ch` means what it looks like it means, and the
+   * lines inherit.
+   */
+  font-size: clamp(46px, 8vw, 158px);
+  /* 18ch at 158px is about 1420px, and "with confidence." needs 1242. Enough slack
+     for the accent's own tracking and for a viewport where the clamp lands low,
+     without letting the claim reach the edges of the screen. */
+  max-width: 18ch;
+  margin-inline: auto;
 }
 .land-claim-line {
   display: block;
-  /* Two lines, so the measure is set by the type rather than by a container —
-     which is why this can be 172px on a wide screen and still not fall apart. */
-  max-width: 14ch;
-  font-size: clamp(50px, 9.6vw, 168px);
+  /* 8vw, down from 9.6vw. At 9.6 the claim ran to 1920px on a 2000px display — the
+     whole width of the screen, with the lede and the buttons hung off it at the
+     left and the photograph reduced to a margin. */
+  font-size: inherit;
 }
 .land-claim-accent {
   color: var(--green);
   /*
-   * Written on rather than revealed, left to right, in the same direction as the
-   * claim is asserted — the same gesture as the tally line crossing the register
-   * further down the page.
+   * The accent is only a colour now.
    *
-   * Longhand, not the `animation` shorthand, so the arrival delay comes from one
-   * place: the `data-open` sequence below. The shorthand sets `animation-delay`
-   * itself, and the sequence rule is the more specific of the two, so a shorthand
-   * here was writing a delay that the sequence immediately overwrote.
+   * It used to be *written on* — a clip-path wipe from the left, its own keyframe,
+   * its own duration, an exclusion in the shared arrival rule so the two would not
+   * compete, and a longhand declaration to stop the shorthand overwriting the
+   * sequence's delay. That was four declarations and a specificity trap to make one
+   * line of type arrive differently from the line above it.
    *
-   * 1500ms because `--cine` front-loads so hard that a shorter run is over before
-   * the eye has committed to it.
+   * It now arrives exactly as everything else in the opening does: one shared fade
+   * and rise, one stagger. The gesture was the point at the time; with a photograph
+   * fading up underneath it, a wipe across the middle of the type was the second
+   * thing happening at once and the frame no longer read as one moment.
    */
-  animation-name: land-claim-in;
-  animation-duration: 1500ms;
-  animation-timing-function: var(--cine);
-  animation-fill-mode: both;
-}
-@keyframes land-claim-in {
-  from { opacity: 0; clip-path: inset(0 100% 0 0); }
-  to { opacity: 1; clip-path: inset(0 -0.05em 0 0); }
 }
 
 .land-open-lede {
@@ -453,25 +467,30 @@
 .land-open-actions {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 14px;
   flex-wrap: wrap;
   margin-top: clamp(26px, 3.4vh, 40px);
 }
 
-/* The scroll cue.
+/*
+ * The scroll cue.
  *
- * A short rail and a segment that travels it, on a slow loop, fading at both
- * ends. Deliberately not a bouncing arrow: the arrow is a piece of clip-art that
- * every page uses and it tells you nothing except that the designer wanted you to
- * scroll. This is the cue the page's own language already uses — a line crossing
- * a measured surface — and it is quiet enough to sit in the frame for as long as
- * the opening is on screen.
+ * A label and a short rule, and nothing moves. It used to have a segment
+ * travelling the rule on a 2.8s loop forever, which was the second thing on the
+ * page that never stopped, on the page whose whole argument is a process that
+ * *finishes*. A static rule under the word "Scroll" says the same thing and is
+ * quiet enough to be furniture.
+ *
+ * Deliberately not a bouncing arrow: the arrow is clip-art that tells you the
+ * designer wanted you to scroll.
  */
 .land-cue {
   position: relative;
   z-index: 2;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 12px;
   padding: 0 var(--land-gutter) clamp(20px, 3.2vh, 34px);
   width: 100%;
@@ -486,55 +505,46 @@
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.42);
 }
+/* A plain rule, green at its centre. The travelling segment that used to run it
+   forever is gone; see the cue's own comment. */
 .land-cue-rail {
-  position: relative;
-  width: 54px;
+  width: 56px;
   height: 1px;
-  background: rgba(255, 255, 255, 0.16);
-  overflow: hidden;
-}
-.land-cue-travel {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, transparent, var(--green), transparent);
-  animation: land-cue 2800ms var(--cine-soft) 1900ms infinite;
-}
-@keyframes land-cue {
-  0% { transform: translateX(-100%); opacity: 0; }
-  22% { opacity: 1; }
-  72% { opacity: 1; }
-  100% { transform: translateX(100%); opacity: 0; }
+  background: linear-gradient(90deg, transparent, var(--green-line), transparent);
 }
 
 /* ========================================
    The opening's own sequence
    ========================================
- *
- * Timed on load rather than observed, because the opening is above the fold and
- * has to play whether or not anything has scrolled. `data-open` carries the
- * position in the sequence and nothing else — the delays live here, so the order
- * of the opening is readable from this block and from nowhere else.
- *
- * These are the only timed delays on the page that are written out longhand; from
- * section two on, the reveal observer takes over and the order is the DOM's.
- */
+
+   The whole opening is one gesture now: the photograph resolves, and the type
+   arrives with it.
+
+   It used to be six things — the plate developing over 2.2s, a light raking
+   across the frame, the claim's second line wiped on with a clip-path, a 58-second
+   infinite drift on the photograph, a segment travelling the scroll cue on a
+   2.8s loop, and a five-step stagger on the type. Four of those never stopped,
+   which is the actual problem: on the page whose argument is a process that
+   finishes, four permanent loops was arguing against it.
+
+   What is left is a fade and a rise, shared by every element, on a short stagger.
+   `data-open` carries the position in the sequence and nothing else — the delays
+   live here, so the order of the opening is readable from this block and nowhere
+   else.
+*/
 /*
- * The shared arrival, and the accent's exclusion from it.
+ * One arrival, shared by every element in the opening.
  *
- * `:not(.land-claim-accent)` is load-bearing. Both this rule and the accent's own
- * were single class selectors, so whichever came later in the file won — and this
- * one does. The accent therefore arrived with a plain fade-up and its "written on"
- * wipe never ran, which is invisible in the stylesheet and only shows up in the
- * computed animation name. Excluding it means the two rules stop competing
- * altogether, so neither source order nor a future reorder can break it again.
+ * The accent used to be excluded from this rule with `:not()`, because it had its
+ * own animation and the two were single class selectors competing on source order.
+ * It has none now, so the exclusion went with it — one rule, one keyframe, one
+ * duration, and nothing that can silently lose a specificity fight.
  */
-.land-open-item:not(.land-claim-accent) { animation: land-rise 1000ms var(--cine) both; }
-.land-open [data-open='1'] { animation-delay: 560ms; }
-/* The claim is written on, so it starts just after the line above it has arrived
-   and takes its own longer run. */
-.land-open [data-open='2'] { animation-delay: 760ms; }
-.land-open [data-open='3'] { animation-delay: 1120ms; }
-.land-open [data-open='4'] { animation-delay: 1300ms; }
+.land-open-item { animation: land-rise 900ms var(--cine) both; }
+.land-open [data-open='1'] { animation-delay: 480ms; }
+.land-open [data-open='2'] { animation-delay: 600ms; }
+.land-open [data-open='3'] { animation-delay: 880ms; }
+.land-open [data-open='4'] { animation-delay: 1020ms; }
 
 @keyframes land-rise {
   from { opacity: 0; transform: translateY(18px); }
@@ -1695,21 +1705,17 @@
  * `!important` on this block and nowhere else on the page.
  *
  * It is a kill switch, and a kill switch that can lose a specificity fight is not
- * one. The arrivals are declared as `.land-open-item:not(.land-claim-accent)`,
- * which is (0,2,0) — and a plain `.land-open-item` here is (0,1,0), so it silently
- * stopped switching them off. That is not hypothetical: it happened the moment
- * `:not()` was added to fix a different specificity bug, three rules above this
- * one, and nothing about the failure was visible except that three animations were
- * still running for a reader who had asked for none. A reader's motion preference
- * is not something that should be contingent on selector arithmetic.
+ * one. It stayed `!important` after the opening's `:not()` was removed, because
+ * the thing it protected against was not that one rule: a reader who has asked for
+ * no motion should not depend on every selector in the file being no more specific
+ * than this list. That failure was real — three animations kept running for a
+ * reader who had asked for none — and it was invisible except by counting
+ * `document.getAnimations()`.
  */
 @media (prefers-reduced-motion: reduce) {
   .land-open-image,
-  .land-open-rake,
-  .land-claim-accent,
   .land-open-item,
   .land-cue,
-  .land-cue-travel,
   .land-bar,
   .land-life-say,
   [data-reveal] {

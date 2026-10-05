@@ -428,7 +428,6 @@ export function Landing() {
               fetchPriority="high"
               decoding="async"
             />
-            <div className="land-open-rake" />
           </div>
           <div className="land-open-scrim" aria-hidden="true" />
 
@@ -459,7 +458,7 @@ export function Landing() {
 
           <div className="land-cue" aria-hidden="true">
             <span className="land-cue-label">Scroll</span>
-            <span className="land-cue-rail"><span className="land-cue-travel" /></span>
+            <span className="land-cue-rail" />
           </div>
         </section>
 
