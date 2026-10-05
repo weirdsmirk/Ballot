@@ -567,14 +567,23 @@
 /*
  * The scroll cue.
  *
- * A label and a short rule, and nothing moves. It used to have a segment
- * travelling the rule on a 2.8s loop forever, which was the second thing on the
- * page that never stopped, on the page whose whole argument is a process that
- * *finishes*. A static rule under the word "Scroll" says the same thing and is
- * quiet enough to be furniture.
+ * A label and an arrow, and nothing moves.
  *
- * Deliberately not a bouncing arrow: the arrow is clip-art that tells you the
- * designer wanted you to scroll.
+ * The rail was a 56px rule with a green gradient through it — transparent at both
+ * ends, `--green-line` in the middle. It was not a rule and not a line either: at
+ * 1px tall and blurred at both ends it read as a smudge, not as an edge, so it said
+ * neither "there is more" nor "go down". An arrow says both, and says them in a
+ * shape that already means direction, so it does not need a gradient to be legible.
+ *
+ * The travelling segment that used to run the rule on a 2.8s loop forever is still
+ * gone, and that part has not changed: on the page whose whole argument is a process
+ * that *finishes*, a permanent loop argues against it. The arrow does not bounce.
+ *
+ * The old comment here said "deliberately not a bouncing arrow: the arrow is
+ * clip-art that tells you the designer wanted you to scroll." That was a
+ * different claim — it was about *motion*, and it is now about shape. An arrow
+ * drawn as a stroke is a direction; an arrow that bounces is an invitation. Only
+ * the second is clip-art, and this is the first.
  */
 .land-cue {
   position: relative;
@@ -596,12 +605,27 @@
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.42);
 }
-/* A plain rule, green at its centre. The travelling segment that used to run it
-   forever is gone; see the cue's own comment. */
-.land-cue-rail {
-  width: 56px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--green-line), transparent);
+/*
+ * The arrow.
+ *
+ * Drawn rather than imported: an SVG sprite or an icon font for one chevron is a
+ * dependency and a request. This is a single path on a 12x7 box, so it inherits
+ * `currentColor` and the label's own opacity — one thing to change if the cue's
+ * colour ever does.
+ *
+ * `stroke` with round caps and joins, at 1.4 on a 12px box, because a hairline
+ * chevron at this size with square caps reads as a crack in the page rather than
+ * as a mark. No fill: a filled triangle would be heavier than the word beside it.
+ *
+ * Height 7px against the label's 10.5px cap height is deliberate — the arrow is
+ * optically smaller than the word, which is what keeps the pair from competing.
+ */
+.land-cue-arrow {
+  display: block;
+  width: 12px;
+  height: 7px;
+  flex: none;
+  color: rgba(255, 255, 255, 0.42);
 }
 
 /* ========================================

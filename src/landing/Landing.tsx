@@ -484,7 +484,16 @@ export function Landing() {
 
           <div className="land-cue" aria-hidden="true">
             <span className="land-cue-label">Scroll</span>
-            <span className="land-cue-rail" />
+            <svg className="land-cue-arrow" viewBox="0 0 12 7" aria-hidden="true" focusable="false">
+              <path
+                d="M1 1l5 5 5-5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </div>
         </section>
 
