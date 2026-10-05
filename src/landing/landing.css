@@ -1260,11 +1260,29 @@
    6 — The close
    ======================================== */
 
+/*
+ * The two doors, side by side, filling the measure.
+ *
+ * They are the page's primary action and its last stop, and the whole page is
+ * composed around a single left edge — so putting them one above the other left the
+ * pair stacked into the left half of a 1920px measure, which was the one place on
+ * the page where the composition had collapsed into a column for no reason. Two
+ * equal tracks is the shape the argument wants: neither destination is more
+ * important than the other, and the reader is choosing between them.
+ *
+ * `minmax(0, 1fr)` rather than `1fr` on both sides. The track has to be allowed to
+ * go narrower than the longest word in it, or "Administrator" sets the column width
+ * and the two doors stop being equal.
+ *
+ * No cap. A 1240px ceiling left the pair stopping three quarters of the way across
+ * a wide screen with a dead right quarter beside it, which is the same complaint as
+ * the measure itself was — and a half-filled row of controls reads as a layout that
+ * ran out rather than one that was chosen.
+ */
 .land-doors {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
-  max-width: 720px;
   margin-top: clamp(30px, 4vh, 48px);
 }
 /*
@@ -1275,6 +1293,11 @@
  * arrived from this page's primary action should meet the identical target.
  */
 .land-door {
+  /* As a grid item the door may be narrower than its contents want to be, and
+     `entry-way` sets its own two tracks off that width. Without this the widest
+     track wins and the two doors come out different sizes, which defeats the point
+     of asking for equal ones. */
+  min-width: 0;
   transition: border-color 280ms var(--cine), transform 280ms var(--cine), box-shadow 280ms var(--cine);
 }
 .land-door .entry-way-arrow { transition: transform 280ms var(--cine); }
@@ -1416,6 +1439,17 @@
   .land-split { grid-template-columns: 1fr; gap: clamp(34px, 6vh, 48px); }
   .land-split-text { max-width: none; }
   .land-records { margin-top: 0; }
+
+  /*
+   * The doors stack again.
+   *
+   * 900px is where two of them stop working side by side: below it each track is
+   * under about 420px, and "Continue to the admin console" at the door label's own
+   * size needs roughly 290px of it once the card's padding is taken off. Stacked
+   * it is one line each with room to spare, which is what the front door does at
+   * every width.
+   */
+  .land-doors { grid-template-columns: 1fr; }
 
   /* The scroll cue is the first thing to go, and it is the only thing here that
      can be: it exists to invite a scroll that a touch device has already started. */
