@@ -148,6 +148,29 @@ export function SiteFoot({ sub }: { sub: ReactNode }) {
  *
  * `children` is the working half: the hero and then the form.
  */
+/**
+ * Home, from the front door.
+ *
+ * Setting the hash is not enough on the landing page. That page reaches this screen by
+ * scrolling — the selection screen is its second screen, one viewport down — so a reader
+ * who presses the wordmark here while already on `#/` gets no hash change and therefore
+ * no navigation: the hash is already `#/`, nothing re-renders, and they stay exactly
+ * where they were with no feedback at all.
+ *
+ * So it scrolls as well, and it scrolls on every route: on `#/enter` the hash change
+ * navigates away and the scroll has nothing to do, and on `#/` the scroll is the
+ * navigation. `smooth`, because the alternative is an instant jump of a full viewport
+ * with a curtain half-raised in the middle of it.
+ *
+ * This is the only way back from the selection screen on the landing page. The landing
+ * page's own bar lifts off with the hero, so by the time the reader has arrived here
+ * that bar is gone and the front door's wordmark is the whole of the way back.
+ */
+function goHome() {
+  window.location.hash = '#/'
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
 export function AuthFrame({
   children,
   statement,
@@ -178,7 +201,7 @@ export function AuthFrame({
         <div className="auth-frame-scrim" aria-hidden="true" />
 
         <div className="auth-frame-media-inner">
-          <Brand onNavigate={() => { window.location.hash = '#/' }} />
+          <Brand onNavigate={goHome} />
 
           <div className="auth-frame-caption">
             <p className="auth-frame-statement">{statement}</p>

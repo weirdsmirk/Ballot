@@ -23,105 +23,10 @@ import { authApi } from '../lib/api'
 import type { ClientSession } from '../lib/adminTypes'
 import { Icon } from '../ui/Icon'
 import { AuthFrame } from '../ui/Shell'
+import { ChooseDoorway, DOOR_HERO } from '../ui/Doorway'
 import { Alert, DemoNote, Field } from '../ui/primitives'
 
 type Stage = 'choose' | 'password' | 'mfa'
-
-/** The footer names the cycle the console is administering this year. */
-const YEAR = new Date().getFullYear()
-
-const HERO = {
-  /*
-   * The eyebrow is about the product, not about signing in. It used to say
-   * "Administrator access", which was wrong the moment this page became the way
-   * in for a voter as well — the headline below is the product's argument and
-   * the two destinations under it are its entry points.
-   */
-  eyebrow: 'Election workspace',
-  headline: 'Run elections',
-  accent: 'with confidence.',
-  /*
-   * The lede, in plain words and a little longer.
-   *
-   * It was "Secure operations for every election, with clear roles and an
-   * audit-ready workspace", which was three adjectives doing the work of three
-   * facts. "Secure operations" names nothing an operator could check. "Audit-ready
-   * workspace" is the noun phrase you write when you do not want to say what the
-   * audit is. A voter or an officer reading it learns nothing about what will
-   * happen to them.
-   *
-   * Now it says the three things that are actually true and checkable: the whole
-   * election runs in one place, the roles decide who may do what, and the actions
-   * get written down. "Five" is `ADMIN_ROLES.length` today; if a role is ever
-   * added, this number is what has to change with it.
-   */
-  lede: 'Ballot runs the whole election from one machine. Five roles decide who may open the poll, certify the result or only read, and every administrative action is written down.',
-  /*
-   * The hero's old "Privacy-first by design" note said authentication is scoped
-   * to this workspace. The statement on the photograph says the same thing in
-   * four words, so carrying both was repetition rather than emphasis. The shield
-   * icon now marks the second-factor step on the card where it is actionable.
-   */
-  statement: 'No credentials leave this server.',
-  /*
-   * The line reversed out of the photograph, bottom-left.
-   *
-   * It was "Ballot administrator access · 2026 cycle", which named the surface
-   * twice — once here and once in the wordmark above — and then spent its second
-   * line on the word "cycle". What is worth saying here is which product this is
-   * and how old it is; the rest was the line talking about itself.
-   */
-  meta: `Ballot administrator ${YEAR}`,
-}
-
-/**
- * What the product is, in one paragraph.
- *
- * On the chooser, because a visitor who has just been offered two doors is
- * deciding whether to care about either, and the answer is the same either way.
- * Every claim here is one the server actually enforces; nothing on this page is
- * a promise the product does not keep.
- */
-const ABOUT = {
-  eyebrow: 'About Ballot',
-  headline: 'A ballot is never stored against the person who cast it.',
-  detail:
-    'The roll, the one-time codes and the audit trail live on this machine and nowhere else. What a voter takes away is a receipt — the only record that a ballot was cast, and one that can be checked later without revealing the choice.',
-}
-
-/**
- * The two ways in.
- *
- * Order is deliberate: an operator arriving at a bare host is looking for the
- * console, and a voter is looking for their ballot. Both are one click, so the
- * order only has to be the more likely intent first.
- *
- * Each description is one line by design. They used to run to two, which made
- * the doors twice as tall as they needed to be and read as paragraphs rather
- * than as captions under a title. Trimming them lost nothing: the second factor
- * is announced on the form itself, live, once the server says the account has
- * one — which is more use than a line promising it in advance.
- *
- * The administrator row swaps the form into this same half of the screen; the
- * voter row navigates, because the portal is a different surface with its own
- * header and footer.
- */
-const DESTINATIONS: {
-  id: 'admin' | 'vote'
-  label: string
-  detail: string
-}[] = [
-  {
-    id: 'admin',
-    label: 'Continue to the admin console',
-    detail: 'Sign in with your administrator credentials.',
-  },
-  {
-    id: 'vote',
-    label: 'Continue to the voter portal',
-    detail: 'Cast your ballot. No account and no password needed.',
-  },
-]
 
 export function AdminLogin({
   needsBootstrap,
@@ -204,57 +109,26 @@ export function AdminLogin({
   }
 
   if (stage === 'choose') {
-    return (
-      <AuthFrame statement={HERO.statement} meta={HERO.meta}>
-        <AuthHero />
+    /*
+      The shared selection screen, not a copy of it.
 
-        <div className="auth-frame-work">
-          <nav className="entry-ways" aria-label="Choose where to go next">
-            {DESTINATIONS.map((destination) => (
-              <button
-                key={destination.id}
-                type="button"
-                className="entry-way"
-                onClick={() => {
-                  if (destination.id === 'admin') {
-                    // Swap the form into this same half. Navigating would throw away
-                    // the page the visitor chose, and there is nothing on the far
-                    // side of the sign-in they would want to come back to.
-                    setStage('password')
-                    return
-                  }
-                  window.location.hash = '#/vote'
-                }}
-              >
-                <span className="entry-way-text">
-                  <span className="entry-way-label">{destination.label}</span>
-                  <span className="entry-way-detail">{destination.detail}</span>
-                </span>
-                <span className="entry-way-arrow" aria-hidden="true">
-                  <Icon name="arrow-right" />
-                </span>
-              </button>
-            ))}
-          </nav>
+      This was the only definition of these two doors and the landing page's second
+      screen is now the same screen, so it lives in `ui/Doorway` and both surfaces
+      call it. `#/enter` renders exactly what it rendered before — same copy, same
+      order, same behaviour — it is just sourced from one place now, which is what
+      stops the landing page's version and the front door's version drifting into
+      saying different things about the same two choices.
 
-          {/*
-            What the product is, below the two doors. It earns its place by being
-            the same answer whichever door someone is about to walk through, and
-            by being the one thing a first-time visitor cannot get from either.
-          */}
-          <div className="entry-about">
-            <span className="eyebrow">{ABOUT.eyebrow}</span>
-            <p className="entry-about-headline">{ABOUT.headline}</p>
-            <p className="entry-about-detail">{ABOUT.detail}</p>
-          </div>
-        </div>
-      </AuthFrame>
-    )
+      The one difference is the administrator door: here it swaps the sign-in form
+      into this same half of the screen, because navigating would throw away the page
+      the visitor chose and there is nothing on the far side worth coming back to.
+    */
+    return <ChooseDoorway onAdmin={() => setStage('password')} />
   }
 
   if (stage === 'mfa') {
     return (
-      <AuthFrame statement={HERO.statement} meta={HERO.meta}>
+      <AuthFrame statement={DOOR_HERO.statement} meta={DOOR_HERO.meta}>
         <div className="auth-frame-work">
           <button type="button" className="entry-back" onClick={() => { setStage('password'); setCode(''); setError(null) }}>
             <Icon name="arrow-left" />
@@ -318,7 +192,7 @@ export function AdminLogin({
   }
 
   return (
-    <AuthFrame statement={HERO.statement} meta={HERO.meta}>
+    <AuthFrame statement={DOOR_HERO.statement} meta={DOOR_HERO.meta}>
       <div className="auth-frame-work">
         {/*
           Always shown. The chooser is the origin of every path into this form, so
@@ -472,27 +346,5 @@ export function AdminLogin({
         </form>
       </div>
     </AuthFrame>
-  )
-}
-
-/**
- * The hero, above the form.
- *
- * Short on purpose: an eyebrow, the headline in two lines, one sentence of
- * lede, and an accent rule that closes the block. The promise that used to sit
- * here as a fourth block now runs under the photograph, where there is room for
- * it and it does not compete with the work.
- */
-function AuthHero() {
-  return (
-    <div className="auth-hero">
-      <span className="eyebrow eyebrow-blue">{HERO.eyebrow}</span>
-      <h1>
-        {HERO.headline}
-        <span className="accent">{HERO.accent}</span>
-      </h1>
-      <p className="auth-hero-lede">{HERO.lede}</p>
-      <div className="auth-hero-rule" />
-    </div>
   )
 }

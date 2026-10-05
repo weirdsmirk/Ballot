@@ -3,52 +3,38 @@
  *
  * A separate surface from the front door, deliberately. The door at `#/enter` is
  * two questions and a photograph: it exists to get an officer to a password and
- * a voter to a ballot, and every pixel of it is in the way of that. This page
- * exists to answer a different question — *what is this thing, and can I trust
- * it* — and it is allowed to take a minute, scroll, and use motion, because
- * nothing here is standing in front of anybody's vote.
+ * a voter to a ballot, and every pixel of it is in the way of that. This page is
+ * allowed to take a minute, scroll, and use motion, because nothing here is
+ * standing in front of anybody's vote.
  *
- * The premise the whole page is built on: **an election is a record, and the
- * record is the product.** So the page is not organised as a feature list. It is
- * an argument, in the order somebody who does not yet trust an election platform
- * would ask it:
+ * It is two screens and both are the same thing at different depths:
  *
- *   1. Cold open.       The photograph, one claim, the door.
- *   2. Secrecy.         The central promise, and the artifact that keeps it —
- *                       a receipt the voter can check and the server cannot read.
- *   3. The lifecycle.   The real transition graph, drawn at the state the live
- *                       election is actually in. Not a row of status pills: the
- *                       actual states and the actual edges, including the branch
- *                       nobody's marketing page draws.
- *   4. Coverage.        What one installation covers. Dense, typographic, small.
- *   5. This workspace.  Real figures, read from the running server. Never
- *                       invented — if the server is empty the section says so.
- *   6. The two doors.   The same two destinations the front door offers.
+ *   1. Cold open.      The photograph, one claim, and the way in.
+ *   2. The selection.  What is actually on this server, as a list you can pick
+ *                      from. Read from the elections the server returned, never
+ *                      invented.
+ *
+ * It used to be six sections — secrecy, the lifecycle graph, coverage, live
+ * figures, and two doors at the foot — and the argument it made was that an
+ * election is a record and the record is the product. That argument was true and
+ * it was also four screens of reading in front of the one thing a visitor came
+ * for, which is a ballot. The record is still the product; it is now the thing
+ * you pick from rather than the thing you scroll past.
  *
  * Two rules held throughout:
  *
- *   · **No decorative data.** Every number on this page is computed from the
+ *   · **No decorative data.** Everything on the second screen is computed from the
  *     elections the server actually returned. There are no testimonials, no
  *     customer logos, no invented adoption figures — for a product whose entire
  *     argument is that its claims are checkable, a fabricated metric on the front
  *     page would be the one thing that could sink it.
- *   · **Motion explains, it does not decorate.** The one scroll-driven sequence
- *     is the lifecycle, because watching an election advance is the thing worth
- *     watching. Everything else is arrival and emphasis.
+ *   · **Motion explains, it does not decorate.** The opening is the only thing
+ *     that moves on its own, and it moves once. The second screen arrives because
+ *     the reader scrolled to it, like everything else on the page.
  */
 
-import { useEffect, useMemo, useState } from 'react'
-import { fetchState, type Bootstrap } from '../lib/api'
-import {
-  ELECTION_STATUSES,
-  ELECTION_TYPE_LABELS,
-  ELECTION_TYPES,
-  RESULTS_VISIBILITIES,
-  type ElectionStatus,
-  type ResultsVisibility,
-} from '../lib/types'
-import { STATUS_DESCRIPTIONS, STATUS_LABELS } from '../lib/lifecycle'
-import { ADMIN_ROLES, ROLE_DESCRIPTIONS, ROLE_LABELS } from '../lib/rbac'
+import { useEffect } from 'react'
+import { ChooseDoorway } from '../ui/Doorway'
 import { Icon } from '../ui/Icon'
 import './landing.css'
 
@@ -62,7 +48,7 @@ const OPEN = {
    * The claim, and nothing above it.
    *
    * There used to be an "Election workspace" eyebrow here. It went because the claim
-   * is display type at up to 158px with a photograph behind it, and an eyebrow above
+   * is display type at up to 124px with a photograph behind it, and an eyebrow above
    * it is a third horizontal element competing with the only two that matter — and
    * because the photograph already says what this is. A ballot box with a hand above
    * it is the product's subject, not its caption.
@@ -92,97 +78,6 @@ const OPEN = {
    */
   lede:
     'Run elections from one place, with controlled roles and a complete record of every action.',
-}
-
-/**
- * Section two: the product's central claim, and the mechanism that keeps it.
- *
- * The receipt is the artifact the entire design is pointed at. A voter leaves
- * with a code they can check; the server keeps only a keyed digest of it. Those
- * two facts cannot both be true unless the stored value is one-way, which is
- * what makes "your vote is secret" a property of the system rather than a promise
- * about how careful the people running it are.
- */
-const SECRECY = {
-  eyebrow: 'Ballot secrecy',
-  headline: 'A ballot is never stored against the person who cast it.',
-  detail:
-    'The roll, the one-time codes and the audit trail live on this machine and nowhere else. What a voter takes away is a receipt — the only record that a ballot was cast, and one that can be checked later without revealing the choice.',
-  /**
-   * A schematic of the two records, not a screenshot and not a sample from the
-   * workspace. The receipt code is the format the server issues, shown as a
-   * placeholder because an invented code would be a real-looking value that
-   * verifies against nothing.
-   */
-  receipt: {
-    eyebrow: 'What the voter takes away',
-    code: 'XXXX-XXXX-XXXX-XXXX-XXXX',
-    caption: 'Shown once, at the moment of voting. The voter can check it later.',
-  },
-  stored: {
-    eyebrow: 'What the server keeps',
-    digest: '4f2a9c1e7b3d0a58',
-    caption: 'A keyed digest of the code. It answers yes or no, and cannot be run backwards.',
-  },
-}
-
-/**
- * Section three: the lifecycle, as the graph it actually is.
- *
- * `paused` is a branch off `open`, not a link in a chain — a poll can pause and
- * resume and end up exactly where it was. Lining the seven states up in a row,
- * which is what every election product's feature table does, would say a thing
- * this product does not do. So the spine is the six states that only move
- * forward, and the branch hangs below it.
- *
- * The rail was scrubbed by scrolling rather than by hovering or by a timer, and the
- * justification was that an election advancing is the thing nobody can show in a
- * static diagram. It is shown here, statically, because the server already knows
- * which state the election is in — so the reader gets the diagram on arrival instead
- * of after a screen and a half of scrolling, and gets it right every time rather
- * than depending on where they stopped reading.
- */
-const SPINE: ElectionStatus[] = ['draft', 'scheduled', 'open', 'closed', 'certified', 'archived']
-const BRANCH: ElectionStatus = 'paused'
-
-/** What moves an election along the spine, named the way the console names it. */
-const SPINE_EDGES: { from: ElectionStatus; to: ElectionStatus; action: string }[] = [
-  { from: 'draft', to: 'scheduled', action: 'Publish' },
-  { from: 'scheduled', to: 'open', action: 'Open voting' },
-  { from: 'open', to: 'closed', action: 'Close voting' },
-  { from: 'closed', to: 'certified', action: 'Certify' },
-  { from: 'certified', to: 'archived', action: 'Archive' },
-]
-
-/** Section four: what one installation covers. Capabilities, all checkable. */
-const VISIBILITY_LABELS: Record<ResultsVisibility, string> = {
-  live: 'Live during the poll',
-  after_close: 'After voting closes',
-  after_certify: 'Once certified',
-  never: 'Never published',
-}
-
-const COVERAGE = {
-  types: {
-    eyebrow: 'Nine kinds of election',
-    detail:
-      'The same installation serves a department, a society, a faculty, a union, a council and a constitutional referendum at once. Nothing is configured per deployment.',
-  },
-  roles: {
-    eyebrow: 'Five roles',
-    detail:
-      'Who may do what is decided by the server on every request, not by hiding buttons. An officer who runs the poll cannot certify the result they ran.',
-  },
-  visibility: {
-    eyebrow: 'Four result rules',
-    detail:
-      'Which totals a voter is allowed to see is a property of the election. An archived election can have a complete tally and still show a voter nothing at all.',
-  },
-  ballots: {
-    eyebrow: 'One, two or three selections',
-    detail:
-      'A single-transfer ballot, a three-seat executive ballot, and everything between, each with the one-vote rule enforced against the server rather than the form.',
-  },
 }
 
 /* ========================================
@@ -233,29 +128,6 @@ function useReveal() {
 }
 
 /**
- * Where the live election actually is on the lifecycle.
- *
- * This used to be the reader's scroll position: the section was 280vh tall with a
- * sticky frame, and the state index was how far they had scrolled. The rail drew
- * itself as they moved and the section argued that an election advancing is the
- * thing a static diagram cannot show.
- *
- * That argument was worth having once and is not worth 280vh of scroll. The live
- * status answers the same question for real — the server already knows which state
- * the election is in — so the diagram now shows where *this* election has got, and
- * the reader gets it on arrival instead of after scrolling.
- *
- * `paused` is not on the spine, so it maps to `open`, which is the state it pauses.
- * With no election on the server the rail starts at `draft` and stays there.
- */
-function liveStep(bootstrap: Bootstrap | null): number {
-  const status = bootstrap?.elections?.[0]?.status
-  if (status === BRANCH) return SPINE.indexOf('open')
-  const at = status ? SPINE.indexOf(status) : -1
-  return at < 0 ? 0 : at
-}
-
-/**
  * The register's drift.
  *
  * The measured grid behind the page moves a fraction of the scroll distance, which
@@ -294,57 +166,102 @@ function useRegisterDrift() {
   }, [])
 }
 
-/* ========================================
-   The page
-   ======================================== */
+/**
+ * The curtain: the hero lifting off the selection screen.
+ *
+ * The hero is a curtain being raised. The selection screen is pinned behind it and
+ * the hero is translated up by exactly the distance the reader has scrolled, so the
+ * two move as one: the photograph and the claim go up and out, and the doors are
+ * already there underneath.
+ *
+ * Driven by scroll rather than by a timer, which is the whole reason it is worth
+ * having as a mechanism at all. A timed reveal cannot be reversed, and this one can:
+ * scroll back and the curtain comes down. It also means the hero's button, which
+ * scrolls to this screen, opens the same curtain rather than setting off a second
+ * animation that would then have to be kept in step with this one.
+ *
+ * A `transform`, and nothing else. One element, one property, coalesced to a single
+ * write per frame. `translate3d` rather than `translateY` so the lift is composited
+ * and never touches layout — the same argument as the register's drift, and the same
+ * code shape.
+ *
+ * Under reduced motion the hero is not lifted at all: the stylesheet stops pinning
+ * and the two screens go back to being two screens in flow, and this writes nothing.
+ * A curtain that a reader asked not to see must not be a curtain they are stuck
+ * behind.
+ */
+function useCurtain() {
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
+    const stage = document.querySelector<HTMLElement>('.land-stage')
+    const hero = document.querySelector<HTMLElement>('.land-open')
+    if (!stage || !hero) return
+
+    let frame = 0
+    let last = -1
+    const write = () => {
+      frame = 0
+      const travel = stage.offsetHeight - window.innerHeight
+      if (travel <= 0) return
+      const passed = -stage.getBoundingClientRect().top
+      const progress = Math.min(1, Math.max(0, passed / travel))
+      // Written only when it moved. A scroll that does not change the progress — the
+      // trackpad jitter at the end of the page, a momentum tail on a phone — must not
+      // cost a style recalculation.
+      const next = Math.round(progress * 1000) / 1000
+      if (next === last) return
+      last = next
+      hero.style.transform = `translate3d(0, ${-next * travel}px, 0)`
+    }
+    const onScroll = () => {
+      if (frame) return
+      frame = requestAnimationFrame(write)
+    }
+
+    write()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll)
+    return () => {
+      if (frame) cancelAnimationFrame(frame)
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+      hero.style.transform = ''
+    }
+  }, [])
+}
 
 export function Landing() {
-  const [bootstrap, setBootstrap] = useState<Bootstrap | null>(null)
   useReveal()
   useRegisterDrift()
-
-  // The same call the front door makes, for the same reason: these figures have
-  // to be the workspace's real contents. Failing to reach the server is not an
-  // error state here — it just means section five says it has nothing to report.
-  useEffect(() => {
-    let live = true
-    void fetchState()
-      .then((state) => { if (live) setBootstrap(state) })
-      .catch(() => { if (live) setBootstrap(null) })
-    return () => { live = false }
-  }, [])
-
-  /*
-   * The rail is horizontal only where horizontal fits, and that is set by the
-   * diagram rather than by the device.
-   *
-   * Below 1180px the rail cannot hold six nodes and their action labels without the
-   * labels colliding — at 1024 the columns come out at 157px and "CLOSE VOTING" runs
-   * through "CERTIFY" — so the stylesheet turns it into a vertical list there.
-   *
-   * The height half of the query is gone, and so is everything it was for. There is
-   * no sticky frame to give room to: the section is the height of its own content
-   * now, and nothing about it depends on the window's height.
-   *
-   * This number has to match the media query in `landing.css`. That is the one thing
-   * in this page stated in two places, and it is worth saying so in both.
-   */
-  const [wide, setWide] = useState(false)
-  useEffect(() => {
-    const query = window.matchMedia('(min-width: 1180px)')
-    const apply = () => setWide(query.matches)
-    apply()
-    query.addEventListener('change', apply)
-    return () => query.removeEventListener('change', apply)
-  }, [])
-
-  /* The live state, not a scroll position. See `liveStep`. */
-  const step = liveStep(bootstrap)
-
-  const figures = useMemo(() => liveFigures(bootstrap), [bootstrap])
+  useCurtain()
 
   const go = (hash: string) => { window.location.hash = hash }
 
+  /*
+    The primary button, and what it does.
+
+    It scrolls to the end of the stage, which is the selection screen, and the same
+    lift the reader's own scroll produces follows it.
+
+    A measured distance rather than `scrollIntoView` on the selection screen, because
+    that screen is `position: sticky` and a sticky element's bounding box is always
+    inside the viewport — `scrollIntoView` reads that as "already there" and does
+    nothing at all. The button looked wired up and did nothing, which is the worst
+    failure mode a primary button has. The distance is the stage's height less the
+    viewport, which is the same number the lift is measured against, so the two cannot
+    disagree.
+
+    `smooth`, because the alternative is an instant jump of a full viewport with the
+    curtain not part way up.
+  */
+  const goToDoor = () => {
+    const stage = document.querySelector<HTMLElement>('.land-stage')
+    if (!stage) return
+    window.scrollTo({ top: stage.offsetHeight - window.innerHeight, behavior: 'smooth' })
+  }
+
+  
   return (
     <div className="land">
       <a className="land-skip" href="#land-body">Skip to content</a>
@@ -357,70 +274,91 @@ export function Landing() {
       <div className="land-register" aria-hidden="true" />
       <div className="land-grain" aria-hidden="true" />
 
-      <header className="land-bar">
-        <button type="button" className="brand" onClick={() => window.scrollTo({ top: 0 })} aria-label="Ballot, back to the top">
-          <span className="brand-name">Ballot<span className="brand-dot">.</span></span>
-        </button>
-        <nav className="land-bar-nav" aria-label="Sections">
-          <a href="#land-life">Lifecycle</a>
-          <a href="#land-coverage">Coverage</a>
-          <a href="#land-docs">Documents</a>
-          <button type="button" className="btn-outline" onClick={() => go('#/enter')}>
-            Sign in
-            <Icon name="arrow-right" />
-          </button>
-        </nav>
-      </header>
-
       <main id="land-body">
-        {/* ---- 1. The cold open -------------------------------------------
-            A title card, not a sales panel: the photograph owns the frame, the
-            type sits in the lower third where a title card sits, and the only
-            motion is the light building. It plays once, on load, over about two
-            and a half seconds — long enough to feel like a frame being
-            developed rather than a component being mounted. */}
-        <section className="land-open">
-          {/*
-            The plate. `alt=""` because the opening carries the claim in type and
-            this is a decorative bed under it — the same photograph is described
-            properly on the front door, where it is the argument rather than the
-            background.
+        {/*
+          The stage: two screens, one gesture.
 
-            The 16:9 frame, not the portrait one. Covering a wide viewport with the
-            portrait crop put the ballot box in the middle of the frame and cropped
-            the hand — the one part of the photograph the product is about — off
-            the top. This composition holds the hand, the ballot and the slot, and
-            puts the box on the left where the empty half of the frame is.
+          The selection screen is pinned and the hero is lifted off it, so the hero
+          rises like a curtain with the next scene already set behind it. The
+          alternative — two screens in ordinary flow — slides the hero away and then
+          brings the second one up through the gap, which is two movements where the
+          gesture only needs one.
 
-            WebP with no fallback, the same as `ballot.webp` on the front door. A
-            `<picture>` with a PNG source was here and has been removed: the source
-            file is gone from `public/`, and a fallback pointing at a missing file
-            is worse than no fallback — it turns a format the browser does not
-            support into a broken image instead of a photograph.
-          */}
-          <div className="land-open-plate" aria-hidden="true">
-            <img
-              className="land-open-image"
-              src="/ballot16x9.webp"
-              alt=""
-              width={1672}
-              height={941}
-              loading="eager"
-              fetchPriority="high"
-              decoding="async"
-            />
-          </div>
-          <div className="land-open-scrim" aria-hidden="true" />
+          The hero comes first in the document and is on top by `z-index`, not the other
+          way round. Document order is what a screen reader and the Tab key follow, and
+          what a reader who asked for no motion follows once the stylesheet puts both
+          screens back into flow — in all three of those the hero is the first screen
+          and has to be first in the source too.
+        */}
+        <div className="land-stage">
+          {/* ---- 1. The cold open -----------------------------------------
+              A title card, not a sales panel: the photograph owns the frame, the
+              type sits in the lower third where a title card sits, and the only
+              motion is the light building. It plays once, on load, over about two
+              and a half seconds — long enough to feel like a frame being
+              developed rather than a component being mounted.
 
-          <div className="land-open-body">
+              The bar is inside this section so it lifts off with it. It was a
+              sibling, positioned against the page, which meant it stayed put while
+              the hero left — leaving the bar floating over the selection screen,
+              which has a wordmark of its own in the corner of its photograph. */}
+          <section className="land-open">
+            <header className="land-bar">
+              <button type="button" className="brand" onClick={() => window.scrollTo({ top: 0 })} aria-label="Ballot, back to the top">
+                <span className="brand-name">Ballot<span className="brand-dot">.</span></span>
+              </button>
+              {/*
+                The bar has one control now.
+
+                It had three links — Lifecycle, Coverage, Documents — and all three
+                pointed at sections that are gone. Nothing is lost: the three legal
+                pages are on the front door's own screen, and "Sign in" is the one
+                destination on this page that goes somewhere else.
+              */}
+              <nav className="land-bar-nav" aria-label="Sections">
+                <button type="button" className="btn-outline" onClick={() => go('#/enter')}>
+                  Sign in
+                  <Icon name="arrow-right" />
+                </button>
+              </nav>
+            </header>
+            {/*
+              The plate. `alt=""` because the opening carries the claim in type and
+              this is a decorative bed under it — the same photograph is described
+              properly on the front door, where it is the argument rather than the
+              background.
+
+              The 16:9 frame, not the portrait one. Covering a wide viewport with the
+              portrait crop put the ballot box in the middle of the frame and cropped
+              the hand — the one part of the photograph the product is about — off
+              the top. This composition holds the hand, the ballot and the slot, and
+              puts the box on the left where the empty half of the frame is.
+
+              WebP with no fallback, the same as `ballot.webp` on the front door. A
+              `<picture>` with a PNG source was here and has been removed: the source
+              file is gone from `public/`, and a fallback pointing at a missing file
+              is worse than no fallback — it turns a format the browser does not
+              support into a broken image instead of a photograph.
+            */}
+            <div className="land-open-plate" aria-hidden="true">
+              <img
+                className="land-open-image"
+                src="/ballot16x9.webp"
+                alt=""
+                width={1672}
+                height={941}
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
+              />
+            </div>
+            <div className="land-open-scrim" aria-hidden="true" />
+
+            <div className="land-open-body">
             <h1 className="land-claim">
               {/*
-                One line, and the accent line is gone.
-
-                It was a second `.land-claim-line` with its own colour, its own italic
-                and its own reveal step, which is three rules and a stagger buying a
-                distinction between two halves of the same sentence. With the phrase
-                on one line there is no second line to distinguish from.
+                One line. It was split across a break for two revisions, which gave a
+                two-word headline the width of a sixteen-word sentence.
               */}
               <span className="land-claim-line land-open-item" data-open="1">
                 {OPEN.claim}
@@ -429,473 +367,54 @@ export function Landing() {
             </h1>
             <p className="land-open-lede land-open-item" data-open="2">{OPEN.lede}</p>
             {/*
-              One button.
+              The one button, and it opens the curtain.
 
-              The second one went, and the arrow with it. Both were saying the same
-              thing twice: that the thing to do is enter the workspace. The arrow on
-              the primary repeated a fact the button's own position and its green
-              fill already carry, and a second button offering the voter portal gave
-              a visitor who came here to read a document a path they did not need.
-
-              The portal is still one click away — the bar's Sign in, and the pair
-              of doors at the foot of the page. Nothing is lost, and the opening now
-              has exactly one thing to do.
+              It pointed at `#/enter` — the front door — until the landing page became
+              two screens with the front door as the second of them. It scrolls now, so
+              the reader gets the same gesture either way rather than being taken off
+              this page and onto a second copy of the thing one scroll below.
             */}
             <div className="land-open-actions land-open-item" data-open="3">
-              <button type="button" className="btn-primary btn-lg" onClick={() => go('#/enter')}>
+              <button type="button" className="btn-primary btn-lg" onClick={goToDoor}>
                 Enter Workspace
               </button>
             </div>
           </div>
 
           <div className="land-cue" aria-hidden="true">
-            <span className="land-cue-label">Scroll</span>
-            <svg className="land-cue-arrow" viewBox="0 0 12 7" aria-hidden="true" focusable="false">
-              <path
-                d="M1 1l5 5 5-5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
-        </section>
-
-        {/* ---- 2. Secrecy --------------------------------------------------
-            The widest measure on the page and the largest type after the opening,
-            because this is the claim the product actually rests on. The artifact
-            sits beside it rather than under it: the claim on the left, the two
-            records it is kept on the right, so the argument and its mechanism are
-            read together rather than in sequence. */}
-        <section className="land-band land-secrecy" aria-labelledby="land-secrecy-h">
-          <div className="land-wrap land-split">
-            <div className="land-split-text">
-              <span className="eyebrow eyebrow-blue land-reveal" data-reveal>{SECRECY.eyebrow}</span>
-              <h2 className="land-headline land-reveal" id="land-secrecy-h" data-reveal>
-                {SECRECY.headline}
-              </h2>
-              <p className="land-detail land-reveal" data-reveal>{SECRECY.detail}</p>
-            </div>
-
-            <div className="land-records land-reveal" data-reveal>
-              <div className="land-record">
-                <span className="eyebrow">{SECRECY.receipt.eyebrow}</span>
-                <code className="land-record-value">{SECRECY.receipt.code}</code>
-                <p className="land-record-caption">{SECRECY.receipt.caption}</p>
+              <span className="land-cue-label">Scroll</span>
+              <svg className="land-cue-arrow" viewBox="0 0 12 7" aria-hidden="true" focusable="false">
+                <path
+                  d="M1 1l5 5 5-5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
               </div>
+          </section>
 
-              <div className="land-record-rule" aria-hidden="true" />
+        {/*
+          ---- 2. The selection ----------------------------------------------
 
-              <div className="land-record">
-                <span className="eyebrow">{SECRECY.stored.eyebrow}</span>
-                <code className="land-record-value land-record-digest">{SECRECY.stored.digest}</code>
-                <p className="land-record-caption">{SECRECY.stored.caption}</p>
-              </div>
-            </div>
-          </div>
+          The front door, as the second screen of this page.
+
+          It is not a restatement of the front door and not a copy of it — it *is* the
+          front door, `ChooseDoorway`, the same component `#/enter` renders. A visitor
+          who scrolls here and a visitor who types the hash must see the same two
+          choices, and one component is the only way that stays true.
+
+          It carries no reveal of its own. It is simply set, and the hero above it is
+          what moves; anything that also animated here would be two effects chasing one
+          gesture.
+        */}
+        <section className="land-door" id="land-door" aria-label="Choose where to go next">
+          <ChooseDoorway onAdmin={() => go('#/enter')} />
         </section>
-
-{/* ---- 3. The lifecycle ---------------------------------------------
-            Rebuilt from scratch twice now. The first version was a 1px wire
-            stretched across the middle of a pinned frame with the description in
-            a third band at the bottom: three disconnected rows, most of the
-            screen empty, and 340vh of scrolling attached to all of it.
-
-            It is a full-bleed horizontal rail now, with the state being described
-            set large above it. Two decisions do the work:
-
-            · **Full bleed.** The rail runs the width of the viewport rather than
-              the width of the measure. A timeline is the one thing on a page that
-              ought not to be boxed — it is a span of time, and the measure is a
-              column of text. The narrative above it stays on the measure, so the
-              section still has one reading column and one edge-to-edge object.
-
-            · **The narrative is above, not beside.** Side by side, the sentence
-              and the diagram each got half the width and neither was big enough to
-              read as the thing it was. Stacked, the sentence can be enormous and
-              the rail can be long, and the frame fills.
-
-            The rail used to draw itself left to right as the reader scrolled, which
-            was the page's own gesture — a record being written — and the same one the
-            tally line and the claim already use. That cost 280vh of scroll and a
-            pinned frame to say something the election's own status says for free, so
-            the rail is static now: the gesture is still here, in the claim and the
-            tally line, and the diagram is just a diagram. */}
-        <section className="land-life" id="land-life" aria-labelledby="land-life-h">
-          <div className="land-wrap land-life-intro">
-            <span className="eyebrow eyebrow-blue land-reveal" data-reveal>The lifecycle</span>
-            <h2 className="land-headline land-headline-sm land-reveal" id="land-life-h" data-reveal>
-              Seven states, and the poll can go back.
-            </h2>
-            <p className="land-detail land-detail-sm land-reveal" data-reveal>
-              Six of them only move forward. One does not: a poll can be paused and resumed
-              and arrive exactly where it started. And certification is not optional on the
-              way to the archive — a finished poll cannot be filed away uncertified.
-            </p>
-          </div>
-
-          {wide ? (
-            /*
-             * No track and no sticky frame.
-             *
-             * This was a 280vh section with a sticky frame, and the state index was
-             * the reader's scroll position: the rail drew itself as they moved. It is
-             * now the height of its own content, and the state index is the live
-             * election's actual status — so the diagram answers on arrival rather
-             * than after a screen and a half of scrolling, and it answers the same
-             * way every time instead of depending on where someone stopped reading.
-             *
-             * The consequence worth stating: the rail no longer *animates*. It is a
-             * static picture of where the election is, which is what a lifecycle
-             * diagram is. The `--life-progress` fill still shows how far it has got,
-             * and that is now a fact rather than an animation.
-             */
-            <div className="land-life-frame">
-                {/* The narrative, on the measure. */}
-                <div className="land-wrap land-life-story">
-                  <div className="land-life-top">
-                    <span className="eyebrow eyebrow-blue">Now</span>
-                    <span className="land-life-step" aria-hidden="true">
-                      {String(step + 1).padStart(2, '0')}
-                      <span className="land-life-step-of">/ {String(SPINE.length).padStart(2, '0')}</span>
-                    </span>
-                  </div>
-
-                  {/*
-                    No `key`, and that is the point. It was keyed on the state so
-                    React remounted the block on every change and this arrival
-                    animation replayed — necessary when the text swapped under the
-                    reader, and pointless now. The block is written once, on arrival,
-                    from the election's real status, and it does not change under
-                    anyone.
-                  */}
-                  <div className="land-life-say">
-                    <h3 className="land-life-name">{STATUS_LABELS[SPINE[step]]}</h3>
-                    <p className="land-life-copy">{STATUS_DESCRIPTIONS[SPINE[step]]}</p>
-                  </div>
-
-                  {/*
-                    The footnote, cut to one line.
-
-                    Two edits, both about spending words. "on this rail" went: the
-                    rail is directly above it, so naming it was fourteen characters
-                    spent pointing at something the reader is already looking at.
-                    "Every transition is" went too, leaving the sentence as a
-                    fragment — which is what a footnote under a diagram should be,
-                    and which also happens to be the length that fits one line at
-                    13px in a 52ch measure. At two lines it stranded "are showing."
-                    on its own.
-
-                    The contrast clause stayed. "not by which buttons are showing"
-                    is the half that separates this from a client-side state
-                    machine, and it is the half worth the line.
-                  */}
-                  <p className="land-life-key">
-                    <span className="land-life-key-dot" aria-hidden="true" />
-                    Enforced by the server, not by which buttons are showing.
-                  </p>
-                </div>
-
-                {/* The rail, edge to edge. */}
-                <div className="land-life-railwrap">
-                  <ol
-                    className="land-life-rail"
-                    style={{ '--life-progress': step / (SPINE.length - 1) } as React.CSSProperties}
-                    aria-label="The six forward states of an election"
-                  >
-                    {SPINE.map((status, i) => {
-                      const reached = i <= step
-                      const current = i === step
-                      // The edge belongs to the state it leaves. Indexing by i-1
-                      // puts every connector a column out of place.
-                      const edge = SPINE_EDGES[i]
-                      return (
-                        <li
-                          className={
-                            current ? 'life-stop life-stop-now'
-                              : reached ? 'life-stop life-stop-past'
-                                : 'life-stop'
-                          }
-                          key={status}
-                        >
-                          {edge && (
-                            <span
-                              className={reached ? 'life-edge life-edge-on' : 'life-edge'}
-                              aria-hidden="true"
-                            >
-                              <span className="life-edge-label">{reached ? edge.action : ''}</span>
-                            </span>
-                          )}
-
-                          <span className="life-node" aria-hidden="true" />
-
-                          <span className="life-name">{STATUS_LABELS[status]}</span>
-
-                          {/*
-                            The branch, hanging under `open` in every mode. It is
-                            the reason this section exists — a poll that can stop
-                            and come back is not a straight line through six states.
-                          */}
-                          {status === 'open' && (
-                            <span className="life-branch">
-                              <span className="life-branch-stem" aria-hidden="true" />
-                              <span className="life-branch-cap" aria-hidden="true" />
-                              <span className="life-branch-name">{STATUS_LABELS[BRANCH]}</span>
-                              <span className="life-branch-note">
-                                Pause and resume — back to exactly where it left off
-                              </span>
-                            </span>
-                          )}
-                        </li>
-                      )
-                    })}
-                  </ol>
-                </div>
-            </div>
-          ) : (
-            /*
-             * Narrow. A horizontal rail cannot work here: six states and five
-             * labels across 390px puts roughly 60px on each, and the action names
-             * are longer than that. So this is the honest fallback rather than a
-             * squeezed version of the same thing — the same seven states, vertical,
-             * each carrying its own description, because with no readout panel there
-             * is nowhere else for them to go.
-             */
-            <div className="land-wrap land-life-list">
-              <ol className="land-graph land-graph-static">
-                {SPINE.map((status, i) => {
-                  const edge = SPINE_EDGES[i]
-                  return (
-                    <li className="land-graph-row" key={status}>
-                      {edge && (
-                        <span className="land-graph-link land-graph-link-on" aria-hidden="true">
-                          <span className="land-graph-link-label">{edge.action}</span>
-                        </span>
-                      )}
-                      <span className="land-graph-node land-graph-node-past">
-                        <span className="land-graph-dot" aria-hidden="true" />
-                        <span className="land-graph-name">{STATUS_LABELS[status]}</span>
-                      </span>
-                      <p className="land-graph-desc">{STATUS_DESCRIPTIONS[status]}</p>
-                      {status === 'open' && (
-                        <div className="land-graph-branch">
-                          <span className="land-graph-branch-stem" aria-hidden="true" />
-                          <span className="land-graph-branch-stub" aria-hidden="true" />
-                          <span className="land-graph-branch-body">
-                            <span className="land-graph-branch-name">{STATUS_LABELS[BRANCH]}</span>
-                            <span className="land-graph-branch-note">
-                              {STATUS_DESCRIPTIONS[BRANCH]}
-                            </span>
-                          </span>
-                        </div>
-                      )}
-                    </li>
-                  )
-                })}
-              </ol>
-            </div>
-          )}
-        </section>
-
-        {/* ---- 4. Coverage --------------------------------------------------
-            The densest section on the page, and deliberately the quietest: four
-            small-type columns, no images, no cards. It is the part of the
-            argument that is a list, so it is set as a list. */}
-        <section className="land-band land-coverage" id="land-coverage" aria-labelledby="land-coverage-h">
-          <div className="land-wrap">
-            <h2 className="land-headline land-headline-sm land-reveal" id="land-coverage-h" data-reveal>
-              One installation. Every kind of vote.
-            </h2>
-
-            <div className="land-coverage-grid">
-              <div className="land-coverage-cell land-reveal" data-reveal>
-                <span className="eyebrow eyebrow-blue">{COVERAGE.types.eyebrow}</span>
-                <p className="land-detail land-detail-sm">{COVERAGE.types.detail}</p>
-                <ul className="land-tags">
-                  {ELECTION_TYPES.map((type) => (
-                    <li key={type}>{ELECTION_TYPE_LABELS[type]}</li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="land-coverage-cell land-reveal" data-reveal>
-                <span className="eyebrow eyebrow-blue">{COVERAGE.visibility.eyebrow}</span>
-                <p className="land-detail land-detail-sm">{COVERAGE.visibility.detail}</p>
-                <ul className="land-tags">
-                  {RESULTS_VISIBILITIES.map((rule) => (
-                    <li key={rule}>{VISIBILITY_LABELS[rule]}</li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="land-coverage-cell land-reveal" data-reveal>
-                <span className="eyebrow eyebrow-blue">{COVERAGE.ballots.eyebrow}</span>
-                <p className="land-detail land-detail-sm">{COVERAGE.ballots.detail}</p>
-                <ul className="land-tags">
-                  <li>NOTA offered or withheld</li>
-                  <li>Abstain counted separately</li>
-                  <li>Ballot order randomised</li>
-                  <li>One-time codes required</li>
-                </ul>
-              </div>
-            </div>
-
-            {/*
-              The roles, in their own band rather than as a fourth column.
-              Five role descriptions stacked in one column of a four-column grid
-              made that column twice the height of the other three and left the
-              section bottom-heavy and lopsided. Across the full measure they are
-              five short entries on one line of rule, which is what they are: a
-              permission model, read across rather than down.
-            */}
-            <div className="land-roles-band land-reveal" data-reveal>
-              <div className="land-roles-band-head">
-                <span className="eyebrow eyebrow-blue">{COVERAGE.roles.eyebrow}</span>
-                <p className="land-detail land-detail-sm">{COVERAGE.roles.detail}</p>
-              </div>
-              <ul className="land-roles">
-                {ADMIN_ROLES.map((role) => (
-                  <li key={role}>
-                    <span className="land-role-name">{ROLE_LABELS[role]}</span>
-                    <span className="land-role-detail">{ROLE_DESCRIPTIONS[role]}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        {/* ---- 5. This workspace ---------------------------------------------
-            Real figures, from the elections the server returned. The whole
-            section is conditional on there being something to report: an
-            election platform's landing page inventing adoption numbers is the
-            fastest way to lose an audience that has spent its life watching
-            people invent them. */}
-        <section className="land-band land-figures" aria-labelledby="land-figures-h">
-          <div className="land-wrap">
-            <div className="land-figures-head">
-              <span className="eyebrow eyebrow-blue land-reveal" data-reveal>This workspace</span>
-              <h2 className="land-headline land-headline-sm land-reveal" id="land-figures-h" data-reveal>
-                What is on this server right now.
-              </h2>
-              <p className="land-detail land-detail-sm land-reveal" data-reveal>
-                Read from the election database behind this page — not an example, not a
-                screenshot. It updates with the workspace.
-              </p>
-            </div>
-
-            {figures ? (
-              <dl className="land-figure-row land-reveal" data-reveal>
-                {figures.map((figure) => (
-                  <div className="land-figure" key={figure.label}>
-                    <dt className="land-figure-label">{figure.label}</dt>
-                    <dd className="land-figure-value">{figure.value}</dd>
-                    <dd className="land-figure-note">{figure.note}</dd>
-                  </div>
-                ))}
-              </dl>
-            ) : (
-              <p className="land-figures-empty land-reveal" data-reveal>
-                Nothing to report — the workspace is empty, or this server could not be reached.
-                Start one and the figures appear here.
-              </p>
-            )}
-          </div>
-        </section>
-
-        {/* ---- 6. The two doors ---------------------------------------------
-            Back where the page started, at the bottom, which is where a reader
-            who has just been convinced actually wants to be. The same two
-            destinations, the same order, and the same one-click behaviour as the
-            front door: the operator is more likely to be the one who arrived. */}
-        <section className="land-band land-close">
-          <div className="land-wrap">
-            <h2 className="land-headline land-headline-sm land-reveal" data-reveal>
-              Two ways in.
-            </h2>
-
-            <nav className="land-doors land-reveal" data-reveal aria-label="Choose where to go next">
-              <button type="button" className="entry-way land-door" onClick={() => go('#/enter')}>
-                <span className="entry-way-text">
-                  <span className="entry-way-label">Continue to the admin console</span>
-                  <span className="entry-way-detail">Sign in with your administrator credentials.</span>
-                </span>
-                <span className="entry-way-arrow" aria-hidden="true"><Icon name="arrow-right" /></span>
-              </button>
-              <button type="button" className="entry-way land-door" onClick={() => go('#/vote')}>
-                <span className="entry-way-text">
-                  <span className="entry-way-label">Continue to the voter portal</span>
-                  <span className="entry-way-detail">Cast your ballot. No account and no password needed.</span>
-                </span>
-                <span className="entry-way-arrow" aria-hidden="true"><Icon name="arrow-right" /></span>
-              </button>
-            </nav>
-
-            {/* The three documents, on the landing page rather than buried in a
-                footer nobody reaches. For a product that argues its claims are
-                checkable, they belong where the argument is made. */}
-            <div className="land-close-foot land-reveal" data-reveal>
-              <p className="land-close-sub">Ballot secrecy is structural, not a promise.</p>
-              <nav className="land-close-docs" id="land-docs" aria-label="Legal and policy">
-                <a href="#/legal">Legal notices</a>
-                <a href="#/terms">Terms</a>
-                <a href="#/privacy">Privacy</a>
-              </nav>
-            </div>
-          </div>
-        </section>
+        </div>
       </main>
     </div>
   )
-}
-
-/* ========================================
-   The real figures
-   ======================================== */
-
-type Figure = { label: string; value: string; note?: string }
-
-/**
- * Section five's numbers, counted from the elections the server returned.
- *
- * Turnout is computed from `participant_count` and never from `ballot_count`.
- * Those are kept apart in the domain model for exactly this reason: the number
- * of ballots is not the number of people who voted when a ballot carries several
- * selections, so deriving a headcount from the table that holds what people chose
- * is how a turnout figure quietly starts implying something about individual
- * choices. This is the same rule the console follows, for the same reason, and it
- * is worth the reader knowing that this page got it right.
- */
-function liveFigures(bootstrap: Bootstrap | null): Figure[] | null {
-  const elections = bootstrap?.elections ?? []
-  if (elections.length === 0) return null
-
-  let ballots = 0
-  let eligible = 0
-  let participants = 0
-  const states = new Set<ElectionStatus>()
-
-  for (const election of elections) {
-    ballots += election.ballot_count
-    eligible += election.eligible_count
-    participants += election.participant_count
-    states.add(election.effective_status)
-  }
-
-  const turnout = eligible > 0 ? Math.round((participants / eligible) * 100) : 0
-  const labels = ELECTION_STATUSES.filter((status) => states.has(status))
-
-  return [
-    { label: 'Elections', value: String(elections.length), note: 'on this server at once' },
-    { label: 'Ballots cast', value: String(ballots), note: 'anonymous, receipted' },
-    { label: 'On the rolls', value: String(eligible), note: 'across every roll' },
-    { label: 'Turnout', value: `${turnout}%`, note: 'of those eligible' },
-    {
-      label: 'States in use',
-      value: `${labels.length} of 7`,
-      note: labels.map((s) => STATUS_LABELS[s].toLowerCase()).join(', '),
-    },
-  ]
 }
