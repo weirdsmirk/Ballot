@@ -12,18 +12,24 @@
  *     a hairline rather than a shadow. On a dark surface, hierarchy has to come
  *     from border weight, surface step and type scale — a drop shadow reads as
  *     nothing at all once the page behind it is nearly the same colour.
- *   · Instrument Serif carries every name: page titles, card titles, candidate
- *     names, the figures in a tally, the wordmark. It ships at one weight, so
- *     hierarchy inside it comes from size and colour, never from bold.
- *   · Inter carries everything else: every sentence, label, control and name.
- *     It is the interface.
+ *   · Google Sans carries every name: page titles, card titles, candidate names,
+ *     the figures in a tally, the wordmark, and every sentence, label and control.
+ *     It is the interface and it is the display, and it is a variable font, so the
+ *     weight axis is real rather than four snapped cuts.
+ *   · Instrument Serif is the other half, and it is now the *secondary* voice
+ *     rather than the primary one: it carries the phrases a voter is meant to sit
+ *     with — the claim on the opening, the headline in the secrecy section, the
+ *     state names on the lifecycle rail. Used for names it read as a voice; used
+ *     for everything it read as a costume.
  *   · Machine data — receipt codes, digests, one-time codes, timestamps — is set
- *     in Inter too, and distinguished by *tabular figures* rather than by a
- *     different typeface. That is not a downgrade: a monospace is the usual way
- *     to stop a column of digits from going ragged, but it is not the only way,
- *     and `font-variant-numeric: tabular-nums` does that job in the face that is
+ *     in the interface face and distinguished by *tabular figures* rather than by a
+ *     different typeface. That is not a downgrade: a monospace is the usual way to
+ *     stop a column of digits from going ragged, but it is not the only way, and
+ *     `font-variant-numeric: tabular-nums` does that job in the face that is
  *     already loaded, without putting a second alphabet on the page. The `.data`
  *     utility sets it.
+ *   · Corners are Google's shape scale, not a bespoke ladder: 4 / 8 / 12 / 16 /
+ *     full. See the shape tokens for what each one is for.
  *   · Green is the only action colour. Green means healthy, amber means waiting
  *     and red means refused. Those three never take a button.
  *   · Labels are small, uppercase and letterspaced. They name every region,
@@ -37,7 +43,7 @@
  * distinctions the product needed.
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;450;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans:ital,wght@0,400..700;1,400..700&family=Instrument+Serif:ital@0;1&display=swap');
 @import "tailwindcss";
 
 /* ========================================
@@ -46,7 +52,7 @@
 :root {
   /* Type */
   --font-serif: 'Instrument Serif', 'Iowan Old Style', 'Times New Roman', Georgia, serif;
-  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-sans: 'Google Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
   /*
    * The monospace token is gone, and nothing replaces it.
    *
@@ -69,7 +75,7 @@
    * "this is the lockup" in a way that `var(--font-sans)` does not. If the face
    * ever changes, this is the one line to change.
    */
-  --font-wordmark: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-wordmark: 'Google Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   /* Ground and surfaces — near-black, faintly warm */
   --bg: #080a09;
@@ -155,12 +161,33 @@
   --blue-soft-2: rgba(126, 224, 168, 0.2);
   --blue-ink: #a8ecc6;
 
-  /* Shape */
-  --r-xs: 5px;
-  --r-sm: 7px;
-  --r-md: 10px;
-  --r-lg: 14px;
-  --r-pill: 999px;
+  /*
+   * Shape — Google's corner scale.
+   *
+   * The five tokens are Google's, not ours: extra small, small, medium, large and
+   * full, from the Labs shape scale. They replace an arbitrary 5/7/10/14 ladder,
+   * which is a shape system nobody could reason about — nothing said why a card was
+   * 14 and a tag was 5, and the two were never more than 4px apart, so nothing was
+   * being distinguished either.
+   *
+   * These are spaced far enough apart to mean something. A tag at 4 and a card at
+   * 16 are visibly different objects; a tag at 5 and a card at 14 were the same
+   * object with a different class name.
+   *
+   *   extra small  4   tags, small chips, tight controls
+   *   small        8   inputs, selects, buttons, callouts
+   *   medium      12   inner cards, wells, list rows
+   *   large       16   cards, panels, the auth frame
+   *   full       9999   buttons, anything that reads as pressable
+   *
+   * Every one of these is already referenced by name, so the scale is now the one
+   * thing deciding how round anything in the product is.
+   */
+  --r-xs: 4px;
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-pill: 9999px;
 
   /*
    * The page measure.
@@ -612,7 +639,7 @@ a { color: inherit; }
   justify-content: center;
   gap: 8px;
   border: 1px solid transparent;
-  border-radius: var(--r-sm);
+  border-radius: var(--r-pill);
   font-weight: 550;
   line-height: 1;
   cursor: pointer;
@@ -634,7 +661,7 @@ a { color: inherit; }
   background: var(--green);
   color: var(--green-ink);
   border: 1px solid var(--green);
-  border-radius: var(--r-sm);
+  border-radius: var(--r-pill);
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
@@ -659,7 +686,7 @@ a { color: inherit; }
   background: transparent;
   color: var(--ink-2);
   border: 1px solid var(--border-strong);
-  border-radius: var(--r-sm);
+  border-radius: var(--r-pill);
   font-weight: 550;
   font-size: 13px;
   cursor: pointer;
@@ -681,7 +708,7 @@ a { color: inherit; }
   background: transparent;
   color: var(--muted);
   border: 1px solid transparent;
-  border-radius: var(--r-sm);
+  border-radius: var(--r-pill);
   font-weight: 550;
   font-size: 13px;
   cursor: pointer;
@@ -701,7 +728,7 @@ a { color: inherit; }
   background: transparent;
   color: var(--muted);
   border: 1px solid var(--border);
-  border-radius: var(--r-sm);
+  border-radius: var(--r-pill);
   cursor: pointer;
   flex: none;
   position: relative;
@@ -722,7 +749,7 @@ a { color: inherit; }
   background: var(--red-soft);
   color: var(--red-text);
   border: 1px solid var(--red-soft-2);
-  border-radius: var(--r-sm);
+  border-radius: var(--r-pill);
   font-weight: 600;
   font-size: 13px;
   cursor: pointer;
@@ -743,7 +770,7 @@ a { color: inherit; }
   background: rgba(255, 255, 255, 0.06);
   color: var(--ink);
   border: 1px solid var(--border-strong);
-  border-radius: var(--r-sm);
+  border-radius: var(--r-pill);
   font-weight: 550;
   font-size: 13px;
   cursor: pointer;
@@ -767,7 +794,7 @@ a { color: inherit; }
   background: var(--green);
   color: var(--green-ink);
   border: 1px solid var(--green);
-  border-radius: var(--r-sm);
+  border-radius: var(--r-pill);
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
@@ -790,7 +817,7 @@ a { color: inherit; }
   background: var(--green);
   color: var(--green-ink);
   border: 1px solid var(--green);
-  border-radius: var(--r-sm);
+  border-radius: var(--r-pill);
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
@@ -817,7 +844,7 @@ a { color: inherit; }
   background: var(--green);
   color: var(--green-ink);
   border: 1px solid var(--green);
-  border-radius: var(--r-sm);
+  border-radius: var(--r-pill);
   font-weight: 600;
   font-size: 13px;
   cursor: pointer;
@@ -838,7 +865,7 @@ a { color: inherit; }
   background: transparent;
   color: var(--ink-2);
   border: 1px solid var(--border-strong);
-  border-radius: var(--r-sm);
+  border-radius: var(--r-pill);
   font-weight: 550;
   font-size: 13.5px;
   cursor: pointer;
@@ -854,7 +881,7 @@ a { color: inherit; }
   background: var(--green);
   color: var(--green-ink);
   border: 1px solid var(--green);
-  border-radius: var(--r-sm);
+  border-radius: var(--r-pill);
   font-weight: 600;
   font-size: 13.5px;
   cursor: pointer;
@@ -883,7 +910,7 @@ a { color: inherit; }
   gap: 7px;
   height: 38px;
   padding: 0 15px;
-  border-radius: var(--r-sm);
+  border-radius: var(--r-pill);
   border: 1px solid var(--green);
   background: var(--green);
   color: var(--green-ink);
@@ -3227,7 +3254,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   margin-left: auto;
   background: transparent;
   border: 1px solid var(--border-strong);
-  border-radius: var(--r-sm);
+  border-radius: var(--r-pill);
   padding: 8px 13px;
   font-size: 13px;
   font-weight: 550;

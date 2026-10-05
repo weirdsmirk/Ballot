@@ -372,24 +372,34 @@
  * but they are set to be *read*, and this is set to be *landed on*. The size is
  * the composition, not decoration — at anything under about 90px the two lines
  * stop being a title card and become a headline.
+ *
+ * It was Instrument Serif, and is now the interface face.
+ *
+ * The reference this was rebuilt from is a title card set in a grotesque: one very
+ * large line, one smaller line under it, one pill. A serif here was a costume —
+ * Instrument Serif is now the *secondary* voice on this page, carrying the phrases
+ * a voter is meant to sit with, and the one thing that should be largest was the
+ * one thing wearing the smaller face.
+ *
+ * Consequence, and it is a real one: the accent line was italic for two
+ * revisions — a deliberate request, set in the serif's own drawn italic — and the
+ * reference has no italic anywhere. Matching the reference drops it. If the italic
+ * is wanted back, `.land-claim-accent` is the one rule to change.
  */
 .land-claim {
-  font-family: var(--font-serif);
-  font-weight: 400;
-  /* -0.018em, down from -0.028em.
+  font-family: var(--font-sans);
+  font-weight: 500;
+  /*
+   * -0.03em, and tighter than the -0.018em the serif had.
    *
-   * It was the tightest tracking anywhere in the product — the page title is
-   * -0.022em at 40px, this was tighter at 168px. At that size the space between
-   * letters is large enough in absolute terms that -0.028em pulls the pairs in the
-   * serif apart from each other: the f and i of "confidence" and the c and t of
-   * "elections" read as a single mass rather than as letters.
-   *
-   * Display type wants *less* negative tracking as it grows, not more. The cut that
-   * reads correctly at 40px over-tightens at 168px, because a proportion of an em
-   * is a much bigger number of pixels when the em is four times the size.
+   * A grotesque at this size needs more negative tracking than a serif does, not
+   * less. Instrument Serif's letterforms are narrow and the fit between them was
+   * doing most of the work; Google Sans is a wider face with more open counters, and
+   * at 158px the default spacing sets the whole line loose enough to read as three
+   * words rather than one.
    */
-  letter-spacing: -0.018em;
-  line-height: 0.92;
+  letter-spacing: -0.03em;
+  line-height: 0.96;
   color: var(--ink);
   margin: 0;
   /*
@@ -429,40 +439,39 @@
 }
 .land-claim-line {
   display: block;
-  /* 8vw, down from 9.6vw. At 9.6 the claim ran to 1920px on a 2000px display — the
-     whole width of the screen, with the lede and the buttons hung off it at the
-     left and the photograph reduced to a margin. */
+  /*
+   * 8vw, down from 9.6vw.
+   *
+   * At 9.6 the claim ran to 1920px on a 2000px display — the whole width of the
+   * screen, with the lede and the button hung off it at the left and the
+   * photograph reduced to a margin.
+   */
   font-size: inherit;
 }
+
 /*
- * The accent line: italic, and white.
+ * The accent line: white, upright.
  *
- * It was green, and the colour was carrying the emphasis. Colour and italic are the
- * same weight in a title card — using both is what made it read as decoration
- * rather than as type — so the style now carries it alone and the line is the same
- * colour as the line above it.
+ * It was green, and then italic white. Both were carrying the emphasis and now
+ * neither does — it is the same colour as the line above it and is distinguished
+ * only by being the second line. That is the reference exactly: a title card whose
+ * two lines are the same thing.
  *
- * Instrument Serif ships a real italic (the stylesheet imports `ital@0;1`), so this
- * is a drawn italic and not a synthesised slant — at 158px the difference between
- * the two is the difference between a serif and an oblique.
- *
- * One consequence worth stating: the claim's measure is set in `ch` on the parent,
- * and italic advances differently from roman, so the width this line needs is not
- * the width the roman version needed. The cap has enough slack for both; if the
- * claim ever wraps at 158px, this is the first number to look at.
+ * The italic was asked for two revisions ago, in the serif's own drawn cut, and
+ * matching the reference dropped it. It is one declaration away — `font-style:
+ * italic` here and on `.land-claim-stop`. Google Sans ships a real italic, so it
+ * would not be a synthesised slant.
  */
 .land-claim-accent {
-  font-style: italic;
   color: var(--ink);
 }
 
 /*
- * The full stop, upright.
+ * The full stop, as its own span.
  *
- * Set as its own span rather than left inside the italic. A period is punctuation
- * and the italic is emphasis, and an italic period at display size leans away from
- * the word it belongs to — at 158px the difference is the difference between a full
- * stop and a comma. White, so it matches the line it closes.
+ * It was separate because an italic period leans away from the word it belongs to.
+ * It stays separate because a period is punctuation and the line is a title, and it
+ * costs nothing.
  */
 .land-claim-stop {
   font-style: normal;
