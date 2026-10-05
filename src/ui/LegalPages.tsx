@@ -200,7 +200,7 @@ export function isLegalPage(hash: string): LegalPageId | null {
  */
 export function LegalPage({
   id,
-  backTo = '#/',
+  backTo = '#/enter',
   backLabel = 'Back to the front door',
 }: {
   id: LegalPageId
