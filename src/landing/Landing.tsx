@@ -477,7 +477,7 @@ export function Landing() {
             */}
             <div className="land-open-actions land-open-item" data-open="3">
               <button type="button" className="btn-primary btn-lg" onClick={() => go('#/enter')}>
-                Enter the workspace
+                Enter Workspace
               </button>
             </div>
           </div>
