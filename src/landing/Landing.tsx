@@ -68,16 +68,24 @@ const OPEN = {
    * The claim, and nothing above it.
    *
    * There used to be an "Election workspace" eyebrow here. It went because the claim
-   * is two lines of display serif at up to 158px with a photograph behind it, and
-   * an eyebrow above it is a third horizontal element competing with the only two
-   * that matter — and because the photograph already says what this is. A ballot
-   * box with a hand above it is the product's subject, not its caption.
+   * is two lines of display type at up to 158px with a photograph behind it, and an
+   * eyebrow above it is a third horizontal element competing with the only two that
+   * matter — and because the photograph already says what this is. A ballot box with
+   * a hand above it is the product's subject, not its caption.
    *
-   * The accent line carries no full stop. It is set separately, one span, upright,
-   * because a period is punctuation and the italic is emphasis — an italic period
-   * at 158px reads as a comma.
+   * Two words now, and they break across the two lines rather than sitting on one.
+   *
+   * Set as a single line at this size, "Make Count." is about 620px of type on a
+   * 2000px plate — a headline with a great deal of empty frame around it, which is
+   * what a phrase this short does to a hero built for a sixteen-word sentence. The
+   * line break puts the verb over the noun, which is also the only reading of the
+   * phrase that sounds like a sentence rather than two nouns side by side, and it
+   * returns the claim to roughly the width it held before.
+   *
+   * The second line carries the full stop, set in its own span. A period is
+   * punctuation and the line is a title, and it costs nothing to separate.
    */
-  claim: ['Run elections', 'with confidence'],
+  claim: ['Make', 'Count'],
   lede:
     'Ballot runs the whole election from one machine. Five roles decide who may open the poll, certify the result or only read, and every administrative action is written down.',
 }
@@ -446,13 +454,13 @@ export function Landing() {
                 the two cannot disagree again.
               */}
               {/*
-                The accent line: white, italic, and the full stop upright.
+                The accent line: white, upright, and the full stop in its own span.
 
-                It was green, and the colour was doing the emphasis. Emphasis by
-                colour and emphasis by italic are the same weight in a title card —
-                using both is what made it read as decoration — and Instrument Serif
-                ships a real italic, so the style can carry it on its own. That also
-                hands the green back to the one place it means "go": the button.
+                It was green, and the colour was doing the emphasis; then italic
+                white, and the italic was doing it. Neither does now. The second
+                line is the same weight and the same colour as the first and is
+                distinguished by being the second — which leaves the green meaning
+                exactly one thing on this page, and that thing is the button.
               */}
               <span className="land-claim-line land-claim-accent" data-open="2">
                 {OPEN.claim[1]}
