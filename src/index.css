@@ -2768,7 +2768,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
 */
 .election-grid { align-items: stretch; }
 .election-card {
-  height: 254px;
+  height: 258px;
   min-width: 0;
   padding: 18px;
   text-align: left;
@@ -2779,7 +2779,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   box-shadow: var(--shadow-sm);
   cursor: pointer;
   display: grid;
-  grid-template-rows: 26px 48px minmax(60px, 1fr) 46px;
+  grid-template-rows: 30px 48px minmax(60px, 1fr) 46px;
   gap: 12px;
   transition: border-color var(--ease), background var(--ease), box-shadow var(--ease);
 }
