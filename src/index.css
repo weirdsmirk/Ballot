@@ -177,10 +177,10 @@
    *
    *   extra small  4   tight controls, a close button, a 6px dot
    *   small        8   tags, chips, avatars, small callouts
-   *   medium      12   icon tiles, tabs, code blocks, list rows
+   *   medium      12   fields, icon tiles, tabs, code blocks, list rows
    *   large       16   inner cards, wells, tables, menus, nav rows, alerts
    *   extra large 28   cards, panels, modals — the outermost boxes
-   *   full       9999   buttons *and* inputs: everything you touch
+   *   full       9999   buttons, badges, switches, meters, anything pressable
    *
    * Every one of these is referenced by name, so the scale is the one thing deciding
    * how round anything in the product is, and a hardcoded radius anywhere is a bug.
@@ -190,11 +190,18 @@
    * at 16px, which is a rounding, not a shape, and the largest objects in the product
    * were the least rounded things in it.
    *
-   * `full` is not just buttons. It used to be, and the inputs were left on `small`
-   * at 8px — so a pill button sat directly below an input with a visibly different
-   * corner, in the same form, a few lines apart. Two things you reach for should not
-   * be told apart by their shape. Anything the pointer or the keyboard lands on is
-   * `full` now; anything the pointer looks *at* is on the scale below it.
+   * **Fields are not buttons, and they should not be shaped like them.** They were
+   * tried at `full`, matching the buttons directly below them, on the argument that
+   * two things you reach for should not be told apart by shape. A 44px field at 9999px
+   * is a lozenge: at a quarter of the width it stops reading as a box you type into
+   * and starts reading as a capsule, and the rounded ends eat the padding the
+   * placeholder needs. So fields sit on `medium` at 12px — visibly rounded, clearly a
+   * field, and a step above the 8px they were at before.
+   *
+   * The buttons are pills and the fields are not, and that is a deliberate
+   * difference rather than an inconsistency: a button is a thing you press once, a
+   * field is a surface you sit and read. If they are ever made to match again, check
+   * a placeholder at the left edge first — that is what a pill field breaks.
    */
   --r-xs: 4px;
   --r-sm: 8px;
@@ -1629,7 +1636,7 @@ a { color: inherit; }
   height: 44px;
   padding: 0 14px;
   border: 1px solid var(--border-strong);
-  border-radius: var(--r-pill);
+  border-radius: var(--r-md);
   background: var(--bg-sunken);
   font-size: 14px;
   color: var(--ink);
@@ -1823,7 +1830,7 @@ a { color: inherit; }
   font-weight: 400;
   color: var(--ink);
   border: 1px solid var(--border-strong);
-  border-radius: var(--r-pill);
+  border-radius: var(--r-md);
   background: var(--bg-sunken);
   outline: none;
   transition: border-color var(--ease), box-shadow var(--ease);
@@ -2156,7 +2163,7 @@ a { color: inherit; }
   height: 40px;
   padding: 0 13px 0 36px;
   border: 1px solid var(--border-strong);
-  border-radius: var(--r-pill);
+  border-radius: var(--r-md);
   background: var(--bg-sunken);
   font-size: 13.5px;
   color: var(--ink);
@@ -2169,7 +2176,7 @@ a { color: inherit; }
 .election-picker select {
   height: 40px;
   border: 1px solid var(--border-strong);
-  border-radius: var(--r-pill);
+  border-radius: var(--r-md);
   background: var(--bg-sunken);
   font-size: 13px;
   padding: 0 36px 0 13px;
@@ -2988,7 +2995,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   min-height: 44px;
   padding: 11px 14px;
   border: 1px solid var(--border-strong);
-  border-radius: var(--r-pill);
+  border-radius: var(--r-md);
   background: var(--bg-sunken);
   font-size: 14px;
   color: var(--ink);
