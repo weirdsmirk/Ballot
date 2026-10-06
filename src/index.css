@@ -4627,7 +4627,28 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
 
 .surface--in,
 .surface--back {
-  animation: surface-in 240ms var(--ease);
+  /*
+   * The curve is spelled out, not taken from `--ease`, and that is not a style
+   * preference. `--ease` is `0.18s cubic-bezier(0.2, 0, 0.2, 1)` — it carries a
+   * duration as well as a timing function, because a `transition` wants both. In an
+   * `animation` shorthand the first `<time>` is the duration and the second is the
+   * delay, so `animation: surface-in 240ms var(--ease)` does not mean "240ms, eased".
+   * It means *240ms duration, 180ms delay*. Nothing is wrong with that in a
+   * stylesheet; nothing announces it either.
+   *
+   * What it did here was make the transition happen 180ms late. The destination
+   * mounted, painted at full opacity and sat there — a fifth of a second of a
+   * perfectly still new page — and only then dropped to zero and faded in, which
+   * read as a page that changed and then, separately, did something. Traced frame by
+   * frame: opacity 1 at 47ms through 227ms, then 0.0017 at 244ms.
+   *
+   * The other six animations in this file all take their curve literally, and
+   * `modal-in` at line 2993 already spells out this exact cubic-bezier for this exact
+   * reason. Two tokens for one idea — `--ease` for the duration-plus-curve that a
+   * transition needs, and a bare curve where an animation already has its duration —
+   * is the whole fix.
+   */
+  animation: surface-in 240ms cubic-bezier(0.2, 0, 0.2, 1);
 }
 
 @keyframes surface-in {

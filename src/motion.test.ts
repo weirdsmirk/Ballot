@@ -187,6 +187,75 @@ const retainedTransforms = parse(sheet).filter(
   (r) => RETAINS.test(r.body) && moving.some((name) => new RegExp(`\\b${name}\\b`).test(r.body)),
 )
 
+/*
+ * No animation may arrive late.
+ *
+ * In an `animation` shorthand the first `<time>` is the duration and the second is
+ * the delay. `--ease` is `0.18s cubic-bezier(0.2, 0, 0.2, 1)` — correct for a
+ * `transition`, which wants a duration and a curve, and quietly wrong for an
+ * `animation`, which already has a duration. Written as
+ * `animation: surface-in 240ms var(--ease)` it parses as *240ms duration, 180ms
+ * delay*, and the stylesheet that says so looks entirely reasonable.
+ *
+ * The page transition shipped that way and the delay was invisible in every static
+ * check, in the build, and in a screenshot taken after the animation had settled. It
+ * only showed by sampling every painted frame: opacity pinned at 1 from 47ms to
+ * 227ms, then 0.0017 at 244ms. The destination mounted, sat still for 180ms, then
+ * blinked out and faded in — a page that changed and then, separately, did something.
+ *
+ * So this counts `<time>` values in each expanded animation shorthand. Two means a
+ * delay nobody asked for. `var()` is resolved first, because that is how the delay
+ * got in: the shorthand that produced it had one time value written in it and two
+ * after expansion.
+ */
+
+const ROOT_PROPERTIES = new Map<string, string>()
+for (const m of readFileSync(STYLESHEET, 'utf8').matchAll(/(--[\w-]+)\s*:\s*([^;{}]+);/g)) {
+  if (!ROOT_PROPERTIES.has(m[1])) ROOT_PROPERTIES.set(m[1], m[2].trim())
+}
+
+/** Resolve `var(--x, fallback)` against the declared custom properties. */
+function expandVars(value: string): string {
+  return value.replace(/var\((--[\w-]+)(?:\s*,\s*([^)]*))?\)/g, (_, name, fallback) =>
+    (ROOT_PROPERTIES.get(name) ?? (fallback ?? '').trim()),
+  )
+}
+
+const TIME = /(^|[\s,(])(\d*\.?\d+)m?s(\b|$)/
+
+const delayed = rules.flatMap((r) => {
+  const shorthand = r.body.match(/(?:^|[;{])\s*animation\s*:\s*([^;}]+)/)
+  if (!shorthand) return []
+  const expanded = expandVars(shorthand[1])
+  // A single <time> is a duration. Two is a duration and a delay, which is only ever
+  // deliberate in an `alternate`-style two-phase animation and never in this file.
+  const times = expanded.match(new RegExp(TIME.source, 'g')) ?? []
+  return times.length > 1 ? [`${r.selector} -> animation:${expanded.trim()}`] : []
+})
+
+describe('animation delays', () => {
+  it('resolves the custom properties it needs to judge the shorthands', () => {
+    // A guard on the guard: if `--ease` stopped being found, every shorthand would
+    // expand to nothing and the assertion below would pass on an empty set.
+    expect(ROOT_PROPERTIES.get('--ease')).toBe('0.18s cubic-bezier(0.2, 0, 0.2, 1)')
+    expect(expandVars('240ms var(--ease)')).toBe('240ms 0.18s cubic-bezier(0.2, 0, 0.2, 1)')
+    expect((expandVars('240ms var(--ease)').match(new RegExp(TIME.source, 'g')) ?? []).length).toBe(2)
+  })
+
+  it('finds the animation shorthands it is meant to police', () => {
+    const found = rules.filter((r) => /(?:^|[;{])\s*animation\s*:/.test(r.body))
+    expect(found.length).toBeGreaterThan(4)
+  })
+
+  it('gives no animation a delay nobody asked for', () => {
+    expect(
+      delayed,
+      `these animation shorthands expand to two <time> values, so the second is a ` +
+        `delay: ${delayed.join(' | ') || 'none'}`,
+    ).toEqual([])
+  })
+})
+
 describe('retained transforms', () => {
   it('finds the keyframes and rules it is meant to police', () => {
     // Without this the two assertions below pass on an empty set, which is the state
