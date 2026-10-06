@@ -2780,7 +2780,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   cursor: pointer;
   display: grid;
   grid-template-rows: 22px 52px minmax(60px, 1fr) 46px;
-  gap: 12px;
+  gap: 8px;
   transition: border-color var(--ease), background var(--ease), box-shadow var(--ease);
 }
 .election-card:hover { border-color: var(--border-strong); background: var(--card-soft); box-shadow: var(--shadow-md); }
