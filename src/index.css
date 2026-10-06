@@ -262,10 +262,22 @@
    * placeholder needs. So fields sit on `medium` at 12px — visibly rounded, clearly a
    * field, and a step above the 8px they were at before.
    *
-   * The buttons are pills and the fields are not, and that is a deliberate
-   * difference rather than an inconsistency: a button is a thing you press once, a
-   * field is a surface you sit and read. If they are ever made to match again, check
-   * a placeholder at the left edge first — that is what a pill field breaks.
+   * The buttons are pills and the fields are not, and that was defended as a
+   * principled difference rather than an inconsistency: a button is a thing you press
+   * once, a field is a surface you sit and read. It did not survive being looked at.
+   * On a short, wide button a pill is a *shape*, and when every pressable thing in
+   * the product is the same lozenge the pill stops reading as a deliberate choice and
+   * starts reading as the only shape the designer knew. It also fought the cards,
+   * which were the most rounded objects on the page at 28px — so the biggest box was
+   * rounder than the things inside it, and the two ways in, which are tall rows of
+   * copy, read as capsules rather than as rectangles with soft corners.
+   *
+   * Buttons and fields both sit on `medium` at 12px now, and the ladder is: 8px for
+   * small controls, 12px for buttons and fields, 16px for the tall cards, 28px for the
+   * outermost boxes. What stays a pill is what genuinely is one — the 23px toggle
+   * track, status badges, count chips, and the 4-to-6px meter and tally bars, where a
+   * full round is the only radius that fits the height. A pill suits a thing whose
+   * height is its radius. It does not suit a rectangle.
    */
   --r-xs: 4px;
   --r-sm: 8px;
@@ -752,7 +764,7 @@ a { color: inherit; }
   justify-content: center;
   gap: 8px;
   border: 1px solid transparent;
-  border-radius: var(--r-pill);
+  border-radius: var(--r-md);
   font-weight: 550;
   line-height: 1;
   cursor: pointer;
@@ -774,7 +786,7 @@ a { color: inherit; }
   background: var(--green);
   color: var(--green-ink);
   border: 1px solid var(--green);
-  border-radius: var(--r-pill);
+  border-radius: var(--r-md);
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
@@ -799,7 +811,7 @@ a { color: inherit; }
   background: transparent;
   color: var(--ink-2);
   border: 1px solid var(--border-strong);
-  border-radius: var(--r-pill);
+  border-radius: var(--r-md);
   font-weight: 550;
   font-size: 13px;
   cursor: pointer;
@@ -821,7 +833,7 @@ a { color: inherit; }
   background: transparent;
   color: var(--muted);
   border: 1px solid transparent;
-  border-radius: var(--r-pill);
+  border-radius: var(--r-md);
   font-weight: 550;
   font-size: 13px;
   cursor: pointer;
@@ -841,7 +853,7 @@ a { color: inherit; }
   background: transparent;
   color: var(--muted);
   border: 1px solid var(--border);
-  border-radius: var(--r-pill);
+  border-radius: var(--r-md);
   cursor: pointer;
   flex: none;
   position: relative;
@@ -862,7 +874,7 @@ a { color: inherit; }
   background: var(--red-soft);
   color: var(--red-text);
   border: 1px solid var(--red-soft-2);
-  border-radius: var(--r-pill);
+  border-radius: var(--r-md);
   font-weight: 600;
   font-size: 13px;
   cursor: pointer;
@@ -883,7 +895,7 @@ a { color: inherit; }
   background: rgba(255, 255, 255, 0.06);
   color: var(--ink);
   border: 1px solid var(--border-strong);
-  border-radius: var(--r-pill);
+  border-radius: var(--r-md);
   font-weight: 550;
   font-size: 13px;
   cursor: pointer;
@@ -907,7 +919,7 @@ a { color: inherit; }
   background: var(--green);
   color: var(--green-ink);
   border: 1px solid var(--green);
-  border-radius: var(--r-pill);
+  border-radius: var(--r-md);
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
@@ -930,7 +942,7 @@ a { color: inherit; }
   background: var(--green);
   color: var(--green-ink);
   border: 1px solid var(--green);
-  border-radius: var(--r-pill);
+  border-radius: var(--r-md);
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
@@ -957,7 +969,7 @@ a { color: inherit; }
   background: var(--green);
   color: var(--green-ink);
   border: 1px solid var(--green);
-  border-radius: var(--r-pill);
+  border-radius: var(--r-md);
   font-weight: 600;
   font-size: 13px;
   cursor: pointer;
@@ -978,7 +990,7 @@ a { color: inherit; }
   background: transparent;
   color: var(--ink-2);
   border: 1px solid var(--border-strong);
-  border-radius: var(--r-pill);
+  border-radius: var(--r-md);
   font-weight: 550;
   font-size: 13.5px;
   cursor: pointer;
@@ -994,7 +1006,7 @@ a { color: inherit; }
   background: var(--green);
   color: var(--green-ink);
   border: 1px solid var(--green);
-  border-radius: var(--r-pill);
+  border-radius: var(--r-md);
   font-weight: 600;
   font-size: 13.5px;
   cursor: pointer;
@@ -1023,7 +1035,7 @@ a { color: inherit; }
   gap: 7px;
   height: 38px;
   padding: 0 15px;
-  border-radius: var(--r-pill);
+  border-radius: var(--r-md);
   border: 1px solid var(--green);
   background: var(--green);
   color: var(--green-ink);
@@ -1415,7 +1427,16 @@ a { color: inherit; }
      light falling on a surface instead of as a coloured box. */
   background: linear-gradient(180deg, rgba(126, 224, 168, 0.055), rgba(126, 224, 168, 0.014) 62%), var(--card);
   border: 1px solid var(--border-strong);
-  border-radius: var(--r-xl);
+  /* `--r-lg`, not `--r-xl`, and the reason is this card's proportions rather than
+     its importance. At 28px on something ~120px tall the radius is a meaningful
+     fraction of the card's height, so the shape stops being a rectangle with soft
+     corners and becomes a lozenge — the two cards read as pills you press rather
+     than as the two ways into the product. 16px is the largest radius that still
+     leaves the corners visibly corners at this size, and it is what these two were
+     before the corner scale moved every card up a step. The argument at the time
+     was that the biggest objects should be the least rounded; that holds on the
+     wide, shallow cards but inverts on a tall row of copy. */
+  border-radius: var(--r-lg);
   padding: 24px 26px;
   cursor: pointer;
   color: inherit;
@@ -3367,7 +3388,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   margin-left: auto;
   background: transparent;
   border: 1px solid var(--border-strong);
-  border-radius: var(--r-pill);
+  border-radius: var(--r-md);
   padding: 8px 13px;
   font-size: 13px;
   font-weight: 550;
