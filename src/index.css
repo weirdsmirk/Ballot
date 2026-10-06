@@ -2779,7 +2779,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   box-shadow: var(--shadow-sm);
   cursor: pointer;
   display: grid;
-  grid-template-rows: 22px 52px minmax(60px, 1fr) 46px;
+  grid-template-rows: 26px 48px minmax(60px, 1fr) 46px;
   gap: 12px;
   transition: border-color var(--ease), background var(--ease), box-shadow var(--ease);
 }
