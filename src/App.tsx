@@ -1,21 +1,21 @@
 /**
  * Application root.
  *
- * Four surfaces share one server: the landing page, the front door, the voter
- * portal and the administration workspace. The root owns the bootstrap poll, the
- * server clock offset, and the routing between them. There is deliberately no
- * offline voting path: the server is the only authority for election state and
- * timing.
+ * Three surfaces share one server: the front door, the voter portal and the
+ * administration workspace. The root owns the bootstrap poll, the server clock
+ * offset, and the routing between them. There is deliberately no offline voting
+ * path: the server is the only authority for election state and timing.
  *
- * `#/` is the landing page — the argument, the real figures, and the two ways in.
- * `#/enter` is the front door, and it is a separate surface because those two
- * destinations need genuinely different opening moves, one of which is a
- * password: putting a sign-in form in front of everyone would be a form in the
- * way of the thing the product is actually for.
+ * There is no landing page. There was one — a long, scrolling argument about why
+ * the product could be trusted — and it is gone, along with the route. `#/` is the
+ * front door now: the root of the product is its way in, and a reader who lands on
+ * a bare host with no session is two clicks from a ballot.
  *
- * The landing page is allowed to be long, to scroll and to move on its own,
- * because nothing on it stands in front of anybody's vote. The door is not,
- * because the whole job of a door is to be gone.
+ * `#/enter` is the same screen and is kept as an explicit route, because it is what
+ * people bookmark and what the exit controls name. It is a separate surface from the
+ * portal and the console because those destinations need genuinely different opening
+ * moves, one of which is a password: putting a sign-in form in front of everyone
+ * would be a form in the way of the thing the product is actually for.
  */
 
 import { useCallback, useEffect, useState } from 'react'
@@ -31,13 +31,12 @@ import {
 import { AdminApp } from './admin/AdminApp'
 import { AdminLogin } from './admin/AdminLogin'
 import { VoterFlow } from './voter/VoterFlow'
-import { Landing } from './landing/Landing'
 import { SiteBar, SiteFoot } from './ui/Shell'
 import { LegalPage, isLegalPage, type LegalPageId } from './ui/LegalPages'
 import { Icon } from './ui/Icon'
 import { Alert, Spinner } from './ui/primitives'
 
-type Surface = 'landing' | 'start' | 'voter' | 'admin'
+type Surface = 'start' | 'voter' | 'admin'
 
 /**
  * Which document, if any, this hash points at.
@@ -55,8 +54,8 @@ function readSurface(): Surface {
   if (hash.startsWith('admin')) return 'admin'
   if (hash.startsWith('vote')) return 'voter'
   if (hash.startsWith('enter')) return 'start'
-  // The root, and anything unrecognised, is the landing page.
-  return 'landing'
+  // The root, and anything unrecognised, is the front door.
+  return 'start'
 }
 
 /**
@@ -71,7 +70,6 @@ function readSurface(): Surface {
  * the thing that made this unreadable in the first place.
  */
 const BACK_LABEL: Record<Surface, string> = {
-  landing: 'Back to Ballot',
   start: 'Back to the front door',
   voter: 'Back to the voter portal',
   admin: 'Back to the console',
@@ -209,11 +207,12 @@ export default function App() {
       }
     }
     forgetVoterSession()
-    // `#/enter`, the front door — not `#/`. Leaving the portal is an act of
-    // finishing with voting, and the landing page is a page to be *read*, which is
-    // a strange thing to arrive at mid-session on a shared machine. The front door
-    // is the page whose whole job is offering the two ways in, and it is where
-    // somebody who has just left the voter portal expects to be able to choose again.
+    // `#/enter` rather than `#/`, even though the root now resolves to the same
+    // screen. Leaving the portal is an act of finishing with voting, and the door is
+    // the page whose whole job is offering the two ways in — so it is where somebody
+    // who has just left the voter portal expects to be able to choose again. Naming
+    // it explicitly also means this keeps working if the root is ever pointed at
+    // something else.
     window.location.hash = '#/enter'
     void load()
   }
@@ -223,20 +222,12 @@ export default function App() {
   const serverOffsetMs = getServerOffset()
 
   /*
-   * The landing page. The first surface and the only one that is allowed to be
-   * long, to scroll and to move on its own.
-   */
-  if (surface === 'landing') {
-    return <Landing />
-  }
-
-  /*
-   * The front door, on its own. It renders the same sign-in component the console
-   * does: the photograph and the argument, the two ways in, and the administrator
-   * form swapping into the same page rather than by navigating away — so the page
-   * the reader chose is still the page behind the form. This is what a bookmark, a
-   * shared link and a refresh land on, which is why the door is a route rather
-   * than a state inside the landing page.
+   * The front door, and what a bare host lands on. It renders the same sign-in
+   * component the console does: the photograph and the argument, the two ways in,
+   * and the administrator form swapping into the same page rather than by
+   * navigating away — so the page the reader chose is still the page behind the
+   * form. This is what a bookmark, a shared link and a refresh land on, which is
+   * why the door is a route rather than a state inside anything else.
    *
    * Signing in hands over to `#/admin`, because that is where the console
    * actually lives and the two must not end up rendering each other.

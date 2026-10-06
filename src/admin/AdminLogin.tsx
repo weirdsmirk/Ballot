@@ -23,7 +23,7 @@ import { authApi } from '../lib/api'
 import type { ClientSession } from '../lib/adminTypes'
 import { Icon } from '../ui/Icon'
 import { AuthFrame } from '../ui/Shell'
-import { ChooseDoorway, DOOR_HERO } from '../ui/Doorway'
+import { Doorway, DOOR_HERO } from '../ui/Doorway'
 import { Alert, DemoNote, Field } from '../ui/primitives'
 
 type Stage = 'choose' | 'password' | 'mfa'
@@ -110,20 +110,18 @@ export function AdminLogin({
 
   if (stage === 'choose') {
     /*
-      The shared selection screen, not a copy of it.
+      The chooser, from `ui/Doorway`.
 
-      This was the only definition of these two doors and the landing page's second
-      screen is now the same screen, so it lives in `ui/Doorway` and both surfaces
-      call it. `#/enter` renders exactly what it rendered before — same copy, same
-      order, same behaviour — it is just sourced from one place now, which is what
-      stops the landing page's version and the front door's version drifting into
-      saying different things about the same two choices.
+      It lives there because it used to have two callers — this, and the second
+      screen of a landing page that argued its way down to the same two doors. That
+      page is gone, so this is the door and nothing else, and the component is the
+      door rather than a thing one chooses between.
 
-      The one difference is the administrator door: here it swaps the sign-in form
-      into this same half of the screen, because navigating would throw away the page
-      the visitor chose and there is nothing on the far side worth coming back to.
+      The administrator door swaps the sign-in form into this same half of the
+      screen, because navigating would throw away the page the visitor chose and
+      there is nothing on the far side worth coming back to.
     */
-    return <ChooseDoorway onAdmin={() => setStage('password')} />
+    return <Doorway onAdmin={() => setStage('password')} />
   }
 
   if (stage === 'mfa') {

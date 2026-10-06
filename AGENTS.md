@@ -49,9 +49,21 @@ and in a fallback and compare widths. Equal widths mean the fallback was reached
 
 ## Routes
 
-`#/` is the landing page and it may be long, scroll and move. `#/enter` is the front
-door: no animation, and it stays that way. They are separate surfaces on purpose —
-do not merge them, and do not give the front door motion.
+There are three surfaces and `#/` is the front door.
+
+`#/` and `#/enter` both render the front door: the photograph, the two ways in, and
+the administrator form swapping into the same screen rather than navigating away.
+`#/vote` is the voter portal, `#/admin` the console, and anything unrecognised falls
+back to the front door.
+
+There is no landing page. There was one — a long scrolling argument about why the
+product could be trusted — and it was deleted along with `src/landing/`. Do not add
+one back without being asked.
+
+The front door does not move. Every animation in the product is switched off under
+`prefers-reduced-motion` by one block at the foot of `index.css`, and
+`src/motion.test.ts` fails if any rule in that file declares an animation without
+being named in it.
 
 ## Data
 

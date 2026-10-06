@@ -1,25 +1,18 @@
 /**
  * The selection: two doors and one statement of what this is.
  *
- * This is the screen the landing page's claim leads to, and it is also the whole
- * of the front door at `#/enter` in its first state. Those are the same screen —
- * same copy, same two destinations, same order — so it is one component with two
- * callers rather than two copies that can drift apart. A visitor who reaches it by
- * scrolling and a visitor who reaches it by typing the hash must see the same thing.
+ * This is the whole of the front door at `#/enter` and `#/` in its first state.
  *
- * The two surfaces differ in exactly one respect, and it is a prop: where the
- * administrator door goes. On the front door it swaps the sign-in form into this
- * same half of the screen, because there is nothing on the far side of it worth
- * coming back to. On the landing page it is a signpost, so it navigates to `#/enter`
- * and lets the front door do that swap there — the landing page has no form to swap
- * into and should not grow one.
+ * It used to have two callers: the front door, and the second screen of a landing
+ * page that argued its way down to these same two choices over four screens of
+ * thesis first. Two copies of a claim about the same two doors will drift, and they
+ * were one component for that reason. The landing page is gone, so this is now the
+ * front door and nothing else, and it has been renamed from `ChooseDoorway` —
+ * "choose" described what a screen below a claim made you do; here it is simply the
+ * door.
  *
- * It is a component and not a copy for one more reason. The landing page used to
- * argue its way down to a pair of doors over four screens, and the landing page now
- * is two screens: the claim, and this. Having the landing page's second screen be
- * literally the front door is what keeps the claim honest — "Enter Workspace" is
- * followed by the actual workspace's front door, not by a marketing restatement of
- * it.
+ * It is still a component rather than inlined, because it is long enough to be worth
+ * naming and because `AdminLogin` uses the same hero in its other two stages.
  */
 
 import { Icon } from './Icon'
@@ -115,7 +108,7 @@ export const DESTINATIONS: {
   },
 ]
 
-export function ChooseDoorway({ onAdmin }: { onAdmin: () => void }) {
+export function Doorway({ onAdmin }: { onAdmin: () => void }) {
   return (
     <AuthFrame statement={DOOR_HERO.statement} meta={DOOR_HERO.meta}>
       <DoorHero />

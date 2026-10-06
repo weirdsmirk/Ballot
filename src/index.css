@@ -4423,3 +4423,62 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   .lifecycle { padding: 16px; }
   .receipt-copy { width: 100%; }
 }
+
+/* ========================================
+   Reduced motion
+   ======================================== */
+
+/*
+ * The whole product, in one block, with `!important`.
+ *
+ * This stylesheet had no reduced-motion query in it at all. Every animation in the
+ * console, the portal and the sign-in ran regardless of the preference, and the only
+ * reduced-motion support anywhere in the product lived in the landing page's
+ * stylesheet — which has now been deleted along with the page. Removing that file
+ * without adding this would have left the app with no handling for the preference
+ * whatsoever, so it belongs here rather than surviving by accident somewhere else.
+ *
+ * It is one list of seven selectors and it is exhaustive, and there is a test
+ * (`src/motion.test.ts`) that fails if any rule in this file declares an animation and
+ * is not named here. That test exists because the equivalent block has been deleted
+ * twice — once to a specificity fight and once to an edit four sections away that
+ * had nothing to do with it — and both times the only way to notice was to count
+ * `document.getAnimations()` by hand in a browser with the feature emulated.
+ *
+ * `!important` and nowhere else in this file. It is a kill switch, and a kill switch
+ * that can lose a specificity fight is not one: a reader who has asked for no motion
+ * should not depend on every other selector in a 4,400-line stylesheet being less
+ * specific than this block.
+ *
+ * What each one loses, and whether that is a loss:
+ *
+ *   status-dot, live-dot     an infinite 2.4s opacity pulse. The badge's green fill,
+ *                            its border and its label all say the same thing; the
+ *                            pulse only draws the eye to it. Not a loss.
+ *
+ *   menu-panel,              a 140–200ms fade and rise on a dropdown and on a modal.
+ *   modal-overlay,             An entrance, not a state. The menu appears already open
+ *   modal-content              and the modal already present, which is what a
+ *                               140ms animation was arriving at anyway.
+ *
+ *   loading-spinner,         a rotation while a command is in flight. This is the one
+ *   approval-waiting-spinner  worth arguing about, and the argument is that a spinner
+ *                             is progress feedback rather than decoration. It is kept:
+ *                             the button it sits in reads "Working…" in words, so the
+ *                             information survives and only the motion goes.
+ *
+ * The resting state is the design everywhere in this product, so nothing is hidden by
+ * these animations and nothing has to be unhidden here. A stopped spinner is a static
+ * ring, a stopped badge is a badge.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .status-open .status-dot,
+  .live-badge .live-dot,
+  .menu-panel,
+  .modal-overlay,
+  .modal-content,
+  .approval-waiting-spinner,
+  .loading-spinner {
+    animation: none !important;
+  }
+}
