@@ -2837,7 +2837,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   overflow: hidden;
   color: var(--ink);
   font-family: var(--font-sans);
-  font-size: 21px;
+  font-size: 19px;
   font-weight: 400;
   letter-spacing: -0.01em;
   line-height: 1.24;
