@@ -148,9 +148,11 @@ function ballotResult(overrides: Partial<VoterBallotResult> = {}): VoterBallotRe
   }
 }
 
-/** Open the election, which is what triggers the resume ask. */
+/** Select the election and continue past its ballot preview. */
 async function openElection(user: ReturnType<typeof userEvent.setup>) {
   await user.click(await screen.findByText(ELECTION.title))
+  expect(await screen.findByRole('heading', { name: 'Description' })).toBeInTheDocument()
+  await user.click(screen.getByRole('button', { name: 'Continue to verification' }))
 }
 
 beforeEach(() => {

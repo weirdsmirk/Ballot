@@ -1346,6 +1346,7 @@ a { color: inherit; }
   width: 100%;
   margin: 0 auto;
 }
+.focus-card-plain { background: transparent; border: 0; box-shadow: none; }
 .focus-card-lg { max-width: 720px; padding: 40px; }
 
 .auth-card {
@@ -3064,6 +3065,13 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
 .green-stripe { height: 2px; width: 100%; background: var(--green); box-shadow: var(--green-glow); }
 .confirmed-icon {
   width: 68px; height: 68px;
+.ballot-heading .ballot-description-title {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.4;
+}
   margin: 40px auto 22px;
   background: var(--green-soft);
   border: 1px solid var(--green-soft-2);

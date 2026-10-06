@@ -6,7 +6,7 @@
  * reports, and the ballot itself is only rendered when the server says voting
  * is open, so a voter is never left guessing why they cannot proceed.
  *
- * The frame is constant across the flow: a dark brand strip, a three-step
+ * The frame is constant across the flow: a dark brand strip, a step
  * indicator, then a single focused card. Only the card's contents change, which
  * is what keeps a voter oriented while they move through it.
  */
@@ -30,7 +30,7 @@ import { Alert, Countdown, DemoNote, Eyebrow, Field, Modal, StatusBadge } from '
 import { Icon } from '../ui/Icon'
 import { ResultsPanel } from './ResultsPanel'
 
-type Stage = 'pick' | 'identify' | 'codes' | 'ballot' | 'receipt' | 'results'
+type Stage = 'pick' | 'preview' | 'identify' | 'codes' | 'ballot' | 'receipt' | 'results'
 
 /**
  * The stages the progress indicator names, in order.
@@ -41,6 +41,7 @@ type Stage = 'pick' | 'identify' | 'codes' | 'ballot' | 'receipt' | 'results'
  */
 const STEPS = [
   { id: 'pick', label: 'Choose' },
+  { id: 'preview', label: 'Preview' },
   { id: 'identify', label: 'Identify' },
   { id: 'codes', label: 'Code' },
   { id: 'ballot', label: 'Ballot' },
@@ -49,14 +50,15 @@ const STEPS = [
 
 function stepFor(stage: Stage): number {
   if (stage === 'pick') return 0
-  if (stage === 'identify') return 1
-  if (stage === 'codes') return 2
-  if (stage === 'ballot') return 3
+  if (stage === 'preview') return 1
+  if (stage === 'identify') return 2
+  if (stage === 'codes') return 3
+  if (stage === 'ballot') return 4
   // 'results' is not a stage of its own — it is a detour off the ballot, reached
   // from a stage already passed, so it keeps that stage's marker rather than
   // inventing one.
-  if (stage === 'receipt') return 4
-  return 3
+  if (stage === 'receipt') return 5
+  return 4
 }
 
 type Flash = { tone: 'info' | 'warn' | 'error' | 'success'; text: string } | null
@@ -79,6 +81,17 @@ async function copyText(value: string): Promise<boolean> {
 
 function optionLabel(option: BallotOption) {
   return option.kind === 'candidate' ? option.name : option.name
+}
+
+function ballotPurpose(description: string, title: string, type: string) {
+  const outOfScope = /\b(candidates?|voters? rank|choices?|options?|preferential ballot|single transferable|voting (?:opens|closed|will)|results?|tally|certif\w*|draft|published|paused|archived|standing order|never published|whether\b.*\bor\b)\b/i
+  const summary = description
+    .split(/(?<=[.!?])\s+/)
+    .filter((sentence) => !outOfScope.test(sentence))
+    .join(' ')
+    .trim()
+  const purpose = summary || `This ballot is for the ${type.toLowerCase()} titled “${title}.”`
+  return `${purpose} The ballot records the official outcome of this election.`
 }
 
 function shuffled<T>(items: T[], seed: number): T[] {
@@ -175,7 +188,7 @@ export function VoterFlow({
    * shown, which is the whole point: nothing here can manufacture a session.
    */
   useEffect(() => {
-    if (!electionId) return
+    if (!electionId || stage !== 'identify') return
     let cancelled = false
     void (async () => {
       const result = await voterApi.ballot(electionId)
@@ -204,21 +217,19 @@ export function VoterFlow({
     return () => {
       cancelled = true
     }
-  }, [electionId])
+  }, [electionId, stage])
 
   const openElection = useCallback(
-    async (id: string) => {
+    (id: string) => {
       setElectionId(id)
       setFlash(null)
       setBallot(null)
       setBegin(null)
       setReceipt(null)
       setCodes({})
-      const restored = await loadBallot(id)
-      if (restored) return
-      setStage('identify')
+      setStage('preview')
     },
-    [loadBallot],
+    [],
   )
 
   const state = useMemo(() => {
@@ -393,6 +404,7 @@ export function VoterFlow({
 
       {stage !== 'results' && (
         <div style={{ marginBottom: 18 }}>
+  const purpose = ballotPurpose(election.description, election.title, ELECTION_TYPE_LABELS[election.election_type])
           <button type="button" className="workspace-back" onClick={back}>
             <Icon name="arrow-left" />
             All elections
@@ -413,6 +425,28 @@ export function VoterFlow({
               <Icon name="shield-check" />
             </span>
             <div>
+      {stage === 'preview' && (
+        <div className="focus-card focus-card-plain">
+          <div className="focus-head">
+            <div>
+              <Eyebrow tone="blue">Ballot preview · {ELECTION_TYPE_LABELS[election.election_type]}</Eyebrow>
+              <h1>{election.title}</h1>
+              <p>The description below explains why the election is being held and what the ballot covers.</p>
+            </div>
+          </div>
+
+          <div className="ballot-heading">
+            <h2 className="ballot-description-title">Description</h2>
+            <p>{purpose}</p>
+          </div>
+
+          <button type="button" className="btn-primary btn-block btn-lg" onClick={() => setStage('identify')}>
+            Continue to verification
+            <Icon name="arrow-right" />
+          </button>
+        </div>
+      )}
+
               <Eyebrow tone="blue">{label}</Eyebrow>
               <h1>Cast your ballot securely.</h1>
               <p>
