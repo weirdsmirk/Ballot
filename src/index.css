@@ -4445,7 +4445,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
  * without adding this would have left the app with no handling for the preference
  * whatsoever, so it belongs here rather than surviving by accident somewhere else.
  *
- * It is one list of seven selectors and it is exhaustive, and there is a test
+ * It is one list of selectors and it is exhaustive, and there is a test
  * (`src/motion.test.ts`) that fails if any rule in this file declares an animation and
  * is not named here. That test exists because the equivalent block has been deleted
  * twice — once to a specificity fight and once to an edit four sections away that
@@ -4474,6 +4474,13 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
  *                             the button it sits in reads "Working…" in words, so the
  *                             information survives and only the motion goes.
  *
+ *   surface--in, surface--back  the page transition between surfaces: a 10px rise or
+ *                             settle. This is the one on the list that is entirely about
+ *                             how the product feels rather than about what it says, and
+ *                             it goes for the same reason the spinners stay — nothing
+ *                             is lost by stopping it. The pages are the same pages; one
+ *                             of them just arrives without the movement.
+ *
  * The resting state is the design everywhere in this product, so nothing is hidden by
  * these animations and nothing has to be unhidden here. A stopped spinner is a static
  * ring, a stopped badge is a badge.
@@ -4485,7 +4492,88 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   .modal-overlay,
   .modal-content,
   .approval-waiting-spinner,
-  .loading-spinner {
+  .loading-spinner,
+  .surface--in,
+  .surface--back {
     animation: none !important;
   }
+}
+
+/* ========================================
+   Page transitions
+   ======================================== */
+
+/*
+ * One frame around the surface, and the arrival is its animation.
+ *
+ * A transition earns its place by answering a question the instant change cannot:
+ * *which way did I go?* The console and the portal are places you go into, and the
+ * door and the documents are places you step back out to, so the incoming content
+ * rises when you go in and settles when you come back. A fade alone would have been
+ * prettier and would have said nothing.
+ *
+ * Five decisions, each of which is the difference between this feeling considered
+ * and feeling like a template.
+ *
+ * **Only the incoming surface moves.** The outgoing one is never held on screen, so
+ * the destination paints on the same frame the hash changes. That is why this is
+ * 240ms: a two-sided cross-fade would need 400ms of dead time to read, and 400ms of
+ * dead time on a page whose purpose is somebody casting a ballot is not a
+ * transition, it is a tax. The front door is the worst case for this and the reason
+ * it is not one.
+ *
+ * **Ten pixels, not forty.** A large travel reads as a slideshow. At 10px the page
+ * appears to settle into place rather than fly in, and the eye reads it as the new
+ * page having *weight* — which is what a page is.
+ *
+ * **`still` on the first paint.** The front door's whole argument is that a door
+ * should be gone, so it must not arrive with a flourish; and a transition on first
+ * paint delays the one thing every reader came for. `still` is the default and the
+ * transition only applies to a change the reader made.
+ *
+ * **Opacity and transform only.** Both are composited, so the arrival does not
+ * repaint, and neither one affects layout — the frame occupies the page and is
+ * transparent until it settles.
+ *
+ * **No `animation-fill-mode`.** This is the one that is easy to get wrong and that
+ * nothing in a screenshot would ever reveal. A transform on an ancestor makes that
+ * ancestor the containing block for every `position: fixed` descendant, which would
+ * put this product's three fixed elements — the modal overlay, the save toast and the
+ * console's mobile sidebar — inside the frame.
+ *
+ * The obvious defence is to end the animation at `transform: none` on the theory that
+ * `none` is inert. It is not, and the reason is worth writing down: with
+ * `animation-fill-mode: both`, the `to` keyframe's value is *retained on the element*
+ * after the animation ends, and Chrome resolves a `none` in a keyframe to the identity
+ * matrix. The settled computed style then reads `matrix(1, 0, 0, 1, 0, 0)`, which is a
+ * value other than `none`, and the frame is a containing block for the rest of its
+ * life. Measured: a `position: fixed` child at `top: 24px`, on a page scrolled 226px,
+ * sits at −202 — parked off the top of the screen with the frame — instead of at 24.
+ * The save toast would have stopped being a toast, and the modal overlay would have
+ * covered the document rather than the viewport.
+ *
+ * So there is no fill mode, and the frame has no transform at all once the animation
+ * has ended: the base style and the `to` keyframe are both `opacity: 1` with no
+ * transform, which is why dropping the fill mode costs nothing visually. During the
+ * 240ms the frame does hold a transform and does trap those three elements; it is the
+ * only window in which they are misplaced, no modal can be open across a route change,
+ * and it resolves the instant the arrival settles.
+ *
+ * `--surface-travel` is a variable so the two rules differ by one number and cannot
+ * drift apart, and `--surface-rise` is the direction.
+ */
+.surface {
+  --surface-travel: 10px;
+}
+.surface--in { --surface-rise: var(--surface-travel); }
+.surface--back { --surface-rise: calc(var(--surface-travel) * -1); }
+
+.surface--in,
+.surface--back {
+  animation: surface-in 240ms var(--ease);
+}
+
+@keyframes surface-in {
+  from { opacity: 0; transform: translateY(var(--surface-rise)); }
+  to { opacity: 1; transform: none; }
 }

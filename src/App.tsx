@@ -18,7 +18,7 @@
  * would be a form in the way of the thing the product is actually for.
  */
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import {
   fetchState,
   forgetVoterSession,
@@ -134,18 +134,86 @@ export default function App() {
   }, [])
 
   /*
+   * The route the reader is on, and the arrival.
+   *
+   * Declared here rather than beside the surfaces because two branches — the
+   * documents and the loading states — return long before the bootstrap exists, and
+   * a deep link to any of them should not arrive with a flourish either.
+   *
+   * `route` is the key for the surface frame below, so it is deliberately made of
+   * nothing but the route itself. It is tempting to put the server revision or a
+   * reload counter in there as well; that would replay the transition every ten
+   * seconds when the poll lands, which is the failure mode that makes a page feel
+   * broken rather than considered.
+   *
+   * The direction is not read from history, because a hash router has none. It comes
+   * from what is being entered, and that is enough: the portal and the console are
+   * places you *go into*, and the door and the documents are places you step back
+   * out to. So the arriving content rises when you go in and settles when you come
+   * back — the one thing a transition can tell you that a fade cannot.
+   */
+  const route = legal ? `legal:${legal}` : surface
+  const firstPaint = useRef(true)
+  useEffect(() => { firstPaint.current = false }, [])
+  const arriving = firstPaint.current ? 'still' : legal || surface === 'start' ? 'back' : 'in'
+
+  /*
+   * Read `firstPaint` during render rather than tracking the last route in state,
+   * because of when the animation has to start. The frame remounts on the same
+   * render that changes the route, so the class it remounts *with* is the only one
+   * that can animate — a direction derived in an effect would arrive a commit too
+   * late, when the key had already changed and the animation was already over.
+   *
+   * The visible consequence is that the class reads `still` on the very first render
+   * and then corrects itself on the next one, without the frame remounting in
+   * between. That correction is inert: a CSS animation restarts on remount or on a
+   * changed `animation-name`, never on a changed class that resolves to the same
+   * property. So the door stays still on arrival and picks up a direction without
+   * ever having moved. Measured either way, `document.getAnimations()` on a cold load
+   * of `#/` returns nothing running.
+   */
+
+  /*
+   * The surface frame.
+   *
+   * A keyed wrapper rather than an animation on each surface, so the transition is
+   * defined once and cannot drift between them. The key is what replays it: React
+   * remounts the frame when the route changes, and a remount is the only thing that
+   * restarts a CSS animation — the same trick the lifecycle readout used, back when
+   * there was a lifecycle.
+   *
+   * `still` on the first paint, and that is the front door's whole argument: a door
+   * whose job is to be gone must not arrive with a flourish. It is also the fastest
+   * possible first render, and a transition on first paint delays the one thing
+   * every reader came for.
+   *
+   * Only the incoming surface moves. The outgoing one is never held on screen, so
+   * the destination paints immediately and the transition reads as arrival rather
+   * than as a wait — which is why it is 240ms and not the 400ms a two-sided
+   * cross-fade would want.
+   */
+  const frame = (node: ReactNode) => (
+    <div className={`surface surface--${arriving}`} key={route}>{node}</div>
+  )
+
+  /*
    * The three documents render before anything else, including the connection
    * attempt. They are the same text on every machine and they have nothing to do
    * with the database, so a person whose election server is down should still be
    * able to read the privacy notice.
+   *
+   * They take the frame on the same terms as everything else, and that matters more
+   * here than anywhere: a document is the one page somebody arrives at from a link
+   * in somebody else's email, on a cold load, having never seen the product. It
+   * should behave like a page rather than like something that rendered.
    */
   if (legal) {
-    return (
+    return frame(
       <LegalPage
         id={legal}
         backTo={surfaceRoute(documentFrom)}
         backLabel={BACK_LABEL[documentFrom]}
-      />
+      />,
     )
   }
 
@@ -233,14 +301,14 @@ export default function App() {
    * actually lives and the two must not end up rendering each other.
    */
   if (surface === 'start') {
-    return (
+    return frame(
       <AdminLogin
         needsBootstrap={!bootstrap.admins_exist}
         onAuthenticated={() => {
           window.location.hash = '#/admin'
           void load()
         }}
-      />
+      />,
     )
   }
 
@@ -249,18 +317,18 @@ export default function App() {
   // voter portal's header or footer: an operator's screen and a voter's screen
   // should not be the same screen.
   if (surface === 'admin') {
-    return (
+    return frame(
       <AdminApp
         serverOffsetMs={serverOffsetMs}
         needsBootstrap={!bootstrap.admins_exist}
         session={bootstrap.session}
         onSessionChange={() => void load()}
         onChanged={() => void load()}
-      />
+      />,
     )
   }
 
-  return (
+  return frame(
     <div className="app-shell">
       <SiteBar
         meta={
@@ -280,6 +348,6 @@ export default function App() {
       </div>
 
       <SiteFoot sub="Ballot secrecy is structural, not a promise." />
-    </div>
+    </div>,
   )
 }

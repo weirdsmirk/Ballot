@@ -134,3 +134,73 @@ describe('reduced motion', () => {
     expect(blocks).toHaveLength(1)
   })
 })
+
+/*
+ * A retained transform is a containing block, and that is invisible.
+ *
+ * An element with any `transform` other than `none` becomes the containing block for
+ * its `position: fixed` descendants. An animation that animates `transform` therefore
+ * needs to *stop holding* one the moment it ends, or every fixed thing inside it is
+ * pinned to that element instead of to the viewport.
+ *
+ * The way to lose is quiet and it is worth being precise about, because the obvious
+ * defence does not work. Ending the animation at `transform: none` sounds like it
+ * settles to nothing, and with `animation-fill-mode: both` the `to` keyframe's value
+ * is retained on the element — where a `none` is resolved to the identity matrix. The
+ * settled computed style then reads `matrix(1, 0, 0, 1, 0, 0)`, which is a value other
+ * than `none`, and the containing block is in place for the rest of the element's life.
+ *
+ * Nothing here would have shown it. The pages render correctly, every element's
+ * resting state is right, and the stylesheet says `none`. What it did was measured in
+ * a browser: a `position: fixed` child at `top: 24px` on a page scrolled 226px sat at
+ * −202 instead of 24, and the modal overlay covered the document rather than the
+ * screen. So it is asserted here instead, where the words in the file are the thing
+ * under test.
+ */
+
+/** Every `@keyframes` block, with its body, located by brace match. */
+function keyframes(css: string): Array<{ name: string; body: string }> {
+  const out: Array<{ name: string; body: string }> = []
+  const stripped = css.replace(/\/\*[\s\S]*?\*\//g, '')
+  const open = /@keyframes\s+([\w-]+)\s*\{/g
+  let m: RegExpExecArray | null
+  while ((m = open.exec(stripped)) !== null) {
+    const brace = m.index + m[0].length - 1
+    const close = matchBrace(stripped, brace)
+    out.push({ name: m[1], body: stripped.slice(brace + 1, close) })
+    open.lastIndex = close
+  }
+  return out
+}
+
+const sheet = readFileSync(STYLESHEET, 'utf8')
+
+/** The names of keyframes that move something, via `transform`. */
+const moving = keyframes(sheet)
+  .filter((k) => /(?:^|[;{\s])transform\s*:/.test(k.body))
+  .map((k) => k.name)
+
+/** A fill mode that leaves the final value on the element. */
+const RETAINS = /animation(?:-fill-mode)?\s*:[^;]*\b(?:both|forwards)\b/
+
+const retainedTransforms = parse(sheet).filter(
+  (r) => RETAINS.test(r.body) && moving.some((name) => new RegExp(`\\b${name}\\b`).test(r.body)),
+)
+
+describe('retained transforms', () => {
+  it('finds the keyframes and rules it is meant to police', () => {
+    // Without this the two assertions below pass on an empty set, which is the state
+    // this file has been in before when its parser stopped finding anything.
+    expect(moving).toContain('surface-in')
+    expect(parse(sheet).some((r) => moving.some((n) => r.body.includes(n)))).toBe(true)
+  })
+
+  it('leaves no transform behind when an arrival ends', () => {
+    const offending = retainedTransforms.map((r) => r.selector)
+    expect(
+      offending,
+      `these rules retain a transform after animating one, which makes them the ` +
+        `containing block for every position: fixed descendant: ${offending.join(', ') || 'none'}`,
+    ).toEqual([])
+  })
+})
