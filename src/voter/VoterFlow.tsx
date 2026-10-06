@@ -447,9 +447,6 @@ export function VoterFlow({
       {stage === 'identify' && (
         <form className="focus-card" onSubmit={submitIdentifier}>
           <div className="focus-head">
-            <span className="icon-tile icon-tile-lg tile-green">
-              <Icon name="shield-check" />
-            </span>
             <div>
               <Eyebrow tone="blue">{label}</Eyebrow>
               <h1>Cast your ballot securely.</h1>
