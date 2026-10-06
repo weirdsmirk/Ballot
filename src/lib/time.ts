@@ -170,6 +170,115 @@ export function formatInZone(instant: string, timeZone: string): string {
   }
 }
 
+/**
+ * A voting window as one line, plus the zone once.
+ *
+ * The card used to print two full instants — "21 Sept 2026, 11:58 (GMT+5:30)" and
+ * "24 Sept 2026, 11:58 (GMT+5:30)" — stacked as a labelled pair. That is two
+ * timestamps where one range is meant, the zone written out twice on a card whose
+ * reader only needs to know it once, and a pair of rows that made the dates the
+ * tallest thing on the card. On a three-column grid of eight elections that added up
+ * to a lot of repeated text and no more information.
+ *
+ * So the range collapses by how much the two ends share, which is the only part of
+ * it that carries meaning:
+ *
+ *   same day      "Sat 6 Oct 2026"
+ *   same month    "6 – 8 Oct 2026"
+ *   same year     "28 Sept – 2 Oct 2026"
+ *   otherwise     "28 Sept 2026 – 2 Nov 2027"
+ *
+ * The time of day is dropped, deliberately. Every election in this product is seeded
+ * to open and close on the hour, so the minute is identical across a card and carries
+ * nothing; a voter reads "6 – 8 Oct" and knows the window, and the exact instants are
+ * one click away in the workspace. A time is kept only when the two ends are on
+ * different days *and* the day is the only thing shared — in which case showing the
+ * hour is what distinguishes closing from opening.
+ *
+ * `zone` is returned separately rather than appended, so the caller can place it
+ * where it reads as a caption instead of repeating it inside a string.
+ */
+export function formatWindow(
+  startsAt: string,
+  endsAt: string,
+  timeZone: string,
+): { label: string; zone: string } {
+  const zone = isValidTimeZone(timeZone) ? timeZone : 'UTC'
+  const start = Date.parse(startsAt)
+  const end = Date.parse(endsAt)
+  const empty = { label: '—', zone: '' }
+  if (!Number.isFinite(start) || !Number.isFinite(end)) return empty
+
+  const parts = (timestamp: number) => {
+    try {
+      const format = new Intl.DateTimeFormat('en-GB', {
+        timeZone: zone,
+        weekday: 'short',
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      })
+      const found: Record<string, string> = {}
+      for (const part of format.formatToParts(new Date(timestamp))) found[part.type] = part.value
+      return {
+        weekday: found.weekday ?? '',
+        day: found.day ?? '',
+        month: found.month ?? '',
+        year: found.year ?? '',
+        hour: found.hour === '24' ? '00' : (found.hour ?? ''),
+        minute: found.minute ?? '',
+      }
+    } catch {
+      return null
+    }
+  }
+
+  const a = parts(start)
+  const b = parts(end)
+  if (!a || !b) return { label: '—', zone: '' }
+
+  let abbreviation = ''
+  try {
+    abbreviation =
+      new Intl.DateTimeFormat('en-US', { timeZone: zone, timeZoneName: 'short' })
+        .formatToParts(new Date(start))
+        .find((part) => part.type === 'timeZoneName')?.value ?? ''
+  } catch {
+    abbreviation = ''
+  }
+
+  let label: string
+  if (a.year === b.year && a.month === b.month && a.day === b.day) {
+    label = `${a.weekday} ${a.day} ${a.month} ${a.year}`
+  } else if (a.year === b.year && a.month === b.month) {
+    label = `${a.day} – ${b.day} ${b.month} ${b.year}`
+  } else if (a.year === b.year) {
+    label = `${a.day} ${a.month} – ${b.day} ${b.month} ${b.year}`
+  } else {
+    label = `${a.day} ${a.month} ${a.year} – ${b.day} ${b.month} ${b.year}`
+  }
+
+  // The one case that needs the hour: two ends on different days with nothing else
+  // shared, where "6 Oct – 8 Oct" would not say which end is which.
+  /*
+   * The hours come back only when they carry information, and "28 Sept – 01 Oct,
+   * 11:58 – 11:58" does not: both ends were seeded to the same hour, so the times are
+   * identical on both sides of the dash and add length without adding meaning. What
+   * the dash has to disambiguate is *which end is which*, and it already does — the
+   * earlier date is the start. So the hours are shown only when they actually differ,
+   * and a month-crossing window whose ends share an hour prints as a plain range.
+   */
+  const crossDay = a.year !== b.year || a.month !== b.month || a.day !== b.day
+  if (crossDay && (a.hour !== b.hour || a.minute !== b.minute)) {
+    label += `, ${a.hour}:${a.minute} – ${b.hour}:${b.minute}`
+  }
+
+  return { label, zone: abbreviation }
+}
+
 /** Compact variant without the zone abbreviation, for dense table cells. */
 export function formatInZoneShort(instant: string, timeZone: string): string {
   const timestamp = Date.parse(instant)

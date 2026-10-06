@@ -19,7 +19,8 @@ import {
   type VoterBallotResult,
   type VoterBeginResult,
 } from '../lib/api'
-import { describeVotableState, formatInZone } from '../lib/time'
+import { describeVotableState, formatWindow } from '../lib/time'
+import { STATUS_LABELS } from '../lib/lifecycle'
 import {
   ELECTION_TYPE_LABELS,
   SPECIAL_OPTION_IDS,
@@ -354,36 +355,39 @@ export function VoterFlow({
                 endsAt: item.ends_at,
                 serverOffsetMs,
               })
+              const window_ = formatWindow(item.starts_at, item.ends_at, item.timezone)
+              const status = item.effective_status
               return (
                 <button key={item.id} type="button" className="election-card" onClick={() => void openElection(item.id)}>
-                  <div className="election-card-top">
-                    <span className="pill">{ELECTION_TYPE_LABELS[item.election_type]}</span>
-                    <StatusBadge status={item.status} effective={item.effective_status} />
+                  <div className="election-card-meta">
+                    <span className="election-card-type">{ELECTION_TYPE_LABELS[item.election_type]}</span>
+                    <span className={`election-card-status election-card-status-${status}`}>
+                      <span className="election-card-status-dot" aria-hidden="true" />
+                      {STATUS_LABELS[status]}
+                      {status !== item.status && <span className="election-card-auto">Auto</span>}
+                    </span>
+                    <span className="roster-arrow" aria-hidden="true"><Icon name="arrow-right" /></span>
                   </div>
+
                   <h2>{item.title}</h2>
                   <p className="election-card-desc">{item.description || 'No description provided.'}</p>
-                  <dl className="election-card-meta">
-                    <div>
-                      <dt>Opens</dt>
-                      <dd>{formatInZone(item.starts_at, item.timezone)}</dd>
-                    </div>
-                    <div>
-                      <dt>Closes</dt>
-                      <dd>{formatInZone(item.ends_at, item.timezone)}</dd>
-                    </div>
-                  </dl>
+
                   <div className="election-card-foot">
-                    <span className="election-card-when">
-                      <Icon name="clock" />
-                      {itemState.nextChangeAt !== null ? (
-                        <Countdown targetAt={itemState.nextChangeAt} serverOffsetMs={serverOffsetMs} prefix={`${itemState.nextChangeLabel} `} />
-                      ) : (
-                        itemState.headline
-                      )}
+                    <span className="election-card-window" title={window_.zone ? `${window_.label} · ${window_.zone}` : window_.label}>
+                      <span className="election-card-window-label">{window_.label}</span>
+                      {window_.zone && <span className="election-card-window-zone">{window_.zone}</span>}
                     </span>
-                    <span className="roster-arrow">
-                      <Icon name="arrow-right" />
-                    </span>
+                    {itemState.nextChangeAt !== null ? (
+                      <span className="election-card-timer" aria-label={itemState.nextChangeLabel ?? 'Time remaining'}>
+                        <Countdown
+                          targetAt={itemState.nextChangeAt}
+                          serverOffsetMs={serverOffsetMs}
+                          prefix={itemState.nextChangeLabel?.replace(/^Voting /, '').replace(/^window /, '')}
+                        />
+                      </span>
+                    ) : (
+                      <span className="election-card-state-detail">{itemState.headline}</span>
+                    )}
                   </div>
                 </button>
               )
@@ -397,6 +401,7 @@ export function VoterFlow({
 
   const activeStep = stepFor(stage)
   const label = [election.title, ELECTION_TYPE_LABELS[election.election_type]].filter(Boolean).join(' · ')
+  const purpose = ballotPurpose(election.description, election.title, ELECTION_TYPE_LABELS[election.election_type])
 
   return (
     <div className="voter-shell">
@@ -404,7 +409,6 @@ export function VoterFlow({
 
       {stage !== 'results' && (
         <div style={{ marginBottom: 18 }}>
-  const purpose = ballotPurpose(election.description, election.title, ELECTION_TYPE_LABELS[election.election_type])
           <button type="button" className="workspace-back" onClick={back}>
             <Icon name="arrow-left" />
             All elections
@@ -418,13 +422,6 @@ export function VoterFlow({
         </Alert>
       )}
 
-      {stage === 'identify' && (
-        <form className="focus-card" onSubmit={submitIdentifier}>
-          <div className="focus-head">
-            <span className="icon-tile icon-tile-lg tile-green">
-              <Icon name="shield-check" />
-            </span>
-            <div>
       {stage === 'preview' && (
         <div className="focus-card focus-card-plain">
           <div className="focus-head">
@@ -447,6 +444,13 @@ export function VoterFlow({
         </div>
       )}
 
+      {stage === 'identify' && (
+        <form className="focus-card" onSubmit={submitIdentifier}>
+          <div className="focus-head">
+            <span className="icon-tile icon-tile-lg tile-green">
+              <Icon name="shield-check" />
+            </span>
+            <div>
               <Eyebrow tone="blue">{label}</Eyebrow>
               <h1>Cast your ballot securely.</h1>
               <p>
