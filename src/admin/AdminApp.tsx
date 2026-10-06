@@ -26,6 +26,7 @@ import type { ElectionSummary } from '../lib/types'
 import { Alert, Spinner } from '../ui/primitives'
 import { Icon, initials, type IconName } from '../ui/Icon'
 import { Brand } from '../ui/Shell'
+import { ThemeToggle } from '../ui/ThemeToggle'
 import { ElevationProvider, useElevation } from './control/elevation'
 import { AdminLogin } from './AdminLogin'
 import { ElectionWorkspace } from './election/ElectionWorkspace'
@@ -363,6 +364,7 @@ function ControlCentre({
               <Icon name="user" />
               {ROLE_LABELS[role]}
             </span>
+            <ThemeToggle />
             <button type="button" className="btn-icon" aria-label="Search" onClick={() => navigate('elections')}>
               <Icon name="search" />
             </button>

@@ -13,6 +13,7 @@
 
 import type { ReactNode } from 'react'
 import { Icon } from './Icon'
+import { ThemeToggle } from './ThemeToggle'
 
 /**
  * The wordmark.
@@ -81,6 +82,7 @@ export function SiteBar({ meta, children }: { meta?: ReactNode; children?: React
           </span>
         )}
         {children}
+        <ThemeToggle className="site-bar-theme" />
       </div>
     </header>
   )
@@ -205,6 +207,16 @@ export function AuthFrame({
       </div>
 
       <main className="auth-frame-panel">
+        {/* The theme control, and the only control on this half of the screen. It is
+            pinned to the panel's top-right rather than sitting in the form's flow,
+            because the form is the reason this page exists and a preference control
+            in the middle of it would be reading as part of the sign-in. It is here
+            and not over the photograph because the photograph's tokens are pinned to
+            the dark palette for the sake of the text reversed out of it, and a control
+            that ignored the page's own theme would be a strange thing to find there. */}
+        <div className="auth-frame-corner">
+          <ThemeToggle />
+        </div>
         <div className="auth-frame-inner">{children}</div>
       </main>
     </div>

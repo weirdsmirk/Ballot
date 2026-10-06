@@ -32,6 +32,33 @@
       href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400..700&display=swap"
     />
     <title>Ballot</title>
+    <script>
+      /*
+        The theme, before the first paint.
+
+        This has to run here rather than in the app. React mounts after the document
+        has already been parsed, and a theme applied at mount is a theme applied
+        after the browser has decided what colour the page is — so a reader who chose
+        light sees a dark page, then a light one, on every load. That flash is worse
+        than no theme switcher at all, and it cannot be fixed from inside the bundle
+        because the bundle is not running yet.
+
+        Three lines that duplicate `src/lib/theme.ts`, deliberately. They cannot
+        import it: a module here is a network request, and the request would defeat
+        the entire purpose. If the storage key ever changes, these three lines are
+        the second thing to update, which is why the key is versioned.
+      */
+      (function () {
+        try {
+          var t = localStorage.getItem('ballot.theme.v1')
+          if (t === 'dark' || t === 'light') {
+            document.documentElement.setAttribute('data-theme', t)
+          }
+        } catch (e) {
+          /* Storage disabled: fall through to the system's preference. */
+        }
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

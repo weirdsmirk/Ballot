@@ -148,7 +148,7 @@
   --card: #0f1311;
   --card-soft: #141917;
 
-  --grid-line: rgba(255, 255, 255, 0.021);
+  --grid-line: rgb(var(--overlay) / 0.021);
   --grid-size: 58px;
 
   /* Ink */
@@ -158,17 +158,24 @@
   --muted-2: #626a64;
 
   /* Hairlines */
-  --border: rgba(255, 255, 255, 0.082);
-  --border-soft: rgba(255, 255, 255, 0.048);
-  --border-strong: rgba(255, 255, 255, 0.16);
+  --border: rgb(var(--overlay) / 0.082);
+  --border-soft: rgb(var(--overlay) / 0.048);
+  --border-strong: rgb(var(--overlay) / 0.16);
 
   /* Chrome. Once the whole page is dark these are not "navy" — they are the
      deepest surfaces: the sidebar, the header band, the sunken wells. */
+  /*
+   * The console's sticky bar, as a translucent ground rather than a flat colour, so
+   * the content scrolling underneath it blurs through instead of being covered. It
+   * carries its own token because it is neither `--bg` nor `--navy`: it is the ground
+   * at 90% over whatever is passing beneath, which is a third thing.
+   */
+  --bar: rgba(9, 12, 10, 0.9);
   --navy: #090c0a;
   --navy-2: #101513;
   --navy-3: #18201b;
-  --navy-line: rgba(255, 255, 255, 0.075);
-  --navy-line-soft: rgba(255, 255, 255, 0.045);
+  --navy-line: rgb(var(--overlay) / 0.075);
+  --navy-line-soft: rgb(var(--overlay) / 0.045);
   --navy-text: #8d958e;
   --navy-text-strong: #f2f1ec;
 
@@ -178,37 +185,37 @@
   --green-press: #6ed199;
   --green-ink: #0b1a12;
   --green-text: #a8ecc6;
-  --green-line: rgba(126, 224, 168, 0.34);
-  --green-soft: rgba(126, 224, 168, 0.1);
-  --green-soft-2: rgba(126, 224, 168, 0.2);
-  --green-glow: 0 0 22px -6px rgba(126, 224, 168, 0.5);
+  --green-line: var(--green-line);
+  --green-soft: var(--green-soft);
+  --green-soft-2: var(--green-soft-2);
+  --green-glow: 0 0 22px -6px var(--green-line);
 
   /* Amber — waiting */
   --amber: #e3b551;
   --amber-text: #e8c377;
-  --amber-soft: rgba(227, 181, 81, 0.1);
-  --amber-soft-2: rgba(227, 181, 81, 0.26);
+  --amber-soft: var(--amber-soft);
+  --amber-soft-2: var(--amber-soft-2);
   --amber-ink: #e8c377;
 
   /* Red — refused */
   --red: #e2705f;
   --red-text: #eb8b7c;
-  --red-soft: rgba(226, 112, 95, 0.1);
-  --red-soft-2: rgba(226, 112, 95, 0.28);
+  --red-soft: var(--red-soft);
+  --red-soft-2: var(--red-soft-2);
   --red-ink: #eb8b7c;
 
   /* Orange — needs a person */
   --orange: #dd9152;
-  --orange-soft: rgba(221, 145, 82, 0.11);
+  --orange-soft: var(--orange-soft);
   --orange-ink: #e5a468;
 
   /* Neutral — archived, draft, inert */
-  --slate-soft: rgba(255, 255, 255, 0.05);
+  --slate-soft: rgb(var(--overlay) / 0.05);
   --slate-ink: #9aa39c;
 
   /* Violet — voter-originated records in the audit trail */
-  --violet-soft: rgba(167, 139, 250, 0.11);
-  --violet-soft-2: rgba(167, 139, 250, 0.28);
+  --violet-soft: var(--violet-soft);
+  --violet-soft-2: var(--violet-soft-2);
   --violet-ink: #b9a1fb;
 
   /*
@@ -222,8 +229,8 @@
   --blue: #7ee0a8;
   --blue-hover: #98ebba;
   --blue-press: #6ed199;
-  --blue-soft: rgba(126, 224, 168, 0.1);
-  --blue-soft-2: rgba(126, 224, 168, 0.2);
+  --blue-soft: var(--green-soft);
+  --blue-soft-2: var(--green-soft-2);
   --blue-ink: #a8ecc6;
 
   /*
@@ -279,6 +286,48 @@
    * full round is the only radius that fits the height. A pill suits a thing whose
    * height is its radius. It does not suit a rectangle.
    */
+
+  /*
+   * The accent opacity ramp, named by its alpha.
+   *
+   * Eighteen rules reach for a specific accent at a specific strength: a card wash
+   * at 5.5%, a dashed receipt border at 42%, a hover fill at 18%. Those were inline
+   * `rgba(126, 224, 168, 0.055)` values, which meant a mint green hardcoded into a
+   * rule that had to work on paper too.
+   *
+   * They are named by alpha rather than by role because the roles genuinely do not
+   * line up: 0.18 is a hover fill on one button and a critical-severity ring on
+   * another, and 0.05 is a card gradient on three different accents. A semantic name
+   * would have been a guess about intent in at least one of those places, and a
+   * wrong guess is worse than an honest number. What a theme needs is to restate one
+   * step of the ramp without reasoning about what it is for, and an alpha can do
+   * that; a name cannot.
+   *
+   * The light values are all *higher* than the dark ones, which is the opposite of
+   * the instinct. A dark accent at 5% over near-black is a hint you can barely see
+   * and do not need to; the same dark accent at 5% over paper is nearly invisible,
+   * because paper is already bright and the thing being asked for is a tint. So the
+   * washes move up, and the steps that carry an edge or a fill move up most.
+   */
+  --green-a0014: rgba(126, 224, 168, 0.014);
+  --green-a0035: rgba(126, 224, 168, 0.035);
+  --green-a0055: rgba(126, 224, 168, 0.055);
+  --green-a0075: rgba(126, 224, 168, 0.075);
+  --green-a013: rgba(126, 224, 168, 0.13);
+  --green-a026: rgba(126, 224, 168, 0.26);
+  --amber-a0045: rgba(227, 181, 81, 0.045);
+  --amber-a005: rgba(227, 181, 81, 0.05);
+  --amber-a014: rgba(227, 181, 81, 0.14);
+  --amber-a018: rgba(227, 181, 81, 0.18);
+  --amber-a042: rgba(227, 181, 81, 0.42);
+  --amber-a044: rgba(227, 181, 81, 0.44);
+  --amber-a06: rgba(227, 181, 81, 0.6);
+  --orange-a026: rgba(221, 145, 82, 0.26);
+  --red-a005: rgba(226, 112, 95, 0.05);
+  --red-a014: rgba(226, 112, 95, 0.14);
+  --red-a018: rgba(226, 112, 95, 0.18);
+  --red-a044: rgba(226, 112, 95, 0.44);
+
   --r-xs: 4px;
   --r-sm: 8px;
   --r-md: 12px;
@@ -319,12 +368,161 @@
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
   --shadow-md: 0 16px 36px -16px rgba(0, 0, 0, 0.8);
   --shadow-lg: 0 44px 90px -36px rgba(0, 0, 0, 0.85);
-  --shadow-nav: 0 1px 0 rgba(255, 255, 255, 0.03);
+  --shadow-nav: 0 1px 0 rgb(var(--overlay) / 0.03);
 
-  --ring: 0 0 0 3px rgba(126, 224, 168, 0.2);
-  --ring-soft: 0 0 0 3px rgba(126, 224, 168, 0.13);
+  --ring: 0 0 0 3px var(--green-soft-2);
+  --ring-soft: 0 0 0 3px var(--green-a013);
 
   --ease: 0.18s cubic-bezier(0.2, 0, 0.2, 1);
+
+/*
+   * The overlay colour. One variable, and it is what makes the light theme
+   * possible.
+   *
+   * Fifty-odd rules in this file are not opaque colours: they are a translucent
+   * white laid over whatever is behind them — a hairline border, a hover fill, a
+   * grid line, the wash on the two ways in. Written as `rgba(255, 255, 255, x)`
+   * those are correct on a near-black ground and invisible on a light one, because
+   * white on white is nothing. There were two ways out: give every alpha its own
+   * token and restate all of them per theme, or change what the white *is*.
+   *
+   * This is the second way. A dark ground is overlaid with white and a light ground
+   * with black, so `--overlay` is the only value a theme has to change for every
+   * translucent fill in the product to stay visible, and the per-alpha tuning that
+   * remains is a handful of overrides rather than fifty.
+   *
+   * Space-separated components rather than a colour, so the alpha attaches at the
+   * point of use: `rgb(var(--overlay) / 0.08)`.
+   */
+  --overlay: 255 255 255;
+}
+
+/* ========================================
+   The light theme
+   ======================================== */
+
+/*
+ * Light is not this theme with its colours inverted, and the accents are where that
+ * becomes obvious. A mint green chosen to glow against near-black — `#7ee0a8` — is
+ * close to invisible on paper. It is a light colour carrying a light theme's
+ * contrast requirement, so it needs roughly a quarter of its previous lightness
+ * before it reads as green at all, let alone as an accessible green. Amber, red and
+ * orange go the same way, and every `-soft` wash needs both a darker base and a
+ * higher alpha, because a 10% mint wash on white is not a tint, it is nothing.
+ *
+ * So each accent gets a light value chosen against `#f7f6f2` rather than derived by
+ * maths from the dark one. Green is the accent that carries real meaning here —
+ * certified, open, complete, and the `--green-ink` set on a filled button — so it is
+ * the one that had to pass rather than merely look present.
+ *
+ * The ground keeps its warmth. The dark theme is not neutral grey; it is a faintly
+ * warm near-black with a green cast, and a cold white beside it reads as a different
+ * product. `#f7f6f2` is paper, not a screen.
+ *
+ * Overlays go to black at the *same* alphas. Black-at-8% on paper and white-at-8%
+ * on near-black are close enough in perceived weight that the fifty-odd rules now
+ * reading `rgb(var(--overlay) / x)` needed almost no retuning, which is the return
+ * on doing this with one variable rather than fifty tokens. The shadows are the
+ * exception: a shadow tuned to separate two dark surfaces is far too heavy on white.
+ */
+:root[data-theme='light'] {
+  --overlay: 0 0 0;
+
+  /* Ground and surfaces — warm paper */
+  --bg: #f7f6f2;
+  --bg-sunken: #efeee8;
+  --card: #ffffff;
+  --card-soft: #f2f1ec;
+
+  --ink: #191c19;
+  --ink-2: #3d443e;
+  --muted: #5c655f;
+  --muted-2: #6f7771;
+
+  /* The console's sidebar, which is a surface rather than a ground */
+  /* Near-opaque white rather than a tint of the ground. A translucent dark bar over
+     paper would be grey, not light, and the console's title sits on it. */
+  --bar: rgba(255, 255, 255, 0.88);
+  --navy: #ffffff;
+  --navy-2: #f4f3ee;
+  --navy-3: #e8e7e1;
+  --navy-line: rgb(var(--overlay) / 0.075);
+  --navy-line-soft: rgb(var(--overlay) / 0.045);
+  --navy-text: #5c655f;
+  --navy-text-strong: #191c19;
+
+  /* Green carries the product's meaning, so it is the accent that had to pass
+     rather than merely look reasonable. */
+  --green: #17794c;
+  --green-hover: #126840;
+  --green-press: #0e5834;
+  --green-ink: #ffffff;
+  --green-text: #0f6b41;
+  --green-line: rgb(23 121 76 / 0.34);
+  --green-soft: rgb(23 121 76 / 0.1);
+  --green-soft-2: rgb(23 121 76 / 0.2);
+
+  --amber: #a9741a;
+  --amber-text: #8a5e12;
+  --amber-soft: rgb(169 116 26 / 0.11);
+  --amber-soft-2: rgb(169 116 26 / 0.26);
+  --amber-ink: #6d4a0d;
+
+  --red: #b8402c;
+  --red-text: #a33523;
+  --red-soft: rgb(184 64 44 / 0.1);
+  --red-soft-2: rgb(184 64 44 / 0.28);
+  --red-ink: #8f2c1d;
+
+  --orange: #a75c1e;
+  --orange-soft: rgb(167 92 30 / 0.11);
+  --orange-ink: #8a4a16;
+
+  --slate-soft: rgb(var(--overlay) / 0.05);
+  --slate-ink: #4d554f;
+  --violet-soft: rgb(107 72 201 / 0.11);
+  --violet-soft-2: rgb(107 72 201 / 0.28);
+  --violet-ink: #6b48c9;
+
+  /* Blue is an alias for green in this product, not a second colour, so it moves
+     with it rather than becoming a blue that means something else. */
+  --blue: #17794c;
+  --blue-hover: #126840;
+  --blue-press: #0e5834;
+  --blue-soft: rgb(23 121 76 / 0.1);
+  --blue-soft-2: rgb(23 121 76 / 0.2);
+  --blue-ink: #0f6b41;
+
+  /* Depth. The dark shadows exist to separate two dark surfaces; on paper the same
+     weight reads as a bruise, so they lose most of their opacity and the large ones
+     lose most of their spread. */
+  --shadow-xs: 0 1px 2px rgb(0 0 0 / 0.06);
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.05);
+  --shadow-md: 0 12px 28px -18px rgb(0 0 0 / 0.28);
+  --shadow-lg: 0 32px 64px -32px rgb(0 0 0 / 0.3);
+
+  --ring: 0 0 0 3px rgb(23 121 76 / 0.28);
+  --ring-soft: 0 0 0 3px rgb(23 121 76 / 0.18);
+  --green-a0014: rgb(23 121 76 / 0.03);
+  --green-a0035: rgb(23 121 76 / 0.05);
+  --green-a0055: rgb(23 121 76 / 0.075);
+  --green-a0075: rgb(23 121 76 / 0.1);
+  --green-a013: rgb(23 121 76 / 0.18);
+  --green-a026: rgb(23 121 76 / 0.3);
+  --amber-a0045: rgb(169 116 26 / 0.06);
+  --amber-a005: rgb(169 116 26 / 0.07);
+  --amber-a014: rgb(169 116 26 / 0.16);
+  --amber-a018: rgb(169 116 26 / 0.2);
+  --amber-a042: rgb(169 116 26 / 0.45);
+  --amber-a044: rgb(169 116 26 / 0.5);
+  --amber-a06: rgb(169 116 26 / 0.65);
+  --orange-a026: rgb(167 92 30 / 0.3);
+  --red-a005: rgb(184 64 44 / 0.06);
+  --red-a014: rgb(184 64 44 / 0.16);
+  --red-a018: rgb(184 64 44 / 0.2);
+  --red-a044: rgb(184 64 44 / 0.5);
+
+  --green-glow: none;
 }
 
 /* ========================================
@@ -389,7 +587,7 @@ button, input, select, textarea {
 
 a { color: inherit; }
 
-::selection { background: rgba(126, 224, 168, 0.26); color: #fff; }
+::selection { background: var(--green-a026); color: #fff; }
 
 /* Focus is a green ring rather than an outline: it has to be visible against
    both the near-black ground and a green-filled button. */
@@ -448,7 +646,7 @@ a { color: inherit; }
 }
 .eyebrow-blue { color: var(--green-text); }
 .eyebrow-muted { color: var(--muted-2); }
-.eyebrow-navy { color: rgba(255, 255, 255, 0.4); }
+.eyebrow-navy { color: rgb(var(--overlay) / 0.4); }
 /* The name this label had before the design system gave it a proper component.
    Kept as an alias so the panels that still use it read the same. */
 .preview-meta-label {
@@ -820,7 +1018,7 @@ a { color: inherit; }
   transition: background var(--ease), border-color var(--ease), color var(--ease);
 }
 .btn-outline svg { width: 15px; height: 15px; }
-.btn-outline:hover:not(:disabled) { background: rgba(255, 255, 255, 0.045); border-color: rgba(255, 255, 255, 0.26); color: var(--ink); }
+.btn-outline:hover:not(:disabled) { background: rgb(var(--overlay) / 0.045); border-color: rgb(var(--overlay) / 0.26); color: var(--ink); }
 .btn-outline:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .btn-ghost {
@@ -842,7 +1040,7 @@ a { color: inherit; }
   transition: background var(--ease), color var(--ease);
 }
 .btn-ghost svg { width: 15px; height: 15px; }
-.btn-ghost:hover:not(:disabled) { background: rgba(255, 255, 255, 0.05); color: var(--ink); }
+.btn-ghost:hover:not(:disabled) { background: rgb(var(--overlay) / 0.05); color: var(--ink); }
 
 .btn-icon {
   display: inline-flex;
@@ -860,7 +1058,7 @@ a { color: inherit; }
   transition: background var(--ease), border-color var(--ease), color var(--ease);
 }
 .btn-icon svg { width: 17px; height: 17px; }
-.btn-icon:hover { background: rgba(255, 255, 255, 0.05); border-color: var(--border-strong); color: var(--ink); }
+.btn-icon:hover { background: rgb(var(--overlay) / 0.05); border-color: var(--border-strong); color: var(--ink); }
 .btn-icon-sm { width: 30px; height: 30px; }
 .btn-icon-sm svg { width: 15px; height: 15px; }
 
@@ -882,7 +1080,7 @@ a { color: inherit; }
   transition: background var(--ease), border-color var(--ease);
 }
 .btn-danger svg { width: 15px; height: 15px; }
-.btn-danger:hover:not(:disabled) { background: rgba(226, 112, 95, 0.18); border-color: rgba(226, 112, 95, 0.44); }
+.btn-danger:hover:not(:disabled) { background: var(--red-a018); border-color: var(--red-a044); }
 .btn-danger:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .btn-navy {
@@ -892,7 +1090,7 @@ a { color: inherit; }
   gap: 7px;
   height: 38px;
   padding: 0 16px;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgb(var(--overlay) / 0.06);
   color: var(--ink);
   border: 1px solid var(--border-strong);
   border-radius: var(--r-md);
@@ -902,7 +1100,7 @@ a { color: inherit; }
   white-space: nowrap;
   transition: background var(--ease);
 }
-.btn-navy:hover:not(:disabled) { background: rgba(255, 255, 255, 0.1); }
+.btn-navy:hover:not(:disabled) { background: rgb(var(--overlay) / 0.1); }
 
 .btn-block { width: 100%; }
 .btn-lg { height: 50px; font-size: 15px; }
@@ -952,7 +1150,7 @@ a { color: inherit; }
 .btn-submit-ballot:hover:not(:disabled) { background: var(--green-hover); }
 .btn-submit-ballot svg { width: 17px; height: 17px; }
 .btn-submit-ballot:disabled {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgb(var(--overlay) / 0.05);
   border-color: var(--border);
   color: var(--muted-2);
   cursor: not-allowed;
@@ -996,7 +1194,7 @@ a { color: inherit; }
   cursor: pointer;
   transition: background var(--ease), border-color var(--ease);
 }
-.btn-cancel:hover:not(:disabled) { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.26); }
+.btn-cancel:hover:not(:disabled) { background: rgb(var(--overlay) / 0.05); border-color: rgb(var(--overlay) / 0.26); }
 .btn-confirm {
   display: inline-flex;
   align-items: center;
@@ -1053,23 +1251,23 @@ a { color: inherit; }
 .btn-lifecycle-open { background: var(--green); border-color: var(--green); }
 .btn-lifecycle-open:hover:not(:disabled) { background: var(--green-hover); border-color: var(--green-hover); }
 .btn-lifecycle-pause { background: var(--amber-soft); border-color: var(--amber-soft-2); color: var(--amber-text); box-shadow: none; }
-.btn-lifecycle-pause:hover:not(:disabled) { background: rgba(227, 181, 81, 0.18); border-color: rgba(227, 181, 81, 0.44); }
+.btn-lifecycle-pause:hover:not(:disabled) { background: var(--amber-a018); border-color: var(--amber-a044); }
 .btn-lifecycle-close,
 .btn-lifecycle-certify,
-.btn-lifecycle-archive { background: rgba(255, 255, 255, 0.06); border-color: var(--border-strong); color: var(--ink); box-shadow: none; }
+.btn-lifecycle-archive { background: rgb(var(--overlay) / 0.06); border-color: var(--border-strong); color: var(--ink); box-shadow: none; }
 .btn-lifecycle-close:hover:not(:disabled),
 .btn-lifecycle-certify:hover:not(:disabled),
-.btn-lifecycle-archive:hover:not(:disabled) { background: rgba(255, 255, 255, 0.11); }
+.btn-lifecycle-archive:hover:not(:disabled) { background: rgb(var(--overlay) / 0.11); }
 .btn-lifecycle-unpublish { background: transparent; color: var(--ink-2); border-color: var(--border-strong); box-shadow: none; }
-.btn-lifecycle-unpublish:hover:not(:disabled) { background: rgba(255, 255, 255, 0.05); }
+.btn-lifecycle-unpublish:hover:not(:disabled) { background: rgb(var(--overlay) / 0.05); }
 .btn-lifecycle-disabled {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgb(var(--overlay) / 0.03);
   border-color: var(--border-soft);
   color: var(--muted-2);
   cursor: not-allowed;
   box-shadow: none;
 }
-.btn-lifecycle-disabled:hover { background: rgba(255, 255, 255, 0.03); border-color: var(--border-soft); }
+.btn-lifecycle-disabled:hover { background: rgb(var(--overlay) / 0.03); border-color: var(--border-soft); }
 .btn-lifecycle-elevated { position: relative; padding-right: 26px; }
 .btn-lifecycle-lock {
   position: absolute;
@@ -1247,6 +1445,35 @@ a { color: inherit; }
   padding: clamp(26px, 2.6vw, 44px) clamp(26px, 3vw, 56px);
 }
 
+/*
+ * The photograph is not a themed surface.
+ *
+ * Everything else on this page follows the theme, including the fifty translucent
+ * fills now built from `--overlay`. This half does not, and it is worth being
+ * explicit about why rather than leaving it to look like an oversight.
+ *
+ * A photograph with a dark scrim over it is dark in both themes — the scrim is
+ * `rgba(8, 10, 9, ...)`, the colour of the dark ground, and it stays that way in
+ * the light theme because inverting a photograph would invert the ballot box. So
+ * this region re-declares the dark values for the handful of tokens its contents
+ * read, which keeps the reversed-out wordmark and the statement legible over the
+ * image instead of printing them near-black on a near-black scrim.
+ *
+ * The consequence is deliberate and visible: on a light page the sign-in screen has
+ * a dark left half and a light right half. That is the photograph showing through,
+ * not the theme failing to reach this corner.
+ */
+.auth-frame-media {
+  --overlay: 255 255 255;
+  --ink: #f2f1ec;
+  --ink-2: #ced2cb;
+  --muted: #8d958e;
+  --muted-2: #626a64;
+  --green: #7ee0a8;
+  --green-text: #a8ecc6;
+  --green-ink: #0b1a12;
+}
+
 /* The wordmark, reversed out of the photograph. Text only, so there is no tile
    to frost here and nothing to compete with the accent. */
 .auth-frame-media .brand { color: #fff; }
@@ -1258,7 +1485,7 @@ a { color: inherit; }
      on a wide screen or a paragraph on a laptop. */
   font-size: clamp(19px, 1.55vw, 27px);
   line-height: 1.32;
-  color: rgba(255, 255, 255, 0.95);
+  color: rgb(var(--overlay) / 0.95);
   text-wrap: balance;
 }
 .auth-frame-meta {
@@ -1268,7 +1495,7 @@ a { color: inherit; }
   letter-spacing: 0.13em;
   text-transform: uppercase;
   line-height: 1.5;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgb(var(--overlay) / 0.6);
 }
 
 /* ---- The working half ---- */
@@ -1280,6 +1507,20 @@ a { color: inherit; }
   overflow-y: auto;
   padding: clamp(26px, 2.8vw, 56px) clamp(26px, 3.6vw, 80px);
   min-width: 0;
+}
+/*
+ * The theme control's corner on the sign-in half.
+ *
+ * Pinned rather than in flow, so the form below stays the only thing on this page
+ * that is asking for anything. It sits in the panel's own padding, which means it
+ * moves with the panel and not with the viewport — so on the narrow layout, where
+ * the photograph becomes a band across the top and the panel runs the full width,
+ * the control follows the form down rather than floating over the image.
+ */
+.auth-frame-corner {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
 }
 .auth-frame-inner {
   width: 100%;
@@ -1425,7 +1666,7 @@ a { color: inherit; }
   text-align: left;
   /* A green wash over the card rather than a flat fill, so the tint reads as
      light falling on a surface instead of as a coloured box. */
-  background: linear-gradient(180deg, rgba(126, 224, 168, 0.055), rgba(126, 224, 168, 0.014) 62%), var(--card);
+  background: linear-gradient(180deg, var(--green-a0055), var(--green-a0014) 62%), var(--card);
   border: 1px solid var(--border-strong);
   /* `--r-lg`, not `--r-xl`, and the reason is this card's proportions rather than
      its importance. At 28px on something ~120px tall the radius is a meaningful
@@ -1692,11 +1933,11 @@ a { color: inherit; }
 .tile-blue { background: var(--green-soft); color: var(--green); border-color: var(--green-soft-2); }
 .tile-green { background: var(--green-soft); color: var(--green); border-color: var(--green-soft-2); }
 .tile-amber { background: var(--amber-soft); color: var(--amber); border-color: var(--amber-soft-2); }
-.tile-orange { background: var(--orange-soft); color: var(--orange); border-color: rgba(221, 145, 82, 0.26); }
+.tile-orange { background: var(--orange-soft); color: var(--orange); border-color: var(--orange-a026); }
 .tile-red { background: var(--red-soft); color: var(--red); border-color: var(--red-soft-2); }
 .tile-slate { background: var(--slate-soft); color: var(--slate-ink); border-color: var(--border); }
-.tile-navy { background: rgba(255, 255, 255, 0.07); color: var(--ink); border-color: var(--border); }
-.tile-white { background: rgba(255, 255, 255, 0.08); color: var(--ink); border-color: var(--border-strong); }
+.tile-navy { background: rgb(var(--overlay) / 0.07); color: var(--ink); border-color: var(--border); }
+.tile-white { background: rgb(var(--overlay) / 0.08); color: var(--ink); border-color: var(--border-strong); }
 .tile-white-line { background: var(--green-soft); color: var(--green); border-color: var(--green-soft-2); }
 
 /* ========================================
@@ -1733,7 +1974,7 @@ a { color: inherit; }
 .form-group textarea::placeholder { color: var(--muted-2); }
 .form-group input:hover,
 .form-group select:hover,
-.form-group textarea:hover { border-color: rgba(255, 255, 255, 0.24); }
+.form-group textarea:hover { border-color: rgb(var(--overlay) / 0.24); }
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus,
@@ -1745,7 +1986,7 @@ a { color: inherit; }
 .form-group input:disabled,
 .form-group select:disabled,
 .form-group textarea:disabled {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgb(var(--overlay) / 0.03);
   color: var(--muted-2);
   cursor: not-allowed;
 }
@@ -1761,7 +2002,7 @@ a { color: inherit; }
 }
 .form-group.has-error input,
 .form-group.has-error select,
-.form-group.has-error textarea { border-color: var(--red); box-shadow: 0 0 0 3px rgba(226, 112, 95, 0.14); }
+.form-group.has-error textarea { border-color: var(--red); box-shadow: 0 0 0 3px var(--red-a014); }
 .field-hint { font-size: 12px; color: var(--muted); margin-top: 7px; line-height: 1.55; }
 .field-error { font-size: 12px; color: var(--red-text); margin-top: 7px; font-weight: 500; }
 
@@ -1859,7 +2100,7 @@ a { color: inherit; }
   width: 40px;
   height: 23px;
   border-radius: var(--r-pill);
-  background: rgba(255, 255, 255, 0.09);
+  background: rgb(var(--overlay) / 0.09);
   border: 1px solid var(--border-strong);
   position: relative;
   flex: none;
@@ -1942,7 +2183,7 @@ a { color: inherit; }
   font-family: var(--font-sans);
   font-size: 12px;
   font-weight: 500;
-  background: rgba(227, 181, 81, 0.14);
+  background: var(--amber-a014);
   color: var(--amber);
   padding: 1px 5px;
   border-radius: var(--r-xs);
@@ -1966,7 +2207,7 @@ a { color: inherit; }
 .alert code {
   font-family: var(--font-sans);
   font-size: 11.5px;
-  background: rgba(255, 255, 255, 0.07);
+  background: rgb(var(--overlay) / 0.07);
   padding: 1px 5px;
   border-radius: var(--r-xs);
   font-weight: 500;
@@ -2030,7 +2271,7 @@ a { color: inherit; }
   font-size: 11.5px;
   font-weight: 500;
   letter-spacing: -0.002em;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgb(var(--overlay) / 0.05);
   color: var(--ink-2);
   border: 1px solid var(--border);
   white-space: nowrap;
@@ -2054,7 +2295,7 @@ a { color: inherit; }
   font-weight: 400;
   font-size: 12px;
   color: var(--ink);
-  background: rgba(255, 255, 255, 0.06);
+  background: rgb(var(--overlay) / 0.06);
   border: 1px solid var(--border);
   padding: 1px 7px;
   border-radius: var(--r-sm);
@@ -2085,7 +2326,7 @@ a { color: inherit; }
 .meter-track {
   flex: 1;
   height: 5px;
-  background: rgba(255, 255, 255, 0.07);
+  background: rgb(var(--overlay) / 0.07);
   border-radius: var(--r-pill);
   overflow: hidden;
   min-width: 40px;
@@ -2099,7 +2340,7 @@ a { color: inherit; }
 /* The card-footer turnout bar used on election cards. */
 .progress {
   height: 4px;
-  background: rgba(255, 255, 255, 0.07);
+  background: rgb(var(--overlay) / 0.07);
   border-radius: var(--r-pill);
   overflow: hidden;
   margin: 14px 0 12px;
@@ -2297,7 +2538,7 @@ a { color: inherit; }
 }
 .data-table td { padding: 13px 15px; border-bottom: 1px solid var(--border-soft); vertical-align: top; }
 .data-table tbody tr:last-child td { border-bottom: none; }
-.data-table tbody tr:hover { background: rgba(255, 255, 255, 0.022); }
+.data-table tbody tr:hover { background: rgb(var(--overlay) / 0.022); }
 .data-table-dense th { padding: 9px 12px; font-size: 9.5px; }
 .data-table-dense td { padding: 9px 12px; font-size: 12.5px; }
 /*
@@ -2432,7 +2673,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   background-image:
     linear-gradient(var(--grid-line) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
-    radial-gradient(120% 80% at 50% 0%, rgba(126, 224, 168, 0.035), transparent 62%);
+    radial-gradient(120% 80% at 50% 0%, var(--green-a0035), transparent 62%);
   background-size: var(--grid-size) var(--grid-size), var(--grid-size) var(--grid-size), 100% 100%;
   background-attachment: fixed, fixed, fixed;
 }
@@ -2476,7 +2717,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
 .step-bar {
   height: 3px;
   border-radius: var(--r-xs);
-  background: rgba(255, 255, 255, 0.08);
+  background: rgb(var(--overlay) / 0.08);
   transition: background var(--ease), box-shadow var(--ease);
 }
 .step-label {
@@ -2624,7 +2865,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
 .menu { position: relative; }
 .menu > summary { list-style: none; cursor: pointer; }
 .menu > summary::-webkit-details-marker { display: none; }
-.menu[open] > summary { background: rgba(255, 255, 255, 0.07); border-color: var(--border-strong); color: var(--ink); }
+.menu[open] > summary { background: rgb(var(--overlay) / 0.07); border-color: var(--border-strong); color: var(--ink); }
 .menu-panel {
   position: absolute;
   top: calc(100% + 6px);
@@ -2659,7 +2900,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   transition: background var(--ease), color var(--ease);
 }
 .menu-item > svg { width: 14px; height: 14px; color: var(--muted-2); flex: none; }
-.menu-item:hover { background: rgba(255, 255, 255, 0.06); color: var(--ink); }
+.menu-item:hover { background: rgb(var(--overlay) / 0.06); color: var(--ink); }
 .menu-rule { height: 1px; background: var(--border-soft); margin: 5px 4px; }
 .menu-empty { font-size: 12px; color: var(--muted-2); padding: 8px 10px; }
 
@@ -2762,7 +3003,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   background: var(--bg-sunken);
   transition: border-color var(--ease), background var(--ease);
 }
-.candidate-row:hover .radio-circle { border-color: rgba(255, 255, 255, 0.3); }
+.candidate-row:hover .radio-circle { border-color: rgb(var(--overlay) / 0.3); }
 .candidate-row.selected .radio-circle { border-color: var(--green); background: var(--green-soft); }
 .candidate-row.selected .radio-circle::after {
   content: '';
@@ -2846,7 +3087,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
 
 .receipt-box {
   background: var(--amber-soft);
-  border: 1px dashed rgba(227, 181, 81, 0.42);
+  border: 1px dashed var(--amber-a042);
   border-radius: var(--r-lg);
   padding: 20px 24px;
   margin: 26px 34px 0;
@@ -2885,7 +3126,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   height: 32px;
   padding: 0 14px;
   background: transparent;
-  border: 1px solid rgba(227, 181, 81, 0.42);
+  border: 1px solid var(--amber-a042);
   border-radius: var(--r-md);
   color: var(--amber-text);
   font-size: 12.5px;
@@ -2894,7 +3135,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   transition: background var(--ease), border-color var(--ease);
 }
 .receipt-copy svg { width: 14px; height: 14px; }
-.receipt-copy:hover { background: rgba(227, 181, 81, 0.14); border-color: rgba(227, 181, 81, 0.6); }
+.receipt-copy:hover { background: var(--amber-a014); border-color: var(--amber-a06); }
 
 /* The one plain sentence about what the receipt is worth. It sits outside the
    stamp because it is an explanation, not part of the artefact. */
@@ -2910,7 +3151,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   font-family: var(--font-sans);
   font-size: 11px;
   color: var(--ink-2);
-  background: rgba(255, 255, 255, 0.06);
+  background: rgb(var(--overlay) / 0.06);
   border: 1px solid var(--border);
   border-radius: var(--r-xs);
   padding: 1px 5px;
@@ -2978,7 +3219,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   color: var(--green-text);
 }
 .tally-party { font-size: 12.5px; color: var(--muted); margin-bottom: 12px; }
-.tally-bar-track { width: 100%; height: 6px; background: rgba(255, 255, 255, 0.07); border-radius: var(--r-pill); overflow: hidden; margin-bottom: 8px; }
+.tally-bar-track { width: 100%; height: 6px; background: rgb(var(--overlay) / 0.07); border-radius: var(--r-pill); overflow: hidden; margin-bottom: 8px; }
 .tally-bar-fill { height: 100%; background: var(--green); border-radius: var(--r-pill); transition: width 0.7s ease; }
 .tally-bar-fill.leading { background: var(--green); box-shadow: var(--green-glow); }
 .tally-votes { font-size: 12px; color: var(--muted); }
@@ -3032,7 +3273,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   transition: background var(--ease), color var(--ease);
 }
 .modal-close svg { width: 16px; height: 16px; }
-.modal-close:hover { background: rgba(255, 255, 255, 0.06); color: var(--ink); }
+.modal-close:hover { background: rgb(var(--overlay) / 0.06); color: var(--ink); }
 .modal-content h2 {
   font-family: var(--font-serif);
   font-size: 26px;
@@ -3157,7 +3398,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   padding: 11px 12px;
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  background: rgba(255, 255, 255, 0.028);
+  background: rgb(var(--overlay) / 0.028);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -3169,7 +3410,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   flex: none;
   transition: background var(--ease), border-color var(--ease);
 }
-.control-workspace:hover { background: rgba(255, 255, 255, 0.055); border-color: var(--border-strong); }
+.control-workspace:hover { background: rgb(var(--overlay) / 0.055); border-color: var(--border-strong); }
 .workspace-avatar {
   width: 32px; height: 32px;
   border-radius: var(--r-md);
@@ -3193,7 +3434,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   font-weight: 600;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.28);
+  color: rgb(var(--overlay) / 0.28);
   padding: 0 10px 9px;
 }
 .control-nav-item {
@@ -3216,7 +3457,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
 }
 .control-nav-item > svg { width: 16px; height: 16px; flex: none; opacity: 0.75; }
 .control-nav-item-label { flex: 1; min-width: 0; font-weight: 500; }
-.control-nav-item:hover { background: rgba(255, 255, 255, 0.04); color: var(--ink); }
+.control-nav-item:hover { background: rgb(var(--overlay) / 0.04); color: var(--ink); }
 .control-nav-item.active {
   /* A green-tinted fill plus a green edge. Over a near-black rail the active
      section is the one thing that must never be ambiguous, so it is the only
@@ -3256,7 +3497,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   display: flex;
   gap: 10px;
   align-items: flex-start;
-  background: rgba(255, 255, 255, 0.022);
+  background: rgb(var(--overlay) / 0.022);
 }
 .control-nav-card > svg { width: 16px; height: 16px; color: var(--green); flex: none; margin-top: 1px; }
 .control-nav-card strong { display: block; font-size: 12.5px; font-weight: 600; color: var(--ink); }
@@ -3334,7 +3575,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   display: inline-flex;
   transition: color var(--ease), background var(--ease);
 }
-.control-user button:hover { color: var(--ink); background: rgba(255, 255, 255, 0.06); }
+.control-user button:hover { color: var(--ink); background: rgb(var(--overlay) / 0.06); }
 .control-user button svg { width: 15px; height: 15px; }
 
 /* ---- Top bar ---- */
@@ -3343,7 +3584,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   position: sticky;
   top: 0;
   z-index: 60;
-  background: rgba(9, 12, 10, 0.9);
+  background: var(--bar);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
   min-height: 66px;
@@ -3440,8 +3681,8 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   padding: 22px;
   min-width: 0;
 }
-.control-card-warn { border-color: var(--amber-soft-2); background: linear-gradient(180deg, rgba(227, 181, 81, 0.045), transparent 60%), var(--card); }
-.control-card-danger { border-color: var(--red-soft-2); background: linear-gradient(180deg, rgba(226, 112, 95, 0.05), transparent 60%), var(--card); }
+.control-card-warn { border-color: var(--amber-soft-2); background: linear-gradient(180deg, var(--amber-a0045), transparent 60%), var(--card); }
+.control-card-danger { border-color: var(--red-soft-2); background: linear-gradient(180deg, var(--red-a005), transparent 60%), var(--card); }
 .control-card-ok { border-color: var(--green-soft-2); }
 .control-card-head {
   display: flex;
@@ -3467,7 +3708,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
    tint rather than a different surface: it glows green because it is asking for
    a decision, and it is the only card in the body allowed to. */
 .attention-card {
-  background: linear-gradient(180deg, rgba(126, 224, 168, 0.075), transparent 70%), var(--card);
+  background: linear-gradient(180deg, var(--green-a0075), transparent 70%), var(--card);
   border: 1px solid var(--green-soft-2);
   border-radius: var(--r-xl);
   box-shadow: var(--shadow-sm);
@@ -3516,7 +3757,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   flex: none;
   transition: color var(--ease), background var(--ease);
 }
-.attention > button:hover { color: var(--ink); background: rgba(255, 255, 255, 0.06); }
+.attention > button:hover { color: var(--ink); background: rgb(var(--overlay) / 0.06); }
 .attention > button svg { width: 16px; height: 16px; }
 .attention-icon { display: none; }
 .attention-critical, .attention-warning, .attention-info { background: none; border: none; color: inherit; padding: 15px 0; }
@@ -3537,7 +3778,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   width: 20px; height: 20px; border-radius: 50%;
   display: inline-flex; align-items: center; justify-content: center;
   flex: none;
-  background: rgba(255, 255, 255, 0.09);
+  background: rgb(var(--overlay) / 0.09);
 }
 .notice-icon svg { width: 12px; height: 12px; }
 .notice-text { flex: 1; min-width: 0; }
@@ -3639,7 +3880,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   font-variant-numeric: tabular-nums;
   font-size: 10.5px;
   color: var(--ink-2);
-  background: rgba(255, 255, 255, 0.06);
+  background: rgb(var(--overlay) / 0.06);
   border: 1px solid var(--border);
   border-radius: var(--r-xs);
   padding: 1px 6px;
@@ -3677,7 +3918,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
 .severity-info { background: var(--muted-2); }
 .severity-notice { background: var(--green); }
 .severity-warning { background: var(--amber); }
-.severity-critical { background: var(--red); box-shadow: 0 0 0 3px rgba(226, 112, 95, 0.18); }
+.severity-critical { background: var(--red); box-shadow: 0 0 0 3px var(--red-a018); }
 .severity-badge { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 600; }
 
 .health-issues { list-style: none; padding: 0; margin: 12px 0 0; display: flex; flex-direction: column; gap: 7px; }
@@ -3702,7 +3943,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   padding: 15px 17px;
   border: 1px solid var(--amber-soft-2);
   border-radius: var(--r-lg);
-  background: linear-gradient(180deg, rgba(227, 181, 81, 0.05), transparent 60%), var(--card);
+  background: linear-gradient(180deg, var(--amber-a005), transparent 60%), var(--card);
   flex-wrap: wrap;
 }
 .approval-queue-body { flex: 1; min-width: 260px; }
@@ -3851,14 +4092,14 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
 }
 .tab-count {
   font-size: 10px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgb(var(--overlay) / 0.08);
   color: var(--muted);
   border-radius: var(--r-pill);
   padding: 1px 6px;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
-.tab.active .tab-count { background: rgba(11, 26, 18, 0.16); color: var(--green-ink); }
+.tab.active .tab-count { background: var(--green-soft-2); color: var(--green-ink); }
 
 /* ---- Panels ---- */
 .panel {
@@ -3975,17 +4216,17 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   font-size: 13px;
   font-weight: 600;
   color: var(--ink-2);
-  background: rgba(255, 255, 255, 0.06);
+  background: rgb(var(--overlay) / 0.06);
   border: 1px solid var(--border);
   letter-spacing: 0.01em;
 }
 .roster-avatar-sm { width: 32px; height: 32px; font-size: 11px; border-radius: var(--r-sm); }
 /* Monogram tints, cycled down a roster. Declared after the tile set so a tint
    named here wins over the neutral default on the same element. */
-.roster-avatar.av-navy { background: rgba(255, 255, 255, 0.06); color: var(--ink-2); }
+.roster-avatar.av-navy { background: rgb(var(--overlay) / 0.06); color: var(--ink-2); }
 .roster-avatar.av-blue { background: var(--green-soft); color: var(--green-text); border-color: var(--green-soft-2); }
 .roster-avatar.av-green { background: var(--green-soft); color: var(--green-text); border-color: var(--green-soft-2); }
-.roster-avatar.av-orange { background: var(--orange-soft); color: var(--orange-ink); border-color: rgba(221, 145, 82, 0.26); }
+.roster-avatar.av-orange { background: var(--orange-soft); color: var(--orange-ink); border-color: var(--orange-a026); }
 .roster-avatar.av-slate { background: var(--slate-soft); color: var(--slate-ink); }
 .roster-body { min-width: 0; flex: 1; }
 .roster-name {
@@ -4080,7 +4321,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
 .tally-line { padding: 14px 0; border-bottom: 1px solid var(--border-soft); }
 .tally-line:last-child { border-bottom: none; }
 .tally-line-name { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.tally-line-track { height: 6px; background: rgba(255, 255, 255, 0.07); border-radius: var(--r-pill); overflow: hidden; }
+.tally-line-track { height: 6px; background: rgb(var(--overlay) / 0.07); border-radius: var(--r-pill); overflow: hidden; }
 .tally-line-fill { height: 100%; background: var(--green); border-radius: var(--r-pill); transition: width 0.6s ease; }
 .tally-line-leading .tally-line-fill { background: var(--green); box-shadow: var(--green-glow); }
 .tally-line-leading .cell-primary { color: var(--green-text); }
@@ -4133,7 +4374,7 @@ th[aria-sort="ascending"] .table-sort-mark svg { transform: rotate(180deg); }
   font-variant-numeric: tabular-nums;
   font-size: 10.5px;
   color: var(--ink-2);
-  background: rgba(255, 255, 255, 0.06);
+  background: rgb(var(--overlay) / 0.06);
   border: 1px solid var(--border);
   border-radius: var(--r-xs);
   padding: 1px 6px;
