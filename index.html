@@ -10,8 +10,27 @@
       http-equiv="Content-Security-Policy"
       content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; style-src-attr 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-src 'none'"
     />
+    <!--
+      The webfonts, here rather than behind an `@import` in the bundled stylesheet.
+
+      An `@import` cannot start until the file containing it has been downloaded and
+      parsed, and the font files cannot start until that has returned and been parsed
+      in turn — so the sequence was HTML, app CSS, Google CSS, font files, four
+      round trips in series before the serif could be considered. As a `<link>` the
+      request is discovered from this document and runs alongside the app CSS, which
+      removes one round trip from the window in which the fallback is on screen.
+
+      `display=swap` stays. `optional` would remove the swap entirely, but a reader on a
+      cold, slow first visit would then spend the whole visit looking at the fallback,
+      and the serif is this product's most recognisable face. Swapping is the lesser
+      problem now that the fallback occupies the same width.
+    -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400..700&display=swap"
+    />
     <title>Ballot</title>
   </head>
   <body>

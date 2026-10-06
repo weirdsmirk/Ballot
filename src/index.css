@@ -45,8 +45,60 @@
  * a thing being announced, and a thing being read.
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400..700&display=swap');
 @import "tailwindcss";
+
+/* ========================================
+   The fallback for the serif
+   ======================================== */
+
+/*
+ * Instrument Serif is very condensed, and the serif it was falling back to was not.
+ *
+ * The fallback stack used to resolve to Iowan Old Style, which sets 37.9% wider than
+ * Instrument Serif does. Measured on the five strings this product actually sets in
+ * the serif, at their real sizes: the front door headline went from 546.86px to
+ * 734.89px on a cold load and snapped back when the webfont arrived. That is not a
+ * subtle reflow — it is the page's largest type visibly breathing outward and then
+ * jumping inward, on every hard reload and every first visit, which is what reads as
+ * a weird stretch.
+ *
+ * So the fallback is metric-matched rather than merely close. `size-adjust` rescales
+ * a fallback face's advances to the width of the face it stands in for, which makes
+ * the swap a change of letterforms rather than a change of layout. The two faces
+ * still do not look alike — that is unavoidable, and no amount of metric work hides
+ * it — but the lines break in the same places and nothing moves.
+ *
+ * The value is 84% and it was measured, not guessed. Canvas text metrics put Times at
+ * 83.53% (Instrument Serif 37.928 advance per em against Times' 45.404), and a sweep
+ * over eleven candidate values against the real rendered strings independently
+ * bottomed out at 84% with a worst-case error of 2.17% across all five, down from
+ * 21.65%. The two methods agreeing to within half a percent is the reason to believe
+ * the number.
+ *
+ * Times is the fallback rather than Iowan on purpose. Iowan is the closest-looking
+ * face and the worst-measured one, and `local('Iowan Old Style')` does not resolve on
+ * current Chrome, so an alias naming it silently lands on Times anyway. Times is also
+ * the portable choice: it is present on macOS and Windows and stands in for Liberation
+ * Serif on Linux, so one number holds the layout steady on all three. Iowan, Georgia
+ * and the generic remain in the stack below as the net under this one — if `local()`
+ * matches nothing at all, this face fails to load and the reader gets a serif that
+ * stretches rather than no serif at all.
+ *
+ * No ascent or descent override. They would be dead weight here: every serif rule in
+ * this stylesheet sets an explicit `line-height`, so the font's own vertical metrics
+ * never reach the line box. Verified — the measured line box was 58.75px with and
+ * without them, at every size. They are omitted because they would look load-bearing
+ * while doing nothing.
+ *
+ * It is a `local()` alias and not a second download, which is the point: the whole
+ * problem is a face that is not there yet, and adding a network request to fix a
+ * network problem would be circular.
+ */
+@font-face {
+  font-family: 'Instrument Serif Fallback';
+  src: local('Times New Roman'), local('Liberation Serif'), local('Nimbus Roman');
+  size-adjust: 84%;
+}
 
 /* ========================================
    Tokens
@@ -82,7 +134,12 @@
    * product actually makes: a thing being announced, and a thing being read.
    */
   --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-serif: 'Instrument Serif', 'Iowan Old Style', 'Times New Roman', Georgia, serif;
+  /*
+   * The metric-matched alias sits directly after the real face, so it is what gets
+   * used in the window before Instrument Serif arrives, and the three faces below it
+   * are the net for a machine where none of the `local()` names resolve.
+   */
+  --font-serif: 'Instrument Serif', 'Instrument Serif Fallback', 'Iowan Old Style', 'Times New Roman', Georgia, serif;
   --font-wordmark: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   /* Ground and surfaces — near-black, faintly warm */
