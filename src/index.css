@@ -12,21 +12,22 @@
  *     a hairline rather than a shadow. On a dark surface, hierarchy has to come
  *     from border weight, surface step and type scale — a drop shadow reads as
  *     nothing at all once the page behind it is nearly the same colour.
- *   · Google Sans carries every name: page titles, card titles, candidate names,
- *     the figures in a tally, the wordmark, and every sentence, label and control.
- *     It is the interface and it is the display, and it is a variable font, so the
- *     weight axis is real rather than four snapped cuts.
- *   · Instrument Serif is the other half, and it is now the *secondary* voice
- *     rather than the primary one: it carries the phrases a voter is meant to sit
- *     with — the claim on the opening, the headline in the secrecy section, the
- *     state names on the lifecycle rail. Used for names it read as a voice; used
- *     for everything it read as a costume.
- *   · Machine data — receipt codes, digests, one-time codes, timestamps — is set
- *     in the interface face and distinguished by *tabular figures* rather than by a
- *     different typeface. That is not a downgrade: a monospace is the usual way to
+ *   · Inter is the interface and the reader: every sentence, label, control, field,
+ *     table cell and caption. It is a variable font, so the weight axis is real
+ *     rather than four snapped cuts, and 550 is 550 rather than the nearest cut
+ *     the browser could offer. This is the harder brief of the two: it is not
+ *     10.5px in a dense audit log that has to hold up.
+*   · Instrument Serif is everything that is *announced*: page titles, card titles,
+ *     the figures in a tally, the phrase a voter is meant to sit with. It ships at
+ *     one weight, so hierarchy inside it comes from size and colour and never from
+ *     bold — the reason a heading here never looks heavier than the sentence under
+ *     it. A serif announces; an interface states.
+ *   · Machine data — receipt codes, digests, one-time codes, timestamps — is in
+ *     Inter like everything else, distinguished by *tabular figures* rather than by
+ *     a different typeface. That is not a downgrade: a monospace is the usual way to
  *     stop a column of digits from going ragged, but it is not the only way, and
  *     `font-variant-numeric: tabular-nums` does that job in the face that is
- *     already loaded, without putting a second alphabet on the page. The `.data`
+ *     already loaded, without putting a third alphabet on the page. The `.data`
  *     utility sets it.
  *   · Corners are Google's shape scale, not a bespoke ladder: 4 / 8 / 12 / 16 /
  *     full. See the shape tokens for what each one is for.
@@ -37,13 +38,14 @@
  *   · The voter portal carries a faint measured grid. The console does not: an
  *     operator reading a log should not be reading it through a texture.
  *
- * Two typefaces, both already used for something else. The three that were here —
- * serif, sans, monospace — were three ways of saying "this is a name", "this is a
- * sentence" and "this is data", and only the first two turned out to be
- * distinctions the product needed.
+ * Two typefaces, and both are doing a job the other one cannot. The three that were
+ * here — serif, sans, monospace — were three ways of saying "this is a name", "this
+ * is a sentence" and "this is data"; the monospace went when tabular figures took
+ * its job, and what is left is the pair the product actually distinguishes between:
+ * a thing being announced, and a thing being read.
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Google+Sans:ital,wght@0,400..700;1,400..700&family=Instrument+Serif:ital@0;1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400..700&display=swap');
 @import "tailwindcss";
 
 /* ========================================
@@ -51,32 +53,37 @@
    ======================================== */
 :root {
   /* Type */
+  /*
+   * Two faces, and the split is what a thing *is*, not how big it is.
+   *
+   * `--font-sans` is Inter and it is everything you read: every sentence, label,
+   * control, field, table cell and caption. It is the interface, and the harder
+   * brief is not the headline — it is 10.5px in a dense audit log, and a face that
+   * looks handsome at 40px can be unreadable at 11.
+   *
+   * `--font-serif` is Instrument Serif and it is everything that is *announced*:
+   * page titles, card titles, the figures in a tally, the phrase a voter is meant to
+   * sit with. It ships at one weight, so hierarchy inside it comes from size and
+   * colour and never from bold — which is a constraint, not an accident, and the
+   * reason a heading in this product never looks heavier than the sentence under it.
+   *
+   * There was a third face in this product until recently and it was a grotesque,
+   * not a serif: Google Sans, which was the interface face and briefly the display
+   * face too. It is gone. Inter is a better interface face than it was, at these
+   * sizes, for a dense tool; and Instrument Serif is a better display face than
+   * Google Sans was, because a serif announces and a grotesque only states.
+   *
+   * `--font-wordmark` is Inter, like the interface — a wordmark is a name, not an
+   * announcement. It keeps its own token because it is set differently from body
+   * text (larger, tighter, 500 rather than 400) and reading `var(--font-wordmark)` in
+   * a rule says "this is the lockup" in a way `var(--font-sans)` does not.
+   *
+   * Nothing should reintroduce a third face. Two is the number of distinctions this
+   * product actually makes: a thing being announced, and a thing being read.
+   */
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-serif: 'Instrument Serif', 'Iowan Old Style', 'Times New Roman', Georgia, serif;
-  --font-sans: 'Google Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  /*
-   * The monospace token is gone, and nothing replaces it.
-   *
-   * It was `'JetBrains Mono'` plus the platform mono stack, and every one of its
-   * twenty-odd uses was machine data. Those are now set in the interface face
-   * with tabular figures — the property is what was actually doing the work in a
-   * monospace, and dropping the typeface without carrying the property across
-   * would have made every timestamp, row number and receipt hash in the console
-   * go ragged.
-   *
-   * Nothing should reintroduce a third face. Two is the number of distinctions
-   * this product actually makes: a thing being named, and a thing being said.
-   */
-
-  /*
-   * The wordmark, and only the wordmark.
-   *
-   * Google Sans, which is already the body face and already loaded. It is not
-   * aliased to the sans token because the wordmark is set differently from body text —
-   * heavier, tighter, larger — and reading `var(--font-wordmark)` in a rule says
-   * "this is the lockup" in a way that `var(--font-sans)` does not. If the face
-   * ever changes, this is the one line to change.
-   */
-  --font-wordmark: 'Google Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-wordmark: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   /* Ground and surfaces — near-black, faintly warm */
   --bg: #080a09;
@@ -471,8 +478,8 @@ a { color: inherit; }
 /*
  * The name, in headers.
  *
- * Google Sans at 22px, weight 500, tracked in tight. It was the display serif, which
- * is the face this product uses for things being *said* — headlines, results,
+ * Inter at 22px, weight 500, tracked in tight. It was the display serif, which
+ * is the face this product uses for things being *announced* — headlines, results,
  * receipts — so putting the name in it made the mark claim to be an argument
  * rather than a name.
  *
